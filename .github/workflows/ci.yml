@@ -37,3 +37,50 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: barbearia
+          POSTGRES_PASSWORD: barbearia
+          POSTGRES_DB: barbearia
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U barbearia"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NODE_ENV: test
+      DEMO_MODE: 'true'
+      DATABASE_URL: postgresql://barbearia:barbearia@localhost:5432/barbearia
+      DIRECT_URL: postgresql://barbearia:barbearia@localhost:5432/barbearia
+      SESSION_SECRET: test-session-secret-at-least-32-chars
+      CRON_SECRET: test-cron-secret
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: npm
+
+      - name: Install
+        run: HUSKY=0 npm ci --no-audit --no-fund
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Migrate
+        run: npx prisma migrate deploy
+
+      - name: Seed
+        run: npm run db:seed
+
+      - name: Integration tests
+        run: npm run test:integration

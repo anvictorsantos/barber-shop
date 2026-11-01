@@ -129,8 +129,10 @@ SENTRY_AUTH_TOKEN=
 npm install
 docker compose up -d          # local Postgres
 npm run db:migrate
+npm run db:seed
 npm run dev
 npm test
+npm run test:integration
 npm run test:e2e
 npm run build
 npm run lint
@@ -284,7 +286,7 @@ Payment E2E uses Mercado Pago sandbox or a signed test webhook. Never live money
 9. Submit and approve Meta WhatsApp templates.
 10. Create the Sentry project and set `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` for source maps.
 11. Create the GTM container and set `NEXT_PUBLIC_GTM_ID`.
-12. Seed production manually only for the initial catalog; never run the demo seed in production.
+12. Do not run the demo seed in production. A catalog-only seed is required before launch.
 13. Set `DEMO_MODE=false` and confirm the startup guard.
 
 ## Required inputs before production

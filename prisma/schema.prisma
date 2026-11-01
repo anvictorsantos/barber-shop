@@ -7,3 +7,562 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+enum Role {
+  CUSTOMER
+  BARBER
+  OWNER
+}
+
+enum ServiceCategory {
+  CORTE
+  BARBA
+  COMBO
+  PEZINHO
+  QUIMICA
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  NO_SHOW
+  CANCELED
+  CANCELED_LATE
+}
+
+enum AppointmentSource {
+  ONLINE
+  WALK_IN
+  MANUAL
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  OPEN
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+  CANCELED
+  EXPIRED
+}
+
+enum OrderPaymentMode {
+  ONLINE
+  ON_SITE
+}
+
+enum PaymentProvider {
+  MERCADO_PAGO
+  MANUAL
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  DEBIT_CARD
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum LoyaltyTier {
+  BRONZE
+  GOLD
+  PLATINUM
+}
+
+enum LoyaltyEntryType {
+  STAMP
+  CREDIT_ISSUED
+  CREDIT_USED
+  ADJUSTMENT
+}
+
+enum LoyaltyCreditStatus {
+  AVAILABLE
+  USED
+  EXPIRED
+}
+
+enum NotificationChannel {
+  WHATSAPP
+  EMAIL
+}
+
+enum NotificationKind {
+  BOOKING_CONFIRMATION
+  REMINDER
+  CANCELED
+  RESCHEDULED
+  RECEIPT
+  NO_SHOW_BLOCK
+  OTP
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum InventoryMovementType {
+  RESERVE
+  RELEASE
+  SALE
+  REFUND
+  ADJUST
+}
+
+enum VerificationPurpose {
+  EMAIL_VERIFY
+  PHONE_OTP
+  PASSWORD_RESET
+  ACCOUNT_ACTIVATION
+}
+
+model Shop {
+  id          String   @id @default(cuid())
+  name        String
+  cnpj        String?
+  addressLine String   @map("address_line")
+  city        String
+  state       String
+  postalCode  String?  @map("postal_code")
+  phone       String?
+  whatsapp    String
+  email       String?
+  timezone    String   @default("America/Sao_Paulo")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("shops")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String?   @unique
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  phone           String?   @unique
+  phoneVerifiedAt DateTime? @map("phone_verified_at")
+  passwordHash    String?   @map("password_hash")
+  role            Role      @default(CUSTOMER)
+  cpf             String?
+  birthDate       DateTime? @map("birth_date") @db.Date
+  addressLine     String?   @map("address_line")
+  city            String?
+  state           String?
+  postalCode      String?   @map("postal_code")
+  noShowCount     Int       @default(0) @map("no_show_count")
+  bookingBlocked  Boolean   @default(false) @map("booking_blocked")
+  blockedAt       DateTime? @map("blocked_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  barberProfile    BarberProfile?
+  sessions         Session[]
+  appointments     Appointment[]     @relation("CustomerAppointments")
+  orders           Order[]
+  loyalty          LoyaltyAccount?
+  reviews          Review[]          @relation("CustomerReviews")
+  favoriteBarbers  FavoriteBarber[]
+  favoriteServices FavoriteService[]
+  favoriteProducts FavoriteProduct[]
+
+  @@map("users")
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique @map("token_hash")
+  userId     String   @map("user_id")
+  expiresAt  DateTime @map("expires_at")
+  lastUsedAt DateTime @default(now()) @map("last_used_at")
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         String              @id @default(cuid())
+  userId     String?             @map("user_id")
+  identifier String
+  channel    NotificationChannel
+  purpose    VerificationPurpose
+  tokenHash  String              @unique @map("token_hash")
+  expiresAt  DateTime            @map("expires_at")
+  consumedAt DateTime?           @map("consumed_at")
+  attempts   Int                 @default(0)
+  createdAt  DateTime            @default(now()) @map("created_at")
+
+  @@index([identifier, purpose])
+  @@map("verification_tokens")
+}
+
+model BarberProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique @map("user_id")
+  displayName String  @map("display_name")
+  title       String
+  bio         String?
+  avatarUrl   String? @map("avatar_url")
+  active      Boolean @default(true)
+  sortOrder   Int     @default(0) @map("sort_order")
+  ratingAvg   Decimal @default(0) @map("rating_avg") @db.Decimal(3, 2)
+  ratingCount Int     @default(0) @map("rating_count")
+
+  user         User             @relation(fields: [userId], references: [id])
+  appointments Appointment[]
+  timeBlocks   TimeBlock[]
+  reviews      Review[]         @relation("BarberReviews")
+  favorites    FavoriteBarber[]
+
+  @@map("barber_profiles")
+}
+
+model Service {
+  id                 String          @id @default(cuid())
+  slug               String          @unique
+  name               String
+  description        String
+  category           ServiceCategory
+  durationMin        Int             @map("duration_min")
+  priceCents         Int             @map("price_cents")
+  originalPriceCents Int?            @map("original_price_cents")
+  promoLabel         String?         @map("promo_label")
+  imageUrl           String?         @map("image_url")
+  active             Boolean         @default(true)
+  sortOrder          Int             @default(0) @map("sort_order")
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+
+  appointments Appointment[]
+  favorites    FavoriteService[]
+
+  @@map("services")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String
+  priceCents  Int      @map("price_cents")
+  stock       Int      @default(0)
+  reserved    Int      @default(0)
+  imageUrl    String?  @map("image_url")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  orderLines OrderProduct[]
+  movements  InventoryMovement[]
+  favorites  FavoriteProduct[]
+
+  @@map("products")
+}
+
+model ShopHours {
+  id          String  @id @default(cuid())
+  weekday     Int     @unique
+  openMinute  Int     @map("open_minute")
+  closeMinute Int     @map("close_minute")
+  closed      Boolean @default(false)
+
+  @@map("shop_hours")
+}
+
+model TimeBlock {
+  id          String    @id @default(cuid())
+  barberId    String    @map("barber_id")
+  label       String
+  recurring   Boolean   @default(false)
+  weekday     Int?
+  date        DateTime? @db.Date
+  startMinute Int       @map("start_minute")
+  endMinute   Int       @map("end_minute")
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  barber BarberProfile @relation(fields: [barberId], references: [id])
+
+  @@index([barberId, weekday])
+  @@index([barberId, date])
+  @@map("time_blocks")
+}
+
+model Appointment {
+  id                String            @id @default(cuid())
+  orderId           String            @map("order_id")
+  customerId        String?           @map("customer_id")
+  barberId          String            @map("barber_id")
+  serviceId         String            @map("service_id")
+  startAt           DateTime          @map("start_at") @db.Timestamptz(3)
+  endAt             DateTime          @map("end_at") @db.Timestamptz(3)
+  status            AppointmentStatus @default(PENDING)
+  source            AppointmentSource @default(ONLINE)
+  priceCents        Int               @map("price_cents")
+  note              String?
+  createdById       String?           @map("created_by_id")
+  rescheduledFromId String?           @map("rescheduled_from_id")
+  canceledAt        DateTime?         @map("canceled_at")
+  completedAt       DateTime?         @map("completed_at")
+  noShowAt          DateTime?         @map("no_show_at")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  order           Order          @relation(fields: [orderId], references: [id])
+  customer        User?          @relation("CustomerAppointments", fields: [customerId], references: [id])
+  barber          BarberProfile  @relation(fields: [barberId], references: [id])
+  service         Service        @relation(fields: [serviceId], references: [id])
+  review          Review?
+  payments        Payment[]
+  refunds         Refund[]
+  loyaltyEntries  LoyaltyEntry[]
+  rescheduledFrom Appointment?   @relation("Reschedule", fields: [rescheduledFromId], references: [id])
+  rescheduledTo   Appointment[]  @relation("Reschedule")
+
+  @@index([barberId, startAt])
+  @@index([customerId, startAt])
+  @@index([orderId])
+  @@index([status, startAt])
+  @@map("appointments")
+}
+
+model Order {
+  id            String           @id @default(cuid())
+  code          String           @unique
+  customerId    String?          @map("customer_id")
+  customerName  String           @map("customer_name")
+  customerPhone String?          @map("customer_phone")
+  customerEmail String?          @map("customer_email")
+  status        OrderStatus
+  paymentMode   OrderPaymentMode @map("payment_mode")
+  serviceCents  Int              @default(0) @map("service_cents")
+  productCents  Int              @default(0) @map("product_cents")
+  creditCents   Int              @default(0) @map("credit_cents")
+  totalCents    Int              @map("total_cents")
+  expiresAt     DateTime?        @map("expires_at")
+  paidAt        DateTime?        @map("paid_at")
+  canceledAt    DateTime?        @map("canceled_at")
+  note          String?
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  customer     User?           @relation(fields: [customerId], references: [id])
+  appointments Appointment[]
+  products     OrderProduct[]
+  payments     Payment[]
+  usedCredits  LoyaltyCredit[] @relation("OrderUsedCredit")
+
+  @@index([customerId, createdAt])
+  @@index([status, expiresAt])
+  @@map("orders")
+}
+
+model OrderProduct {
+  id             String @id @default(cuid())
+  orderId        String @map("order_id")
+  productId      String @map("product_id")
+  quantity       Int
+  unitPriceCents Int    @map("unit_price_cents")
+  lineTotalCents Int    @map("line_total_cents")
+
+  order   Order    @relation(fields: [orderId], references: [id])
+  product Product  @relation(fields: [productId], references: [id])
+  refunds Refund[]
+
+  @@index([productId])
+  @@map("order_products")
+}
+
+model Payment {
+  id                String          @id @default(cuid())
+  orderId           String          @map("order_id")
+  appointmentId     String?         @map("appointment_id")
+  provider          PaymentProvider
+  providerPaymentId String?         @unique @map("provider_payment_id")
+  method            PaymentMethod
+  status            PaymentStatus
+  amountCents       Int             @map("amount_cents")
+  refundedCents     Int             @default(0) @map("refunded_cents")
+  paidAt            DateTime?       @map("paid_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  order       Order        @relation(fields: [orderId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+  refunds     Refund[]
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+model Refund {
+  id               String   @id @default(cuid())
+  paymentId        String   @map("payment_id")
+  appointmentId    String?  @map("appointment_id")
+  orderProductId   String?  @map("order_product_id")
+  amountCents      Int      @map("amount_cents")
+  reason           String
+  providerRefundId String?  @map("provider_refund_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  payment      Payment       @relation(fields: [paymentId], references: [id])
+  appointment  Appointment?  @relation(fields: [appointmentId], references: [id])
+  orderProduct OrderProduct? @relation(fields: [orderProductId], references: [id])
+
+  @@index([paymentId])
+  @@map("refunds")
+}
+
+model Review {
+  id            String   @id @default(cuid())
+  appointmentId String   @unique @map("appointment_id")
+  customerId    String   @map("customer_id")
+  barberId      String   @map("barber_id")
+  rating        Int
+  comment       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  appointment Appointment   @relation(fields: [appointmentId], references: [id])
+  customer    User          @relation("CustomerReviews", fields: [customerId], references: [id])
+  barber      BarberProfile @relation("BarberReviews", fields: [barberId], references: [id])
+
+  @@index([barberId])
+  @@map("reviews")
+}
+
+model LoyaltyAccount {
+  id             String      @id @default(cuid())
+  userId         String      @unique @map("user_id")
+  stamps         Int         @default(0)
+  lifetimeVisits Int         @default(0) @map("lifetime_visits")
+  tier           LoyaltyTier @default(BRONZE)
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  user    User            @relation(fields: [userId], references: [id])
+  entries LoyaltyEntry[]
+  credits LoyaltyCredit[]
+
+  @@map("loyalty_accounts")
+}
+
+model LoyaltyEntry {
+  id            String           @id @default(cuid())
+  accountId     String           @map("account_id")
+  type          LoyaltyEntryType
+  deltaStamps   Int              @default(0) @map("delta_stamps")
+  appointmentId String?          @map("appointment_id")
+  creditId      String?          @map("credit_id")
+  note          String?
+  createdAt     DateTime         @default(now()) @map("created_at")
+
+  account     LoyaltyAccount @relation(fields: [accountId], references: [id])
+  appointment Appointment?   @relation(fields: [appointmentId], references: [id])
+  credit      LoyaltyCredit? @relation(fields: [creditId], references: [id])
+
+  @@index([accountId, createdAt])
+  @@map("loyalty_entries")
+}
+
+model LoyaltyCredit {
+  id          String              @id @default(cuid())
+  accountId   String              @map("account_id")
+  status      LoyaltyCreditStatus @default(AVAILABLE)
+  expiresAt   DateTime            @map("expires_at")
+  usedOrderId String?             @map("used_order_id")
+  usedAt      DateTime?           @map("used_at")
+  createdAt   DateTime            @default(now()) @map("created_at")
+
+  account   LoyaltyAccount @relation(fields: [accountId], references: [id])
+  usedOrder Order?         @relation("OrderUsedCredit", fields: [usedOrderId], references: [id])
+  entries   LoyaltyEntry[]
+
+  @@index([accountId, status])
+  @@map("loyalty_credits")
+}
+
+model FavoriteBarber {
+  userId    String   @map("user_id")
+  barberId  String   @map("barber_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User          @relation(fields: [userId], references: [id])
+  barber BarberProfile @relation(fields: [barberId], references: [id])
+
+  @@id([userId, barberId])
+  @@map("favorite_barbers")
+}
+
+model FavoriteService {
+  userId    String   @map("user_id")
+  serviceId String   @map("service_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@id([userId, serviceId])
+  @@map("favorite_services")
+}
+
+model FavoriteProduct {
+  userId    String   @map("user_id")
+  productId String   @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@id([userId, productId])
+  @@map("favorite_products")
+}
+
+model NotificationLog {
+  id            String              @id @default(cuid())
+  userId        String?             @map("user_id")
+  orderId       String?             @map("order_id")
+  appointmentId String?             @map("appointment_id")
+  channel       NotificationChannel
+  kind          NotificationKind
+  status        NotificationStatus
+  dedupeKey     String?             @unique @map("dedupe_key")
+  providerId    String?             @map("provider_id")
+  error         String?
+  sentAt        DateTime?           @map("sent_at")
+  createdAt     DateTime            @default(now()) @map("created_at")
+
+  @@index([status, createdAt])
+  @@map("notification_logs")
+}
+
+model InventoryMovement {
+  id        String                @id @default(cuid())
+  productId String                @map("product_id")
+  orderId   String?               @map("order_id")
+  type      InventoryMovementType
+  quantity  Int
+  note      String?
+  createdAt DateTime              @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId, createdAt])
+  @@map("inventory_movements")
+}
