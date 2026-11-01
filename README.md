@@ -2,7 +2,7 @@
 
 Single-shop booking and commerce app. Next.js + TypeScript + Prisma + PostgreSQL.
 
-The product is not built yet. This repository currently contains the foundation: strict TypeScript, Tailwind tokens, ESLint, Prettier, Husky, GTM with consent, Sentry, Playwright, Vitest, a full Prisma schema with migrations and seed, and a Render blueprint.
+The product is not built yet. This repository currently contains the foundation: strict TypeScript, Tailwind tokens, ESLint, Prettier, Husky, GTM with consent, Sentry, Playwright, Vitest, a full Prisma schema with migrations and seed, auth routes and sessions, role-scoped layout shells, UI primitives, and a Render blueprint.
 
 ## Requirements
 
@@ -36,7 +36,7 @@ npm run format:check
 npm run typecheck    # tsc --noEmit, strict
 npm test             # Vitest unit tests
 npm run test:integration
-npm run test:e2e     # Playwright
+npm run test:e2e     # Playwright; shell tests need E2E_SEEDED=true after db:seed
 npm run db:generate
 npm run db:migrate
 npm run db:deploy

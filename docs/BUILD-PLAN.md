@@ -270,6 +270,8 @@ Verify: fresh database → seed → full demo without manual data entry.
 
 Payment E2E uses Mercado Pago sandbox or a signed test webhook. Never live money.
 
+Seeded shell and role-scoping E2E tests are skipped unless `E2E_SEEDED=true`. Run `npm run db:seed` first.
+
 ## Deployment runbook
 
 1. Create Neon Postgres; set `DATABASE_URL` and `DIRECT_URL`.
