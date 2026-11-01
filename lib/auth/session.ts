@@ -42,7 +42,7 @@ function cookieOptions(expiresAt: Date) {
 
 export async function createSession(
   userId: string,
-  meta: { ip?: string; userAgent?: string } = {},
+  meta: { ip?: string | null; userAgent?: string | null } = {},
 ): Promise<string> {
   const token = createOpaqueToken()
   const tokenHash = hashSessionToken(token)
