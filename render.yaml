@@ -1,0 +1,101 @@
+# Render blueprint — Next.js web service.
+#
+# One origin: the app serves the UI, API routes, Mercado Pago webhooks, and the
+# Sentry tunnel. The database is external (Neon) and enters through DATABASE_URL.
+# Deploy: Render → New → Blueprint → this repo.
+services:
+  - type: web
+    name: barbearia-do-luiz
+    runtime: node
+    plan: starter
+    branch: main
+    autoDeployTrigger: commit
+    buildCommand: >-
+      HUSKY=0 npm ci --include=dev --no-audit --no-fund &&
+      npm run build
+    startCommand: npm run db:deploy && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.18.0
+      - key: NODE_ENV
+        value: production
+      - key: APP_URL
+        sync: false
+      - key: SHOP_TIMEZONE
+        value: America/Sao_Paulo
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: DEMO_MODE
+        value: 'false'
+      - key: NEXT_PUBLIC_GTM_ID
+        sync: false
+      - key: NEXT_PUBLIC_ANALYTICS_DEBUG
+        value: 'false'
+      - key: NEXT_PUBLIC_SENTRY_DSN
+        sync: false
+      - key: NEXT_PUBLIC_SENTRY_ENV
+        value: production
+      - key: NEXT_PUBLIC_SENTRY_RELEASE
+        sync: false
+      - key: NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE
+        value: '0.1'
+      - key: NEXT_PUBLIC_SENTRY_REPLAY_ENABLED
+        value: 'false'
+      - key: SENTRY_DSN
+        sync: false
+      - key: SENTRY_ENV
+        value: production
+      - key: SENTRY_ORG
+        sync: false
+      - key: SENTRY_PROJECT
+        sync: false
+      - key: SENTRY_AUTH_TOKEN
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_REPLY_TO
+        sync: false
+      - key: EMAIL_ENABLED
+        value: 'true'
+      - key: WHATSAPP_ENABLED
+        value: 'true'
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_TEMPLATE_CONFIRMATION
+        sync: false
+      - key: WHATSAPP_TEMPLATE_REMINDER
+        sync: false
+      - key: WHATSAPP_TEMPLATE_CANCELED
+        sync: false
+      - key: WHATSAPP_TEMPLATE_RESCHEDULED
+        sync: false
+      - key: WHATSAPP_TEMPLATE_OTP
+        sync: false
+      - key: WHATSAPP_TEMPLATE_NO_SHOW_BLOCK
+        sync: false
+      - key: MERCADO_PAGO_ENABLED
+        value: 'true'
+      - key: MERCADO_PAGO_ACCESS_TOKEN
+        sync: false
+      - key: MERCADO_PAGO_WEBHOOK_SECRET
+        sync: false
+
+  # Cron jobs are added in Phase 5, after their route handlers exist.
+  # - type: cron
+  #   name: barbearia-reminders
+  #   runtime: node
+  #   schedule: "0 * * * *"
+  #   command: curl -fsS -X POST "$APP_URL/api/cron/reminders" -H "Authorization: Bearer $CRON_SECRET"
