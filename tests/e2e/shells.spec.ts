@@ -7,6 +7,16 @@ test.describe('account shells', () => {
     test.skip(!seeded, 'Requires a seeded database. Set E2E_SEEDED=true after db:seed.')
   })
 
+  test('login form reaches admin', async ({ page }) => {
+    await page.goto('/entrar')
+    await page.getByLabel('Telefone ou e-mail').fill('luiz@barbeariadoluiz.com.br')
+    await page.getByLabel('Senha').fill('demo1234')
+    await page.getByRole('button', { name: 'Entrar' }).click()
+
+    await expect(page).toHaveURL('/admin')
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  })
+
   test('owner shell at 1440', async ({ page }) => {
     const login = await page.request.post('/api/auth/login', {
       data: { identifier: 'luiz@barbeariadoluiz.com.br', password: 'demo1234' },
