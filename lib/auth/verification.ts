@@ -108,6 +108,11 @@ export async function consumeEmailVerification(token: string): Promise<string | 
 export async function issuePasswordResetEmail(userId: string, email: string): Promise<string> {
   const token = createOpaqueToken()
 
+  await prisma.verificationToken.updateMany({
+    where: { identifier: email, purpose: 'PASSWORD_RESET', consumedAt: null },
+    data: { consumedAt: new Date() },
+  })
+
   await prisma.verificationToken.create({
     data: {
       userId,

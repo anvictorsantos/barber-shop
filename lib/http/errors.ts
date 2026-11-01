@@ -18,7 +18,7 @@ export function errorResponse(error: unknown): Response {
     )
   }
 
-  console.error('[error]', error instanceof Error ? error.message : 'Unknown error')
+  console.error('[error]', error instanceof Error ? error.name : 'Unknown error')
   return Response.json(
     { error: { code: 'internal_error', message: 'Erro interno. Tente novamente.' } },
     { status: 500 },
