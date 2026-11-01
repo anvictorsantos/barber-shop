@@ -45,6 +45,7 @@
     "@prisma/client": "^6.19.3",
     "@sentry/core": "^11.10.0",
     "@sentry/nextjs": "^11.10.0",
+    "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
     "ics": "^3.12.1",
@@ -56,6 +57,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "recharts": "^3.10.1",
+    "tailwind-merge": "^3.7.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
