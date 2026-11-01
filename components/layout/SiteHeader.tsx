@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { CartLink } from '@/components/cart/CartLink'
 import { buttonClasses } from '@/components/ui/Button'
 
 export function SiteHeader() {
@@ -29,6 +30,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <CartLink />
           <Link
             href="/entrar"
             className={buttonClasses({ variant: 'outline', size: 'sm' })}

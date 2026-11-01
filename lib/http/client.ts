@@ -10,12 +10,20 @@ interface ErrorPayload {
 }
 
 export async function postJson<T>(url: string, body: unknown): Promise<PostResult<T>> {
+  return requestJson<T>(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
+export async function getJson<T>(url: string): Promise<PostResult<T>> {
+  return requestJson<T>(url, { headers: { accept: 'application/json' } })
+}
+
+async function requestJson<T>(url: string, init: RequestInit): Promise<PostResult<T>> {
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    const response = await fetch(url, init)
 
     const payload = (await response.json().catch(() => null)) as (T & ErrorPayload) | null
 

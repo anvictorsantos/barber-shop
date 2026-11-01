@@ -1,19 +1,21 @@
-import { CalendarDays } from 'lucide-react'
+import { ArrowLeft, Scissors } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { BarberChoiceCard } from '@/components/booking/BarberChoiceCard'
 import { PublicShell } from '@/components/layout/PublicShell'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { getServiceById } from '@/lib/catalog/queries'
+import { getActiveBarbers, getServiceById } from '@/lib/catalog/queries'
+import { formatBRL } from '@/lib/format/money'
 
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Agendar — Barbearia do Luiz',
+  title: 'Escolha o profissional — Barbearia do Luiz',
   robots: { index: false, follow: false },
 }
 
@@ -23,29 +25,47 @@ export default async function SelectBarberPage({
   params: Promise<{ serviceId: string }>
 }) {
   const { serviceId } = await params
-  const service = await getServiceById(serviceId)
+  const [service, barbers] = await Promise.all([getServiceById(serviceId), getActiveBarbers()])
   if (!service) notFound()
 
   return (
     <PublicShell>
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-4 py-10 sm:px-6">
-        <PageHeader
-          title={`Agendar ${service.name}`}
-          description="Escolha o profissional e o horário."
-        />
-        <Card>
-          <EmptyState
-            icon={CalendarDays}
-            title="Agendamento em breve"
-            description="A escolha de profissional, data e horário entra na próxima fase."
-          />
-        </Card>
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-10 sm:px-6">
         <Link
           href={`/servicos/${service.slug}`}
-          className="text-center text-caption font-semibold text-muted hover:text-text"
+          className="inline-flex items-center gap-2 text-caption font-semibold text-muted hover:text-text"
         >
+          <ArrowLeft
+            className="h-4 w-4"
+            aria-hidden
+          />
           Voltar para o serviço
         </Link>
+
+        <PageHeader
+          title="Escolha o profissional"
+          description={`${service.name} · ${service.durationMin} min · ${formatBRL(service.priceCents)}`}
+        />
+
+        {barbers.length === 0 ? (
+          <Card>
+            <EmptyState
+              icon={Scissors}
+              title="Nenhum profissional disponível"
+              description="A barbearia ainda não cadastrou barbeiros ativos."
+            />
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {barbers.map((barber) => (
+              <BarberChoiceCard
+                key={barber.id}
+                serviceId={service.id}
+                barber={barber}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </PublicShell>
   )

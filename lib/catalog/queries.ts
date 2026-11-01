@@ -38,3 +38,17 @@ export async function getActiveBarbers() {
     },
   })
 }
+
+export async function getActiveBarberById(id: string) {
+  return prisma.barberProfile.findFirst({
+    where: { id, active: true },
+    select: {
+      id: true,
+      displayName: true,
+      title: true,
+      avatarUrl: true,
+      ratingAvg: true,
+      ratingCount: true,
+    },
+  })
+}
