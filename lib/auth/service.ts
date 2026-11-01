@@ -249,7 +249,7 @@ export async function requestPasswordReset(
       await deps.delivery.sendPasswordResetEmail(
         user.email,
         user.name,
-        emailUrl('/redefinir-senha', token),
+        emailUrl('/recuperar-senha', token),
       )
       return
     }
