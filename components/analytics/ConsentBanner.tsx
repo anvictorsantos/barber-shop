@@ -1,12 +1,16 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { readConsent, writeConsent } from '@/lib/analytics/consent'
+import { cn } from '@/lib/utils'
 
 export function ConsentBanner() {
   const [decided, setDecided] = useState(true)
+  const pathname = usePathname()
+  const hasBottomNav = pathname.startsWith('/conta')
 
   useEffect(() => {
     setDecided(readConsent() !== null)
@@ -23,7 +27,10 @@ export function ConsentBanner() {
     <div
       role="region"
       aria-labelledby="consent-title"
-      className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-50 border-t border-border bg-surface/95 px-4 py-4 backdrop-blur sm:px-6 lg:bottom-0"
+      className={cn(
+        'fixed inset-x-0 z-50 border-t border-border bg-surface/95 px-4 py-4 backdrop-blur sm:px-6',
+        hasBottomNav ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))] lg:bottom-0' : 'bottom-0',
+      )}
     >
       <div className="mx-auto flex max-w-shell flex-col gap-3 md:flex-row md:items-center md:gap-5">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
