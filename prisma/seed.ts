@@ -501,7 +501,7 @@ async function main() {
       userId: owner.id,
       displayName: 'Luiz Silva',
       title: 'Proprietário / Master Barber',
-      avatarUrl: 'https://placehold.co/128x128/1C1D22/EAA83A?text=Luiz',
+      avatarUrl: null,
       sortOrder: 0,
       ratingAvg: 5,
       ratingCount: 240,
@@ -513,7 +513,7 @@ async function main() {
       userId: hinnerUser.id,
       displayName: 'Hinner Santos',
       title: 'Barbeiro Sênior',
-      avatarUrl: 'https://placehold.co/128x128/1C1D22/EAA83A?text=Hinner',
+      avatarUrl: null,
       sortOrder: 1,
       ratingAvg: 4.9,
       ratingCount: 180,
@@ -525,7 +525,7 @@ async function main() {
       userId: carlosUser.id,
       displayName: 'Carlos Heitor',
       title: 'Barbeiro Sênior',
-      avatarUrl: 'https://placehold.co/128x128/1C1D22/EAA83A?text=Carlos',
+      avatarUrl: null,
       sortOrder: 2,
       ratingAvg: 4.8,
       ratingCount: 120,
@@ -542,7 +542,7 @@ async function main() {
     const service = await prisma.service.create({
       data: {
         ...seed,
-        imageUrl: `https://placehold.co/600x400/1C1D22/EAA83A?text=${encodeURIComponent(seed.name)}`,
+        imageUrl: null,
       },
     })
     services[service.slug] = {
@@ -558,7 +558,7 @@ async function main() {
     const product = await prisma.product.create({
       data: {
         ...seed,
-        imageUrl: `https://placehold.co/400x400/1C1D22/EAA83A?text=${encodeURIComponent(seed.name)}`,
+        imageUrl: null,
       },
     })
     products[product.slug] = { id: product.id, slug: product.slug, priceCents: product.priceCents }
