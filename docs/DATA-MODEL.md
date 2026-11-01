@@ -40,6 +40,8 @@ enum NotificationKind {
 }
 enum NotificationStatus { QUEUED SENT FAILED SKIPPED }
 
+enum VerificationPurpose { EMAIL_VERIFY PHONE_OTP PASSWORD_RESET ACCOUNT_ACTIVATION }
+
 enum InventoryMovementType { RESERVE RELEASE SALE REFUND ADJUST }
 ```
 
@@ -78,8 +80,7 @@ Account for customer, barber, or owner.
 - `userId?`
 - `identifier` — normalized email or E.164 phone
 - `channel` — `EMAIL` or `WHATSAPP`
-- `purpose` — `EMAIL_VERIFY`, `PHONE_OTP`, `PASSWORD_RESET`, `ACCOUNT_ACTIVATION`
-- `tokenHash` unique
+- `purpose` — `EMAIL_VERIFY`, `PHONE_OTP`, `PASSWORD_RESET`, `ACCOUNT_ACTIVATION`- `tokenHash` unique
 - `expiresAt`, `consumedAt?`, `attempts` default 0
 
 ### BarberProfile
