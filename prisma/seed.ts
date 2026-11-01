@@ -30,21 +30,18 @@ type BookingSeed = {
 const todayDate = parseISO(formatInTimeZone(new Date(), TIMEZONE, 'yyyy-MM-dd'))
 
 function businessDate(offset: number): string {
-  let cursor = todayDate
+  let base = todayDate
+  while (getDay(base) === 0) base = addDays(base, 1)
 
-  if (offset === 0) {
-    while (getDay(cursor) === 0) cursor = addDays(cursor, 1)
-  } else {
-    let remaining = Math.abs(offset)
-    const step = offset > 0 ? 1 : -1
+  let cursor = base
+  let remaining = Math.abs(offset)
+  const step = offset >= 0 ? 1 : -1
 
-    while (remaining > 0) {
-      cursor = addDays(cursor, step)
-      if (getDay(cursor) !== 0) remaining -= 1
-    }
+  while (remaining > 0) {
+    cursor = addDays(cursor, step)
+    if (getDay(cursor) !== 0) remaining -= 1
   }
 
-  while (getDay(cursor) === 0) cursor = addDays(cursor, 1)
   return format(cursor, 'yyyy-MM-dd')
 }
 
