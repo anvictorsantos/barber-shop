@@ -2,7 +2,7 @@
 
 Single-shop booking and commerce app. Next.js + TypeScript + Prisma + PostgreSQL.
 
-The product is not built yet. This repository currently contains the foundation: strict TypeScript, Tailwind tokens, ESLint, Prettier, Husky, GTM with consent, Sentry, Playwright, Vitest, a full Prisma schema with migrations and seed, auth routes and sessions, login/signup/verification/reset screens, public catalog, service detail, store, owner catalog CRUD, owner settings (shop, hours, team, blocks), role-scoped layout shells, UI primitives, and a Render blueprint.
+The product is not built yet. This repository currently contains the foundation: strict TypeScript, Tailwind tokens, ESLint, Prettier, Husky, GTM with consent, Sentry, Playwright, Vitest, a full Prisma schema with migrations and seed, auth routes and sessions, login/signup/verification/reset screens, public catalog, service detail, store, owner catalog CRUD, owner settings (shop, hours, team, blocks), deterministic availability engine, guest booking flow, multi-line cart, role-scoped layout shells, UI primitives, and a Render blueprint.
 
 ## Requirements
 
