@@ -2,18 +2,37 @@
 
 import { ShoppingBag, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState, type FormEvent } from 'react'
 
+import { FormMessage } from '@/components/auth/FormMessage'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { removeCartItem } from '@/lib/cart/store'
+import { Field, Input } from '@/components/ui/Input'
+import { clearCart, removeCartItem } from '@/lib/cart/store'
 import { useCart } from '@/lib/cart/useCart'
 import { formatBRL } from '@/lib/format/money'
+import { createOrderAction } from '@/lib/orders/actions'
 import { formatBookingDateTime } from '@/lib/time/format'
+import { cn } from '@/lib/utils'
 
-export function CartContents() {
+type PaymentMode = 'ON_SITE' | 'ONLINE'
+
+export function CartContents({
+  customer,
+}: {
+  customer: { name: string; email: string; phone: string } | null
+}) {
+  const router = useRouter()
   const items = useCart()
   const total = items.reduce((sum, item) => sum + item.priceCents, 0)
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>('ON_SITE')
+  const [name, setName] = useState(customer?.name ?? '')
+  const [email, setEmail] = useState(customer?.email ?? '')
+  const [phone, setPhone] = useState(customer?.phone ?? '')
+  const [error, setError] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
 
   if (items.length === 0) {
     return (
@@ -33,6 +52,39 @@ export function CartContents() {
         />
       </Card>
     )
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError(null)
+    setPending(true)
+
+    const result = await createOrderAction({
+      paymentMode,
+      customer: { name, email, phone },
+      lines: items.map((item) => ({
+        kind: 'service' as const,
+        serviceId: item.serviceId,
+        barberId: item.barberId,
+        startAt: item.startAt,
+      })),
+    })
+
+    setPending(false)
+
+    if (!result.ok) {
+      setError(result.error)
+      return
+    }
+
+    clearCart()
+
+    if (result.initPoint) {
+      window.location.assign(result.initPoint)
+      return
+    }
+
+    router.push(`/pedido/${result.code}`)
   }
 
   return (
@@ -72,14 +124,97 @@ export function CartContents() {
           <span className="text-metric font-extrabold text-accent">{formatBRL(total)}</span>
         </div>
 
-        <Button
-          type="button"
-          size="lg"
-          disabled
-        >
-          Finalizar pedido
-        </Button>
-        <p className="text-center text-caption text-subtle">Pagamento entra na próxima etapa.</p>
+        <div className="h-px w-full bg-border" />
+
+        <div className="flex flex-col gap-2">
+          <span className="text-caption font-bold text-text">Pagamento</span>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setPaymentMode('ON_SITE')}
+              className={cn(
+                'flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-left transition',
+                paymentMode === 'ON_SITE'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border bg-surface-input hover:border-accent',
+              )}
+            >
+              <span className="text-caption font-bold text-text">Pagar no local</span>
+              <span className="text-micro text-muted">Dinheiro, cartão ou PIX</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentMode('ONLINE')}
+              className={cn(
+                'flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-left transition',
+                paymentMode === 'ONLINE'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border bg-surface-input hover:border-accent',
+              )}
+            >
+              <span className="text-caption font-bold text-text">Pagar online</span>
+              <span className="text-micro text-muted">PIX ou cartão via Mercado Pago</span>
+            </button>
+          </div>
+        </div>
+
+        {customer ? (
+          <p className="text-caption text-muted">
+            Reservando como <span className="font-bold text-text">{customer.name}</span> ·{' '}
+            {customer.email || customer.phone}
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <Field
+              label="Seu nome"
+              htmlFor="checkout-name"
+            >
+              <Input
+                id="checkout-name"
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+            </Field>
+            <Field
+              label="E-mail"
+              htmlFor="checkout-email"
+              hint="Opcional se informar WhatsApp"
+            >
+              <Input
+                id="checkout-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </Field>
+            <Field
+              label="WhatsApp"
+              htmlFor="checkout-phone"
+              hint="Com DDI, ex: +55 31 98881-5243"
+            >
+              <Input
+                id="checkout-phone"
+                type="tel"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+              />
+            </Field>
+          </div>
+        )}
+
+        {error ? <FormMessage>{error}</FormMessage> : null}
+
+        <form onSubmit={submit}>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            disabled={pending}
+          >
+            {pending ? 'Finalizando…' : 'Finalizar pedido'}
+          </Button>
+        </form>
 
         <Link
           href="/servicos"
