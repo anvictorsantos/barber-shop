@@ -20,9 +20,9 @@ export interface NavItem {
 }
 
 export const customerNavItems: readonly NavItem[] = [
-  { href: '/', label: 'Início', icon: 'home' },
-  { href: '/servicos', label: 'Agendar', icon: 'scissors' },
+  { href: '/conta/agendamentos', label: 'Agenda', icon: 'calendar' },
   { href: '/conta/historico', label: 'Histórico', icon: 'history' },
+  { href: '/conta/favoritos', label: 'Favoritos', icon: 'heart' },
   { href: '/conta/perfil', label: 'Perfil', icon: 'user' },
 ]
 

@@ -47,7 +47,7 @@ async function firstAvailableSlot() {
 
   const today = parseISO(formatInTimeZone(new Date(), BUSINESS_TIMEZONE, 'yyyy-MM-dd'))
 
-  for (let index = 0; index < 8; index += 1) {
+  for (let index = 1; index <= 9; index += 1) {
     const date = format(addDays(today, index), 'yyyy-MM-dd')
     const availability = await getAvailability({ serviceId: service.id, barberId: barber.id, date })
     const slot = availability.slots.find((item) => item.available)

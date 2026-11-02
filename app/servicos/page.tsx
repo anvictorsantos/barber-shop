@@ -6,8 +6,10 @@ import { PublicShell } from '@/components/layout/PublicShell'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { getSessionUser } from '@/lib/auth/session'
 import { groupServicesByCategory } from '@/lib/catalog/labels'
 import { getActiveBarbers, getActiveServices } from '@/lib/catalog/queries'
+import { getFavoriteIds } from '@/lib/customer/queries'
 
 import type { Metadata } from 'next'
 
@@ -19,8 +21,14 @@ export const metadata: Metadata = {
 }
 
 export default async function ServicesPage() {
-  const [services, barbers] = await Promise.all([getActiveServices(), getActiveBarbers()])
+  const user = await getSessionUser()
+  const [services, barbers, favoriteIds] = await Promise.all([
+    getActiveServices(),
+    getActiveBarbers(),
+    getFavoriteIds(user?.role === 'CUSTOMER' ? user.id : null),
+  ])
   const groups = groupServicesByCategory(services)
+  const canFavorite = user?.role === 'CUSTOMER'
 
   return (
     <PublicShell>
@@ -72,6 +80,10 @@ export default async function ServicesPage() {
                 <BarberCard
                   key={barber.id}
                   barber={barber}
+                  favorite={{
+                    canFavorite,
+                    saved: favoriteIds.barbers.has(barber.id),
+                  }}
                 />
               ))}
             </div>
