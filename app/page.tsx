@@ -160,10 +160,10 @@ export default async function HomePage() {
       <SkipLink />
       <main
         id="main-content"
-        className="min-h-dvh bg-background"
+        className="bg-background min-h-dvh"
       >
-        <div className="flex min-h-dvh flex-col lg:hidden">
-          <div className="mx-auto flex min-h-dvh w-full max-w-narrow flex-col">
+        <div className="lg:hidden flex flex-col min-h-dvh">
+          <div className="flex flex-col mx-auto w-full max-w-narrow min-h-dvh">
             <section className="relative h-[260px]">
               <Image
                 src={HERO_IMAGE}
@@ -175,8 +175,8 @@ export default async function HomePage() {
               />
               <div className="absolute inset-0 bg-[linear-gradient(116.57deg,rgba(0,0,0,0.8)_33.33%,rgba(18,19,22,0)_50%,#121316_66.67%)]" />
 
-              <div className="relative flex h-full flex-col justify-between p-5">
-                <div className="flex items-center justify-between gap-4">
+              <div className="relative flex flex-col justify-between p-5 h-full">
+                <div className="flex justify-between items-center gap-4">
                   <span
                     className={
                       open
@@ -188,14 +188,14 @@ export default async function HomePage() {
                   </span>
                   <Link
                     href={accountHref}
-                    className="text-caption font-semibold text-text-secondary hover:text-text"
+                    className="font-semibold text-caption text-text-secondary hover:text-text"
                   >
                     {accountLabel}
                   </Link>
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <h1 className="font-display text-brand font-black tracking-wide text-accent">
+                  <h1 className="font-display font-black text-accent text-brand tracking-wide">
                     {shopName.toUpperCase()}
                   </h1>
                   <p className="text-body text-white/80">Corte, Barba e Resenha de Alto Padrão</p>
@@ -203,9 +203,9 @@ export default async function HomePage() {
               </div>
             </section>
 
-            <div className="flex flex-col gap-5 px-5 pb-8 pt-5">
-              <section className="rounded-xl border border-white/10 bg-surface p-4">
-                <p className="text-body font-semibold uppercase tracking-wider text-accent">
+            <div className="flex flex-col gap-5 px-5 pt-5 pb-8">
+              <section className="bg-surface p-4 border border-white/10 rounded-xl">
+                <p className="font-semibold text-accent text-body uppercase tracking-wider">
                   Pronto para dar um tapa no visual?
                 </p>
                 <Link
@@ -216,26 +216,26 @@ export default async function HomePage() {
                 </Link>
               </section>
 
-              <section className="flex flex-col gap-3 rounded-xl bg-surface p-4">
+              <section className="flex flex-col gap-3 bg-surface p-4 rounded-xl">
                 <div className="flex items-start gap-2.5">
                   <MapPin
                     aria-hidden
-                    className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary"
+                    className="mt-0.5 w-[18px] h-[18px] text-primary shrink-0"
                   />
-                  <p className="text-body font-semibold text-text">
+                  <p className="font-semibold text-body text-text">
                     {addressLine}, {cityLabel}
                   </p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <Clock
                     aria-hidden
-                    className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary"
+                    className="mt-0.5 w-[18px] h-[18px] text-primary shrink-0"
                   />
                   <div className="flex flex-col gap-0.5">
                     {hoursLines.map((line) => (
                       <p
                         key={line}
-                        className="text-body font-medium text-text"
+                        className="font-medium text-body text-text"
                       >
                         {line}
                       </p>
@@ -245,21 +245,21 @@ export default async function HomePage() {
               </section>
 
               <section className="flex flex-col gap-2.5">
-                <h2 className="text-lead font-bold text-text">Nossos Produtos e Diferenciais</h2>
+                <h2 className="font-bold text-lead text-text">Nossos Produtos e Diferenciais</h2>
                 <div className="flex gap-2.5">
                   {PERKS.map((perk) => (
                     <Link
                       key={perk.name}
                       href="/loja"
-                      className="flex min-h-[110px] flex-1 flex-col justify-between rounded-lg bg-surface p-3 transition hover:bg-surface-subtle"
+                      className="flex flex-col flex-1 justify-between bg-surface hover:bg-surface-subtle p-3 rounded-lg min-h-[110px] transition"
                     >
-                      <span className="flex h-[45px] items-center justify-center rounded-sm bg-accent-soft">
+                      <span className="flex justify-center items-center rounded-sm h-[45px] bg-accent-soft">
                         <perk.icon
                           aria-hidden
-                          className="h-5 w-5 text-accent"
+                          className="w-5 h-5 text-accent"
                         />
                       </span>
-                      <span className="text-caption font-bold leading-tight text-text">
+                      <span className="font-bold text-caption text-text leading-tight">
                         {perk.name}
                       </span>
                     </Link>
@@ -269,7 +269,7 @@ export default async function HomePage() {
 
               <nav
                 aria-label="Redes sociais"
-                className="flex items-center justify-center gap-1 pt-5"
+                className="flex justify-center items-center gap-1 pt-5"
               >
                 {socials.map((social) => (
                   <a
@@ -278,22 +278,22 @@ export default async function HomePage() {
                     aria-label={social.label}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex h-11 w-11 items-center justify-center rounded-full text-accent transition hover:bg-white/5 hover:text-accent-hover"
+                    className="flex justify-center items-center hover:bg-white/5 rounded-full w-11 h-11 text-accent transition hover:text-accent-hover"
                   >
                     <social.icon
                       aria-hidden
-                      className="h-6 w-6"
+                      className="w-6 h-6"
                     />
                   </a>
                 ))}
               </nav>
             </div>
 
-            <footer className="mt-auto border-t border-border px-5 py-6 text-center text-caption text-subtle">
+            <footer className="mt-auto px-5 py-6 border-border border-t text-caption text-subtle text-center">
               <p>
                 © {new Date().getFullYear()} {shopName}
               </p>
-              <div className="mt-2 flex justify-center gap-4">
+              <div className="flex justify-center gap-4 mt-2">
                 <Link
                   href="/privacidade"
                   className="hover:text-text"
@@ -312,7 +312,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="hidden min-h-dvh flex-col lg:flex">
+        <div className="hidden lg:flex flex-col min-h-dvh">
           <PublicDesktopHeader
             shopName={shopName}
             city={city}
@@ -321,16 +321,12 @@ export default async function HomePage() {
             active="home"
           />
 
-          <section className="flex items-center gap-10 px-10 py-12 xl:gap-16 xl:px-20">
-            <div className="flex min-w-0 flex-1 flex-col gap-6">
+          <section className="flex xl:justify-between items-center gap-10 xl:gap-16 px-10 xl:px-20 py-12">
+            <div className="flex flex-col flex-1 xl:flex-none gap-6 xl:w-[616px] min-w-0">
               <div className="flex items-center gap-2">
                 <span
                   aria-hidden
-                  className={
-                    open
-                      ? 'h-[7px] w-[7px] rounded-full bg-success'
-                      : 'h-[7px] w-[7px] rounded-full bg-muted'
-                  }
+                  className={open ? 'h-[7px] w-[7px] bg-success' : 'h-[7px] w-[7px] bg-muted'}
                 />
                 <span
                   className={
@@ -343,11 +339,11 @@ export default async function HomePage() {
                 </span>
               </div>
 
-              <h1 className="font-display text-[40px] font-bold leading-[1.13] text-text xl:text-[52px]">
+              <h1 className="font-display font-bold text-[40px] text-text xl:text-[52px] leading-[1.13]">
                 Seu próximo corte começa aqui.
               </h1>
 
-              <p className="text-[17px] leading-[1.5] text-accent">
+              <p className="text-[17px] text-accent leading-[1.5]">
                 Corte, barba e resenha de alto padrão.
               </p>
 
@@ -363,7 +359,7 @@ export default async function HomePage() {
                     AGENDAR AGORA
                     <ChevronRight
                       aria-hidden
-                      className="h-[18px] w-[18px]"
+                      className="w-[18px] h-[18px]"
                     />
                   </Link>
                   <Link
@@ -371,7 +367,7 @@ export default async function HomePage() {
                     className={buttonClasses({
                       variant: 'outline',
                       size: 'lg',
-                      className: 'h-[52px] rounded-md px-[22px] text-sm',
+                      className: 'h-[52px] w-[87px] flex-none rounded-md px-[22px] text-sm',
                     })}
                   >
                     Loja
@@ -382,14 +378,14 @@ export default async function HomePage() {
                 </p>
                 <Link
                   href="/servicos"
-                  className="w-fit text-body font-semibold text-primary underline underline-offset-2 transition hover:text-primary-hover"
+                  className="w-fit font-semibold text-body text-primary hover:text-primary-hover underline underline-offset-2 transition"
                 >
                   Ver serviços sem agendar
                 </Link>
               </div>
             </div>
 
-            <div className="relative aspect-[600/436] w-[47%] shrink-0 overflow-hidden rounded-3xl">
+            <div className="relative xl:flex-none rounded-3xl w-[47%] xl:w-[600px] aspect-[600/436] overflow-hidden shrink-0">
               <Image
                 src={HERO_IMAGE}
                 alt=""
@@ -399,11 +395,11 @@ export default async function HomePage() {
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,19,22,0.13)_0%,rgba(18,19,22,0.4)_50%,rgba(18,19,22,0.96)_100%)]" />
-              <div className="absolute bottom-8 left-8 flex flex-col gap-2">
-                <span className="text-label font-semibold uppercase tracking-[2px] text-accent">
+              <div className="bottom-8 left-8 absolute flex flex-col gap-2">
+                <span className="font-semibold text-accent text-label uppercase tracking-[2px]">
                   {locationLabel}
                 </span>
-                <span className="font-display text-[29px] font-black leading-[39px] text-accent">
+                <span className="font-display font-black text-[29px] text-accent leading-[39px]">
                   {shopName.toUpperCase()}
                 </span>
                 <span className="text-body text-white">{streetLine}</span>
@@ -411,17 +407,17 @@ export default async function HomePage() {
             </div>
           </section>
 
-          <section className="flex items-center gap-6 bg-surface px-10 py-7 xl:gap-10 xl:px-20">
-            <div className="flex min-w-0 flex-1 items-center gap-4">
+          <section className="flex items-center gap-6 xl:gap-10 bg-surface px-10 xl:px-20 py-7">
+            <div className="flex flex-1 items-center gap-4 min-w-0">
               <MapPin
                 aria-hidden
-                className="h-6 w-6 shrink-0 text-primary"
+                className="w-6 h-6 text-primary shrink-0"
               />
-              <div className="flex min-w-0 flex-col gap-2">
-                <span className="text-label uppercase tracking-[1.5px] text-accent">
+              <div className="flex flex-col gap-2 min-w-0">
+                <span className="text-accent text-label uppercase tracking-[1.5px]">
                   Onde nos encontrar
                 </span>
-                <span className="text-lead font-semibold text-text">
+                <span className="font-semibold text-lead text-text">
                   {addressLine}, {cityLabel}
                 </span>
               </div>
@@ -429,13 +425,13 @@ export default async function HomePage() {
 
             <div
               aria-hidden
-              className="h-12 w-px shrink-0 bg-white/10"
+              className="bg-white/10 w-px h-12 shrink-0"
             />
 
-            <div className="flex shrink-0 items-center gap-4">
+            <div className="flex items-center gap-4 shrink-0">
               <Clock
                 aria-hidden
-                className="h-6 w-6 text-primary"
+                className="w-6 h-6 text-primary"
               />
               <div className="flex flex-col gap-1.5">
                 {hoursLines.map((line, index) => (
@@ -461,37 +457,37 @@ export default async function HomePage() {
               Como chegar
               <ChevronRight
                 aria-hidden
-                className="h-[18px] w-[18px]"
+                className="w-[18px] h-[18px]"
               />
             </a>
           </section>
 
-          <section className="flex flex-col gap-6 px-10 py-12 xl:px-20">
-            <div className="flex items-center justify-between gap-6">
-              <h2 className="font-display text-[29px] font-bold leading-[39px] text-text">
+          <section className="flex flex-col gap-6 px-10 xl:px-20 py-12">
+            <div className="flex justify-between items-center gap-6">
+              <h2 className="font-display font-bold text-[29px] text-text leading-[39px]">
                 Nossos Produtos e Diferenciais
               </h2>
-              <span className="text-body text-muted">Para continuar o cuidado em casa</span>
+              <span className="text-body text-muted">O cuidado continua além do corte.</span>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="gap-6 grid grid-cols-3">
               {PERKS.map((perk) => (
                 <Link
                   key={perk.name}
                   href="/loja"
-                  className="flex min-h-[152px] items-center gap-[18px] rounded-xl bg-surface p-4 transition hover:bg-surface-subtle"
+                  className="flex items-center gap-[18px] bg-surface hover:bg-surface-subtle p-4 rounded-xl min-h-[152px] transition"
                 >
-                  <span className="flex h-[120px] w-[120px] shrink-0 items-center justify-center rounded-md bg-accent-soft">
+                  <span className="flex justify-center items-center rounded-md w-[120px] h-[120px] bg-accent-soft shrink-0">
                     <perk.icon
                       aria-hidden
-                      className="h-9 w-9 text-accent"
+                      className="w-9 h-9 text-accent"
                     />
                   </span>
-                  <span className="flex min-w-0 flex-col gap-2.5">
-                    <span className="text-[17px] font-bold leading-[21px] text-text">
+                  <span className="flex flex-col gap-2.5 min-w-0">
+                    <span className="font-bold text-[17px] text-text leading-[21px]">
                       {perk.name}
                     </span>
-                    <span className="text-caption leading-[1.6] text-muted">
+                    <span className="text-caption text-muted leading-[1.6]">
                       {perk.description}
                     </span>
                   </span>
