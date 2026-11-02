@@ -7,8 +7,8 @@ export async function getOrderByCode(code: string) {
       appointments: {
         orderBy: { startAt: 'asc' },
         include: {
-          service: { select: { name: true, durationMin: true } },
-          barber: { select: { displayName: true, title: true } },
+          service: { select: { name: true, durationMin: true, imageUrl: true } },
+          barber: { select: { displayName: true, title: true, avatarUrl: true } },
         },
       },
       products: {
