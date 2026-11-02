@@ -1,5 +1,8 @@
+import { after } from 'next/server'
+
 import { getServerEnv } from '@/lib/env'
 import { AppError, errorResponse } from '@/lib/http/errors'
+import { notifyOrderConfirmation } from '@/lib/notifications/orders'
 import { fetchMercadoPagoPayment } from '@/lib/payments/mercado-pago'
 import { settleOrderPayment } from '@/lib/payments/settle'
 import { verifyMercadoPagoSignature } from '@/lib/payments/signature'
@@ -71,6 +74,10 @@ export async function POST(request: Request) {
       amountCents: payment.amountCents,
       paidAt: payment.paidAt,
     })
+
+    if (!result.alreadySettled) {
+      after(() => notifyOrderConfirmation(payment.orderCode!))
+    }
 
     return Response.json({
       ok: true,

@@ -23,6 +23,14 @@ export class ResendEmailSender implements EmailSender {
         html: message.html,
         text: message.text,
         ...(this.replyTo ? { reply_to: this.replyTo } : {}),
+        ...(message.attachments?.length
+          ? {
+              attachments: message.attachments.map((attachment) => ({
+                filename: attachment.filename,
+                content: attachment.contentBase64,
+              })),
+            }
+          : {}),
       }),
       signal: AbortSignal.timeout(10_000),
     })

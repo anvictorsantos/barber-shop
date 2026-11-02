@@ -1,10 +1,12 @@
 'use server'
 
 import { headers } from 'next/headers'
+import { after } from 'next/server'
 
 import { getSessionUser } from '@/lib/auth/session'
 import { AppError } from '@/lib/http/errors'
 import { enforceRateLimit } from '@/lib/http/rate-limit'
+import { notifyOrderConfirmation } from '@/lib/notifications/orders'
 import { createOrder, expirePendingOrder } from '@/lib/orders/create-order'
 import { getOrderByCode } from '@/lib/orders/queries'
 import type { OrderActor, CreateOrderActionResult } from '@/lib/orders/types'
@@ -52,6 +54,8 @@ export async function createOrderAction(input: unknown): Promise<CreateOrderActi
         return failure(error)
       }
     }
+
+    after(() => notifyOrderConfirmation(order.code))
 
     return { ok: true, code: order.code }
   } catch (error) {
