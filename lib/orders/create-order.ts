@@ -1,5 +1,3 @@
-import { randomInt } from 'node:crypto'
-
 import { formatInTimeZone } from 'date-fns-tz'
 
 import { normalizeEmail, normalizePhone } from '@/lib/auth/identity'
@@ -7,6 +5,8 @@ import { getAvailability } from '@/lib/availability/queries'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { prisma } from '@/lib/db/prisma'
 import { AppError } from '@/lib/http/errors'
+import { uniqueOrderCode } from '@/lib/orders/code'
+import { isExclusionError } from '@/lib/orders/conflict'
 import type { OrderActor } from '@/lib/orders/types'
 import type { CreateOrderInput } from '@/lib/validation/orders'
 
@@ -22,21 +22,6 @@ interface PreparedService {
 interface PreparedProduct {
   product: Product
   quantity: number
-}
-
-function isExclusionError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error)
-  return message.includes('appointments_active_no_overlap') || message.includes('23P01')
-}
-
-async function uniqueOrderCode(): Promise<string> {
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const code = `BL-${randomInt(10000, 100000)}`
-    const existing = await prisma.order.findUnique({ where: { code }, select: { id: true } })
-    if (!existing) return code
-  }
-
-  throw new AppError(500, 'code_generation_failed', 'Não foi possível gerar o código do pedido.')
 }
 
 async function resolveCustomer(input: CreateOrderInput, actor: OrderActor | null) {
@@ -68,6 +53,14 @@ async function resolveCustomer(input: CreateOrderInput, actor: OrderActor | null
       OR: [...(email ? [{ email }] : []), ...(phone ? [{ phone }] : [])],
     },
   })
+
+  if (existing?.bookingBlocked) {
+    throw new AppError(
+      403,
+      'booking_blocked',
+      'Sua conta está bloqueada para agendamentos online. Fale com a barbearia.',
+    )
+  }
 
   if (existing) {
     return {

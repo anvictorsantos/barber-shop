@@ -32,6 +32,13 @@ export async function createOrderAction(input: unknown): Promise<CreateOrderActi
     }
 
     const sessionUser = await getSessionUser()
+    if (sessionUser?.bookingBlocked) {
+      return {
+        ok: false,
+        error: 'Sua conta está bloqueada para agendamentos online. Fale com a barbearia.',
+      }
+    }
+
     const actor: OrderActor | null = sessionUser
       ? {
           id: sessionUser.id,
