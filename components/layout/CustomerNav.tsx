@@ -32,6 +32,13 @@ const icons: Record<NavIcon, LucideIcon> = {
   heart: Heart,
 }
 
+const DESKTOP_TABS = [
+  { href: '/conta/agendamentos', label: 'Meus Agendamentos' },
+  { href: '/conta/historico', label: 'Histórico' },
+  { href: '/conta/perfil', label: 'Perfil' },
+  { href: '/conta/favoritos', label: 'Favoritos' },
+] as const
+
 function isActive(pathname: string, href: string): boolean {
   return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
 }
@@ -42,11 +49,10 @@ export function CustomerNav({ variant }: { variant: 'horizontal' | 'bottom' }) {
   if (variant === 'horizontal') {
     return (
       <nav
-        className="hidden items-center gap-1 lg:flex"
+        className="hidden items-center gap-6 lg:flex"
         aria-label="Navegação da conta"
       >
-        {customerNavItems.map((item) => {
-          const Icon = icons[item.icon]
+        {DESKTOP_TABS.map((item) => {
           const active = isActive(pathname, item.href)
           return (
             <Link
@@ -54,14 +60,12 @@ export function CustomerNav({ variant }: { variant: 'horizontal' | 'bottom' }) {
               href={item.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-2 rounded-lg px-3 py-2 text-caption font-semibold transition',
-                active ? 'bg-white/5 text-accent' : 'text-muted hover:text-text',
+                'rounded-xs border px-4 py-2.5 text-sm font-bold leading-[17px] transition',
+                active
+                  ? 'border-primary bg-white/[0.04] text-primary'
+                  : 'border-transparent text-muted hover:text-text',
               )}
             >
-              <Icon
-                className="h-4 w-4"
-                aria-hidden
-              />
               {item.label}
             </Link>
           )

@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { Button } from '@/components/ui/Button'
 import { cancelMyAppointmentAction } from '@/lib/customer/actions'
 
 export function CancelAppointmentButton({
@@ -37,17 +36,14 @@ export function CancelAppointmentButton({
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <Button
-        variant="danger"
-        size="sm"
+      <button
+        type="button"
         onClick={cancel}
         disabled={pending}
+        className="h-9 cursor-pointer rounded-sm border border-danger px-4 text-[13px] font-bold leading-4 text-danger transition hover:bg-danger/10 disabled:pointer-events-none disabled:opacity-40"
       >
         {pending ? 'Cancelando…' : 'Cancelar'}
-      </Button>
-      <span className="text-micro text-subtle">
-        {free ? 'Reembolso até 2h antes' : 'Sem reembolso agora'}
-      </span>
+      </button>
       {error ? (
         <p
           role="alert"
