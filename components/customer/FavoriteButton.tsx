@@ -14,12 +14,14 @@ export function FavoriteButton({
   initial,
   label,
   className,
+  variant = 'badge',
 }: {
   kind: FavoriteKind
   id: string
   initial: boolean
   label: string
   className?: string
+  variant?: 'badge' | 'bare'
 }) {
   const router = useRouter()
   const [saved, setSaved] = useState(initial)
@@ -56,15 +58,19 @@ export function FavoriteButton({
         aria-label={saved ? `Remover ${label} dos favoritos` : `Salvar ${label} nos favoritos`}
         title={saved ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
         className={cn(
-          'flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border transition',
-          saved
-            ? 'border-danger/50 bg-danger/10 text-danger'
-            : 'border-border bg-surface-input text-muted hover:border-accent hover:text-accent',
+          'flex cursor-pointer items-center justify-center transition',
+          variant === 'bare'
+            ? 'h-5 w-5 text-primary hover:text-primary-hover'
+            : 'h-9 w-9 rounded-full border',
+          variant === 'badge' &&
+            (saved
+              ? 'border-danger/50 bg-danger/10 text-danger'
+              : 'border-border bg-surface-input text-muted hover:border-accent hover:text-accent'),
           pending && 'opacity-50',
         )}
       >
         <Heart
-          className="h-4 w-4"
+          className={variant === 'bare' ? 'h-5 w-5' : 'h-4 w-4'}
           fill={saved ? 'currentColor' : 'none'}
           aria-hidden
         />
