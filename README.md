@@ -2,7 +2,7 @@
 
 Single-shop booking and commerce app. Next.js + TypeScript + Prisma + PostgreSQL.
 
-The product is not built yet. This repository currently contains the foundation: strict TypeScript, Tailwind tokens, ESLint, Prettier, Husky, GTM with consent, Sentry, Playwright, Vitest, a full Prisma schema with migrations and seed, auth routes and sessions, login/signup/verification/reset screens, public catalog, service detail, store, owner catalog CRUD, owner settings (shop, hours, team, blocks), deterministic availability engine, guest booking flow, multi-line cart, role-scoped layout shells, UI primitives, and a Render blueprint.
+The app ships the full MVP: auth with e-mail/WhatsApp verification, public catalog and store, deterministic slot engine, guest and staff booking, multi-line cart, Mercado Pago checkout with holds and expiry, at-chair payments, refunds and PDF receipts, booking messages with calendar files, reminders, owner dashboard/agenda/clients/finance, staff settings, customer account with loyalty, reviews, favorites and notification preferences, plus a Render blueprint. Strict TypeScript, Tailwind tokens, ESLint, Prettier, Husky, GTM with consent, Sentry, Playwright and Vitest are wired in.
 
 ## Requirements
 
@@ -36,7 +36,8 @@ npm run format:check
 npm run typecheck    # tsc --noEmit, strict
 npm test             # Vitest unit tests
 npm run test:integration
-npm run test:e2e     # Playwright; shell tests need E2E_SEEDED=true after db:seed
+npm run test:e2e     # Playwright; seeded specs need E2E_SEEDED=true after db:seed
+                     # demo spec needs DEMO_MODE=true and E2E_DEMO=true
 npm run db:generate
 npm run db:migrate
 npm run db:deploy
@@ -44,6 +45,20 @@ npm run db:seed
 npm run db:reset
 npm run db:studio
 ```
+
+## Demo mode
+
+`DEMO_MODE=true` turns on one-click logins on `/entrar` (customer, barber, owner) using the seeded
+accounts. It is guarded by `lib/env.ts`, which refuses to start in production with `DEMO_MODE`
+enabled. To run the demo locally:
+
+```bash
+npm run db:seed
+DEMO_MODE=true npm run dev
+```
+
+Seeded credentials remain `demo1234` for manual login. Never enable demo mode on a production
+deployment.
 
 ## Configuration
 
@@ -80,7 +95,8 @@ Tailwind 4 with `@tailwindcss/postcss`. `tailwind.config.js` maps the design tok
 - Start: `npm run db:deploy && npm start`
 - Health: `/api/health`
 - Database: external Neon/Render Postgres through `DATABASE_URL` and `DIRECT_URL`
-- Cron jobs are added in Phase 5, after their route handlers exist.
+- Cron jobs (reminders, hold expiry, credit expiry) are declared in `render.yaml`; set the same
+  `APP_URL` and `CRON_SECRET` on each.
 
 ### ESLint and Prettier
 

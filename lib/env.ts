@@ -22,6 +22,11 @@ export const serverEnvSchema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().default(''),
   WHATSAPP_VERIFY_TOKEN: z.string().default(''),
   WHATSAPP_TEMPLATE_OTP: z.string().default(''),
+  WHATSAPP_TEMPLATE_CONFIRMATION: z.string().default(''),
+  WHATSAPP_TEMPLATE_REMINDER: z.string().default(''),
+  WHATSAPP_TEMPLATE_CANCELED: z.string().default(''),
+  WHATSAPP_TEMPLATE_RESCHEDULED: z.string().default(''),
+  WHATSAPP_TEMPLATE_NO_SHOW_BLOCK: z.string().default(''),
   WHATSAPP_GRAPH_VERSION: z.string().default('v22.0'),
 
   MERCADO_PAGO_ENABLED: booleanString.default(true),

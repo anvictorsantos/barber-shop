@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { CustomerNav } from '@/components/layout/CustomerNav'
+import { SkipLink } from '@/components/layout/SkipLink'
 import { getSessionUser } from '@/lib/auth/session'
 
 import type { ReactNode } from 'react'
@@ -22,6 +23,7 @@ export async function CustomerShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
+      <SkipLink />
       <header className="border-b border-border bg-shell/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-shell items-center justify-between gap-4 px-4 sm:px-6">
           <Link
@@ -45,7 +47,10 @@ export async function CustomerShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-6 sm:px-6 lg:pb-10">
+      <main
+        id="main-content"
+        className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-6 sm:px-6 lg:pb-10"
+      >
         {children}
       </main>
 

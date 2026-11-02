@@ -43,6 +43,24 @@ export class MetaWhatsAppSender implements WhatsAppSender {
     })
   }
 
+  async sendTemplate(phone: string, templateName: string, parameters: string[]): Promise<void> {
+    await this.post({
+      messaging_product: 'whatsapp',
+      to: phone.replace(/^\+/, ''),
+      type: 'template',
+      template: {
+        name: templateName,
+        language: { code: 'pt_BR' },
+        components: [
+          {
+            type: 'body',
+            parameters: parameters.map((text) => ({ type: 'text', text })),
+          },
+        ],
+      },
+    })
+  }
+
   async sendText(phone: string, text: string): Promise<void> {
     // Free-form text only reaches users inside the 24h service window; booking alerts
     // need an approved template for business-initiated delivery.

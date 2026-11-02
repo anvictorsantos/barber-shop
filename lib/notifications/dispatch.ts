@@ -1,3 +1,6 @@
+import { formatInTimeZone } from 'date-fns-tz'
+
+import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { buildAppointmentIcs, buildGoogleCalendarUrl } from '@/lib/calendar/ics'
 import { prisma } from '@/lib/db/prisma'
 import { getServerEnv } from '@/lib/env'
@@ -27,6 +30,12 @@ interface LogInput {
 }
 
 const DEDUPED_KINDS = new Set<NotificationKind>(['BOOKING_CONFIRMATION', 'REMINDER', 'CANCELED'])
+const WHATSAPP_TEMPLATE_KEYS = {
+  BOOKING_CONFIRMATION: 'WHATSAPP_TEMPLATE_CONFIRMATION',
+  REMINDER: 'WHATSAPP_TEMPLATE_REMINDER',
+  CANCELED: 'WHATSAPP_TEMPLATE_CANCELED',
+  RESCHEDULED: 'WHATSAPP_TEMPLATE_RESCHEDULED',
+} as const
 const CALENDAR_KINDS = new Set<NotificationKind>(['BOOKING_CONFIRMATION', 'RESCHEDULED'])
 
 function errorMessage(error: unknown): string {
@@ -106,6 +115,21 @@ async function deliver(
 
   const message = renderAppointmentWhatsApp(kind, context)
   if (!message) throw new Error(`Tipo de notificação sem WhatsApp: ${kind}`)
+
+  const templateKey = WHATSAPP_TEMPLATE_KEYS[kind as keyof typeof WHATSAPP_TEMPLATE_KEYS]
+  const templateName = templateKey ? getServerEnv()[templateKey] : ''
+
+  if (templateName) {
+    const when = formatInTimeZone(context.startAt, BUSINESS_TIMEZONE, "dd/MM/yyyy 'às' HH:mm")
+    await whatsappSender().sendTemplate(contact, templateName, [
+      context.customerName,
+      context.serviceName,
+      when,
+      context.shopName,
+    ])
+    return
+  }
+
   await whatsappSender().sendText(contact, message)
 }
 
@@ -254,7 +278,12 @@ export async function notifyNoShowBlock(userId: string): Promise<DispatchResult>
           if (channel === 'EMAIL') {
             await emailSender().send({ to: contact, subject, text, html: `<p>${text}</p>` })
           } else {
-            await whatsappSender().sendText(contact, text)
+            const templateName = getServerEnv().WHATSAPP_TEMPLATE_NO_SHOW_BLOCK
+            if (templateName) {
+              await whatsappSender().sendTemplate(contact, templateName, [user.name, shopName])
+            } else {
+              await whatsappSender().sendText(contact, text)
+            }
           }
         },
       })
