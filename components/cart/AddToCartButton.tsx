@@ -18,7 +18,7 @@ export function AddToCartButton({ item }: { item: Omit<CartItem, 'id'> }) {
     <Button
       type="button"
       size="lg"
-      className="w-full"
+      className="h-[52px] w-full rounded-md px-[22px] text-sm"
       onClick={add}
     >
       Confirmar e adicionar ao carrinho

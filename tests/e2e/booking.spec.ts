@@ -19,7 +19,7 @@ test.describe('booking', () => {
 
     const serviceId = new URL(page.url()).pathname.split('/')[2]
     if (!serviceId) throw new Error('missing service id')
-    await page.getByRole('link', { name: 'Escolher' }).first().click()
+    await page.getByRole('link', { name: 'Continuar para horário' }).click()
     await expect(page).toHaveURL(/\/agendar\/.+\/horario\?barberId=/)
 
     const url = new URL(page.url())
