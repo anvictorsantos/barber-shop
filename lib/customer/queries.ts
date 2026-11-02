@@ -10,14 +10,20 @@ export interface AppointmentCard {
   startAtIso: string
   startLabel: string
   endLabel: string
+  serviceId: string
   serviceName: string
   serviceSlug: string
+  serviceImageUrl: string | null
+  serviceDurationMin: number
+  barberId: string
   barberName: string
+  barberAvatarUrl: string | null
   priceCents: number
   status: AppointmentStatus
   orderCode: string
   paid: boolean
   reviewed: boolean
+  reviewRating: number | null
 }
 
 function toCard(appointment: {
@@ -26,22 +32,27 @@ function toCard(appointment: {
   endAt: Date
   priceCents: number
   status: AppointmentStatus
-  service: { name: string; slug: string }
-  barber: { displayName: string }
+  service: { id: string; name: string; slug: string; imageUrl: string | null; durationMin: number }
+  barber: { id: string; displayName: string; avatarUrl: string | null }
   order: {
     code: string
     payments: { status: string }[]
   }
-  review: { id: string } | null
+  review: { id: string; rating: number } | null
 }): AppointmentCard {
   return {
     id: appointment.id,
     startAtIso: appointment.startAt.toISOString(),
     startLabel: formatInTimeZone(appointment.startAt, BUSINESS_TIMEZONE, "dd/MM/yyyy 'às' HH:mm"),
     endLabel: formatInTimeZone(appointment.endAt, BUSINESS_TIMEZONE, 'HH:mm'),
+    serviceId: appointment.service.id,
     serviceName: appointment.service.name,
     serviceSlug: appointment.service.slug,
+    serviceImageUrl: appointment.service.imageUrl,
+    serviceDurationMin: appointment.service.durationMin,
+    barberId: appointment.barber.id,
     barberName: appointment.barber.displayName,
+    barberAvatarUrl: appointment.barber.avatarUrl,
     priceCents: appointment.priceCents,
     status: appointment.status,
     orderCode: appointment.order.code,
@@ -49,19 +60,20 @@ function toCard(appointment: {
       (payment) => payment.status === 'PAID' || payment.status === 'PARTIALLY_REFUNDED',
     ),
     reviewed: appointment.review !== null,
+    reviewRating: appointment.review?.rating ?? null,
   }
 }
 
 const cardInclude = {
-  service: { select: { name: true, slug: true } },
-  barber: { select: { displayName: true } },
+  service: { select: { id: true, name: true, slug: true, imageUrl: true, durationMin: true } },
+  barber: { select: { id: true, displayName: true, avatarUrl: true } },
   order: {
     select: {
       code: true,
       payments: { select: { status: true } },
     },
   },
-  review: { select: { id: true } },
+  review: { select: { id: true, rating: true } },
 } as const
 
 export async function getUpcomingAppointments(userId: string): Promise<AppointmentCard[]> {
@@ -110,18 +122,27 @@ export async function getCustomerProfile(userId: string) {
       postalCode: true,
       notifyEmail: true,
       notifyWhatsapp: true,
+      createdAt: true,
     },
   })
 }
 
 export async function getFavorites(userId: string) {
-  const [barbers, services, products] = await Promise.all([
+  const [barbers, services, products, visits, purchases] = await Promise.all([
     prisma.favoriteBarber.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       select: {
         barber: {
-          select: { id: true, displayName: true, title: true, avatarUrl: true, active: true },
+          select: {
+            id: true,
+            displayName: true,
+            title: true,
+            avatarUrl: true,
+            active: true,
+            ratingAvg: true,
+            sortOrder: true,
+          },
         },
       },
     }),
@@ -137,6 +158,7 @@ export async function getFavorites(userId: string) {
             priceCents: true,
             durationMin: true,
             active: true,
+            sortOrder: true,
           },
         },
       },
@@ -148,6 +170,7 @@ export async function getFavorites(userId: string) {
         product: {
           select: {
             id: true,
+            slug: true,
             name: true,
             description: true,
             priceCents: true,
@@ -158,12 +181,56 @@ export async function getFavorites(userId: string) {
         },
       },
     }),
+    prisma.appointment.findMany({
+      where: { customerId: userId, status: 'COMPLETED' },
+      select: { barberId: true, serviceId: true },
+    }),
+    prisma.orderProduct.findMany({
+      where: { order: { customerId: userId } },
+      select: { productId: true, quantity: true },
+    }),
   ])
 
+  const barberVisits = new Map<string, number>()
+  const serviceVisits = new Map<string, number>()
+  for (const visit of visits) {
+    barberVisits.set(visit.barberId, (barberVisits.get(visit.barberId) ?? 0) + 1)
+    serviceVisits.set(visit.serviceId, (serviceVisits.get(visit.serviceId) ?? 0) + 1)
+  }
+
+  const productPurchases = new Map<string, number>()
+  for (const purchase of purchases) {
+    productPurchases.set(
+      purchase.productId,
+      (productPurchases.get(purchase.productId) ?? 0) + purchase.quantity,
+    )
+  }
+
   return {
-    barbers: barbers.map((row) => row.barber).filter((barber) => barber.active),
-    services: services.map((row) => row.service).filter((service) => service.active),
-    products: products.map((row) => row.product).filter((product) => product.active),
+    barbers: barbers
+      .map((row) => row.barber)
+      .filter((barber) => barber.active)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((barber) => ({
+        ...barber,
+        ratingAvg: Number(barber.ratingAvg),
+        visits: barberVisits.get(barber.id) ?? 0,
+      })),
+    services: services
+      .map((row) => row.service)
+      .filter((service) => service.active)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((service) => ({
+        ...service,
+        timesBooked: serviceVisits.get(service.id) ?? 0,
+      })),
+    products: products
+      .map((row) => row.product)
+      .filter((product) => product.active)
+      .map((product) => ({
+        ...product,
+        timesBought: productPurchases.get(product.id) ?? 0,
+      })),
   }
 }
 
