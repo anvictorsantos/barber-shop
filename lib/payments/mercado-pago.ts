@@ -2,6 +2,8 @@ import { getServerEnv } from '@/lib/env'
 import { AppError } from '@/lib/http/errors'
 import type { getOrderByCode } from '@/lib/orders/queries'
 
+import type { PaymentMethod } from '@prisma/client'
+
 type OrderWithLines = NonNullable<Awaited<ReturnType<typeof getOrderByCode>>>
 
 const MP_ENDPOINT = 'https://api.mercadopago.com/checkout/preferences'
@@ -71,4 +73,77 @@ export async function createMercadoPagoPreference(order: OrderWithLines): Promis
   }
 
   return { initPoint: body.init_point }
+}
+
+const MP_PAYMENT_ENDPOINT = 'https://api.mercadopago.com/v1/payments'
+
+interface PaymentApiResponse {
+  id?: unknown
+  status?: unknown
+  status_detail?: unknown
+  external_reference?: unknown
+  transaction_amount?: unknown
+  payment_type_id?: unknown
+  payment_method_id?: unknown
+  date_approved?: unknown
+}
+
+export interface MercadoPagoPayment {
+  id: string
+  status: string
+  statusDetail: string
+  orderCode: string | null
+  amountCents: number
+  method: PaymentMethod
+  paidAt: Date | null
+}
+
+export function mapMercadoPagoMethod(
+  paymentTypeId: string | null,
+  paymentMethodId: string | null,
+): PaymentMethod {
+  if (paymentMethodId === 'pix' || paymentTypeId === 'bank_transfer') return 'PIX'
+  if (paymentTypeId === 'debit_card') return 'DEBIT_CARD'
+  return 'CREDIT_CARD'
+}
+
+export async function fetchMercadoPagoPayment(paymentId: string): Promise<MercadoPagoPayment> {
+  const env = getServerEnv()
+
+  if (!env.MERCADO_PAGO_ENABLED || !env.MERCADO_PAGO_ACCESS_TOKEN) {
+    throw new AppError(503, 'payment_unavailable', 'Pagamento online indisponível no momento.')
+  }
+
+  const response = await fetch(`${MP_PAYMENT_ENDPOINT}/${encodeURIComponent(paymentId)}`, {
+    headers: { Authorization: `Bearer ${env.MERCADO_PAGO_ACCESS_TOKEN}` },
+    signal: AbortSignal.timeout(15_000),
+  })
+
+  if (!response.ok) {
+    throw new AppError(
+      502,
+      'payment_error',
+      `Mercado Pago recusou a consulta (${response.status}).`,
+    )
+  }
+
+  const body = (await response.json()) as PaymentApiResponse
+  const amount = typeof body.transaction_amount === 'number' ? body.transaction_amount : null
+
+  if (body.id === undefined || typeof body.status !== 'string' || amount === null) {
+    throw new AppError(502, 'payment_error', 'Mercado Pago retornou um pagamento inválido.')
+  }
+
+  return {
+    id: String(body.id),
+    status: body.status,
+    statusDetail: typeof body.status_detail === 'string' ? body.status_detail : '',
+    orderCode: typeof body.external_reference === 'string' ? body.external_reference : null,
+    amountCents: Math.round(amount * 100),
+    method: mapMercadoPagoMethod(
+      typeof body.payment_type_id === 'string' ? body.payment_type_id : null,
+      typeof body.payment_method_id === 'string' ? body.payment_method_id : null,
+    ),
+    paidAt: typeof body.date_approved === 'string' ? new Date(body.date_approved) : null,
+  }
 }
