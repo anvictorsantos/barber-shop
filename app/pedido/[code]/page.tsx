@@ -6,6 +6,7 @@ import { PublicShell } from '@/components/layout/PublicShell'
 import { Card } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { StatusPill } from '@/components/ui/StatusPill'
+import { getSessionUser } from '@/lib/auth/session'
 import { formatBRL } from '@/lib/format/money'
 import { getOrderByCode } from '@/lib/orders/queries'
 import { orderStatusLabel, orderStatusTone } from '@/lib/orders/status'
@@ -24,6 +25,9 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
   const { code } = await params
   const order = await getOrderByCode(code)
   if (!order) notFound()
+
+  const user = await getSessionUser()
+  const settled = order.payments.some((payment) => payment.paidAt !== null)
 
   const title =
     order.status === 'PAID'
@@ -105,6 +109,14 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
         </Card>
 
         <div className="flex flex-col gap-3">
+          {settled && user ? (
+            <a
+              href={`/api/pedidos/${order.code}/recibo`}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-5 py-3 text-body font-bold text-text hover:border-accent"
+            >
+              Baixar recibo
+            </a>
+          ) : null}
           <Link
             href="/"
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-body font-bold text-white hover:bg-primary-hover"
