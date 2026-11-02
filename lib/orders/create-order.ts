@@ -284,13 +284,13 @@ export async function createOrder(input: CreateOrderInput, actor: OrderActor | n
   }
 }
 
-export async function expirePendingOrder(code: string): Promise<void> {
+export async function expirePendingOrder(code: string): Promise<boolean> {
   const order = await prisma.order.findUnique({
     where: { code },
     include: { products: true },
   })
 
-  if (!order || order.status !== 'PENDING_PAYMENT') return
+  if (!order || order.status !== 'PENDING_PAYMENT') return false
 
   await prisma.$transaction(async (tx) => {
     await tx.order.update({
@@ -321,4 +321,22 @@ export async function expirePendingOrder(code: string): Promise<void> {
       })
     }
   })
+
+  return true
+}
+
+export async function expireOverdueOrders(limit = 100): Promise<{ expired: number }> {
+  const overdue = await prisma.order.findMany({
+    where: { status: 'PENDING_PAYMENT', expiresAt: { lt: new Date() } },
+    select: { code: true },
+    orderBy: { expiresAt: 'asc' },
+    take: limit,
+  })
+
+  let expired = 0
+  for (const order of overdue) {
+    if (await expirePendingOrder(order.code)) expired += 1
+  }
+
+  return { expired }
 }
