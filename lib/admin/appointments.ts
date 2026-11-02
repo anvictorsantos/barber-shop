@@ -3,6 +3,7 @@ import { normalizeEmail, normalizePhone } from '@/lib/auth/identity'
 import { getAvailability } from '@/lib/availability/queries'
 import { prisma } from '@/lib/db/prisma'
 import { AppError } from '@/lib/http/errors'
+import { recordCompletedVisit, releaseOrderCredit } from '@/lib/loyalty/service'
 import { uniqueOrderCode } from '@/lib/orders/code'
 import { isExclusionError } from '@/lib/orders/conflict'
 import type { ManualBookingInput } from '@/lib/validation/admin'
@@ -122,9 +123,14 @@ export async function completeAppointment(appointmentId: string, scope: AdminSco
     throw new AppError(409, 'invalid_status', 'Este agendamento não pode ser concluído.')
   }
 
-  return prisma.appointment.update({
-    where: { id: appointment.id },
-    data: { status: 'COMPLETED', completedAt: new Date() },
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.appointment.update({
+      where: { id: appointment.id },
+      data: { status: 'COMPLETED', completedAt: new Date() },
+    })
+
+    await recordCompletedVisit(tx, appointment.id)
+    return updated
   })
 }
 
@@ -193,6 +199,7 @@ export async function cancelAppointment(appointmentId: string, scope: AdminScope
           where: { id: appointment.orderId },
           data: { status: 'CANCELED', canceledAt: now },
         })
+        await releaseOrderCredit(tx, appointment.orderId)
       }
     }
 

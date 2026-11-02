@@ -21,18 +21,25 @@ type PaymentMode = 'ON_SITE' | 'ONLINE'
 
 export function CartContents({
   customer,
+  hasCredit = false,
 }: {
   customer: { name: string; email: string; phone: string } | null
+  hasCredit?: boolean
 }) {
   const router = useRouter()
   const items = useCart()
   const total = items.reduce((sum, item) => sum + item.priceCents, 0)
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('ON_SITE')
+  const [useCredit, setUseCredit] = useState(false)
   const [name, setName] = useState(customer?.name ?? '')
   const [email, setEmail] = useState(customer?.email ?? '')
   const [phone, setPhone] = useState(customer?.phone ?? '')
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const creditApplied =
+    useCredit && paymentMode === 'ON_SITE'
+      ? Math.max(0, ...items.map((item) => item.priceCents))
+      : 0
 
   if (items.length === 0) {
     return (
@@ -68,6 +75,7 @@ export function CartContents({
         barberId: item.barberId,
         startAt: item.startAt,
       })),
+      useCredit: paymentMode === 'ON_SITE' && useCredit,
     })
 
     setPending(false)
@@ -119,9 +127,18 @@ export function CartContents({
       </div>
 
       <Card className="flex flex-col gap-4">
+        {creditApplied > 0 ? (
+          <div className="flex items-center justify-between gap-3 text-caption text-muted">
+            <span>Crédito de fidelidade</span>
+            <span className="font-bold text-success">− {formatBRL(creditApplied)}</span>
+          </div>
+        ) : null}
+
         <div className="flex items-center justify-between gap-3">
           <span className="text-caption uppercase tracking-wider text-muted">Total</span>
-          <span className="text-metric font-extrabold text-accent">{formatBRL(total)}</span>
+          <span className="text-metric font-extrabold text-accent">
+            {formatBRL(total - creditApplied)}
+          </span>
         </div>
 
         <div className="h-px w-full bg-border" />
@@ -144,7 +161,10 @@ export function CartContents({
             </button>
             <button
               type="button"
-              onClick={() => setPaymentMode('ONLINE')}
+              onClick={() => {
+                setUseCredit(false)
+                setPaymentMode('ONLINE')
+              }}
               className={cn(
                 'flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-left transition',
                 paymentMode === 'ONLINE'
@@ -157,6 +177,27 @@ export function CartContents({
             </button>
           </div>
         </div>
+
+        {customer && hasCredit && paymentMode === 'ON_SITE' ? (
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-input p-3 text-caption text-text">
+            <input
+              id="checkout-credit"
+              type="checkbox"
+              checked={useCredit}
+              onChange={(event) => setUseCredit(event.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+            />
+            <label
+              htmlFor="checkout-credit"
+              className="flex cursor-pointer flex-col gap-0.5"
+            >
+              Usar crédito de fidelidade
+              <span className="text-micro text-muted">
+                Um serviço grátis, válido no pagamento na barbearia.
+              </span>
+            </label>
+          </div>
+        ) : null}
 
         {customer ? (
           <p className="text-caption text-muted">

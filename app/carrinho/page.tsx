@@ -2,6 +2,7 @@ import { CartContents } from '@/components/cart/CartContents'
 import { PublicShell } from '@/components/layout/PublicShell'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { getSessionUser } from '@/lib/auth/session'
+import { findAvailableCredit } from '@/lib/loyalty/service'
 
 import type { Metadata } from 'next'
 
@@ -17,6 +18,8 @@ export default async function CartPage() {
   const customer = user
     ? { name: user.name, email: user.email ?? '', phone: user.phone ?? '' }
     : null
+  const hasCredit =
+    user?.role === 'CUSTOMER' ? (await findAvailableCredit(user.id)) !== null : false
 
   return (
     <PublicShell>
@@ -25,7 +28,10 @@ export default async function CartPage() {
           title="Carrinho"
           description="Revise os serviços antes de finalizar."
         />
-        <CartContents customer={customer} />
+        <CartContents
+          customer={customer}
+          hasCredit={hasCredit}
+        />
       </div>
     </PublicShell>
   )
