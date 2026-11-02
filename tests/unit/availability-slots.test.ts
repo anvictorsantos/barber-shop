@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BUSINESS_TIMEZONE,
   getAvailableSlots,
+  isShopOpen,
   type AvailabilityInput,
 } from '@/lib/availability/slots'
 
@@ -112,5 +113,52 @@ describe('slot engine', () => {
   it('returns nothing on a past date', () => {
     const slots = getAvailableSlots(input({ date: '2026-10-30' }))
     expect(slots).toEqual([])
+  })
+})
+
+describe('shop open state', () => {
+  const mondayHours = { weekday: 1, openMinute: 540, closeMinute: 1200, closed: false }
+
+  it('is open inside business hours', () => {
+    expect(
+      isShopOpen({
+        shopHours: mondayHours,
+        now: fromZonedTime('2026-11-02 09:10:00', BUSINESS_TIMEZONE),
+      }),
+    ).toBe(true)
+  })
+
+  it('is closed before opening and after closing', () => {
+    expect(
+      isShopOpen({
+        shopHours: mondayHours,
+        now: fromZonedTime('2026-11-02 08:59:00', BUSINESS_TIMEZONE),
+      }),
+    ).toBe(false)
+    expect(
+      isShopOpen({
+        shopHours: mondayHours,
+        now: fromZonedTime('2026-11-02 20:00:00', BUSINESS_TIMEZONE),
+      }),
+    ).toBe(false)
+  })
+
+  it('is closed on a day without hours', () => {
+    expect(
+      isShopOpen({
+        shopHours: mondayHours,
+        now: fromZonedTime('2026-11-03 09:10:00', BUSINESS_TIMEZONE),
+      }),
+    ).toBe(false)
+    expect(isShopOpen({ shopHours: null })).toBe(false)
+  })
+
+  it('is closed when the day is marked closed', () => {
+    expect(
+      isShopOpen({
+        shopHours: { ...mondayHours, closed: true },
+        now: fromZonedTime('2026-11-02 09:10:00', BUSINESS_TIMEZONE),
+      }),
+    ).toBe(false)
   })
 })

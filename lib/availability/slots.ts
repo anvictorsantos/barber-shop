@@ -53,6 +53,26 @@ export interface AvailabilityInput {
 
 const ACTIVE_STATUSES = new Set(['PENDING', 'CONFIRMED'])
 
+export function isShopOpen({
+  shopHours,
+  now = new Date(),
+  timezone = BUSINESS_TIMEZONE,
+}: {
+  shopHours: SlotShopHours | null | undefined
+  now?: Date
+  timezone?: string
+}): boolean {
+  if (!shopHours || shopHours.closed) return false
+
+  const weekday = Number(formatInTimeZone(now, timezone, 'i')) % 7
+  if (shopHours.weekday !== weekday) return false
+
+  const [hour = '0', minute = '0'] = formatInTimeZone(now, timezone, 'H:m').split(':')
+  const currentMinute = Number(hour) * 60 + Number(minute)
+
+  return currentMinute >= shopHours.openMinute && currentMinute < shopHours.closeMinute
+}
+
 function overlaps(start: Date, end: Date, otherStart: Date, otherEnd: Date): boolean {
   return start.getTime() < otherEnd.getTime() && end.getTime() > otherStart.getTime()
 }

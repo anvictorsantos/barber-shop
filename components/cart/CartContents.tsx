@@ -1,23 +1,28 @@
 'use client'
 
-import { ShoppingBag, Trash2 } from 'lucide-react'
+import { ptBR } from 'date-fns/locale'
+import { formatInTimeZone } from 'date-fns-tz'
+import { ChevronRight, Scissors, ShieldCheck, Trash2, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
 import { FormMessage } from '@/components/auth/FormMessage'
+import { BookingOverview } from '@/components/booking/BookingOverview'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { Field, Input } from '@/components/ui/Input'
+import { Input } from '@/components/ui/Input'
+import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { clearCart, removeCartItem } from '@/lib/cart/store'
 import { useCart } from '@/lib/cart/useCart'
 import { formatBRL } from '@/lib/format/money'
 import { createOrderAction } from '@/lib/orders/actions'
-import { formatBookingDateTime } from '@/lib/time/format'
 import { cn } from '@/lib/utils'
 
 type PaymentMode = 'ON_SITE' | 'ONLINE'
+
+const fieldClass = 'h-[50px] rounded-md border-white/10 bg-background px-4 text-sm'
 
 export function CartContents({
   customer,
@@ -45,7 +50,7 @@ export function CartContents({
     return (
       <Card>
         <EmptyState
-          icon={ShoppingBag}
+          icon={Scissors}
           title="Carrinho vazio"
           description="Escolha um serviço para começar."
           action={
@@ -96,69 +101,144 @@ export function CartContents({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3">
-        {items.map((item) => (
-          <article
-            key={item.id}
-            className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="flex flex-col gap-1">
-              <h2 className="text-lead font-bold text-text">{item.serviceName}</h2>
-              <p className="text-caption text-muted">
-                {item.barberName} · {formatBookingDateTime(item.startAt)} · {item.durationMin} min
-              </p>
-              <p className="text-body font-bold text-accent">{formatBRL(item.priceCents)}</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => removeCartItem(item.id)}
-              aria-label={`Remover ${item.serviceName}`}
-              className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md bg-danger/10 text-danger hover:bg-danger/20"
-            >
-              <Trash2
-                className="h-4 w-4"
-                aria-hidden
-              />
-            </button>
-          </article>
-        ))}
-      </div>
-
-      <Card className="flex flex-col gap-4">
-        {creditApplied > 0 ? (
-          <div className="flex items-center justify-between gap-3 text-caption text-muted">
-            <span>Crédito de fidelidade</span>
-            <span className="font-bold text-success">− {formatBRL(creditApplied)}</span>
+    <form
+      onSubmit={submit}
+      className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px] xl:items-start xl:gap-8"
+    >
+      <div className="flex min-w-0 flex-col gap-6">
+        <div className="flex items-center gap-4 rounded-xl border border-primary bg-[#302119] p-5">
+          <UserRound
+            aria-hidden
+            strokeWidth={1.8}
+            className="h-6 w-6 shrink-0 text-accent"
+          />
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <span className="text-[15px] font-bold leading-[18px] text-text">
+              {customer ? `Agendando como ${customer.name}` : 'Você está agendando como visitante'}
+            </span>
+            <span className="text-caption leading-[1.5] text-muted">
+              {customer
+                ? customer.email || customer.phone
+                : 'Sua conta é criada depois, se quiser acompanhar seus agendamentos.'}
+            </span>
+            {!customer ? (
+              <Link
+                href="/entrar?next=/carrinho"
+                className="w-fit text-[13px] font-bold leading-4 text-accent underline underline-offset-2"
+              >
+                Entrar na minha conta
+              </Link>
+            ) : null}
           </div>
-        ) : null}
-
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-caption uppercase tracking-wider text-muted">Total</span>
-          <span className="text-metric font-extrabold text-accent">
-            {formatBRL(total - creditApplied)}
-          </span>
         </div>
 
-        <div className="h-px w-full bg-border" />
+        <section className="flex flex-col gap-6 rounded-xl border border-white/10 bg-surface p-7">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-[19px] font-bold leading-[23px] text-text">Seus dados</h2>
+            <span className="text-label text-muted">Campos obrigatórios</span>
+          </div>
 
-        <div className="flex flex-col gap-2">
-          <span className="text-caption font-bold text-text">Pagamento</span>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="checkout-name"
+                className="text-caption text-muted"
+              >
+                Nome
+              </label>
+              <Input
+                id="checkout-name"
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className={fieldClass}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="checkout-email"
+                className="text-caption text-muted"
+              >
+                E-mail
+              </label>
+              <Input
+                id="checkout-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className={fieldClass}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="checkout-phone"
+              className="text-caption text-muted"
+            >
+              WhatsApp
+            </label>
+            <Input
+              id="checkout-phone"
+              type="tel"
+              placeholder="Com DDI, ex: +55 31 98881-5243"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              className={fieldClass}
+            />
+          </div>
+
+          <p className="text-caption leading-[1.5] text-muted">
+            Usamos seus dados para confirmar o agendamento e enviar lembretes.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-[22px] rounded-xl border border-white/10 bg-surface p-7">
+          <h2 className="text-[19px] font-bold leading-[23px] text-text">Forma de pagamento</h2>
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <button
               type="button"
               onClick={() => setPaymentMode('ON_SITE')}
               className={cn(
-                'flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-left transition',
+                'flex min-h-[92px] cursor-pointer items-center gap-4 rounded-md border p-5 text-left transition',
                 paymentMode === 'ON_SITE'
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-surface-input hover:border-accent',
+                  ? 'border-primary bg-primary'
+                  : 'border-white/10 bg-background hover:border-accent/50',
               )}
             >
-              <span className="text-caption font-bold text-text">Pagar no local</span>
-              <span className="text-micro text-muted">Dinheiro, cartão ou PIX</span>
+              <span
+                aria-hidden
+                className={cn(
+                  'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-[1.5px]',
+                  paymentMode === 'ON_SITE' ? 'border-white' : 'border-muted',
+                )}
+              >
+                {paymentMode === 'ON_SITE' ? (
+                  <span className="h-2 w-2 rounded-full bg-white" />
+                ) : null}
+              </span>
+              <span className="flex flex-col gap-2">
+                <span
+                  className={cn(
+                    'text-sm font-bold leading-[17px]',
+                    paymentMode === 'ON_SITE' ? 'text-white' : 'text-muted',
+                  )}
+                >
+                  Pagar na barbearia
+                </span>
+                <span
+                  className={cn(
+                    'text-label',
+                    paymentMode === 'ON_SITE' ? 'text-white' : 'text-muted',
+                  )}
+                >
+                  Dinheiro, cartão ou PIX
+                </span>
+              </span>
             </button>
+
             <button
               type="button"
               onClick={() => {
@@ -166,104 +246,192 @@ export function CartContents({
                 setPaymentMode('ONLINE')
               }}
               className={cn(
-                'flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-3 text-left transition',
+                'flex min-h-[92px] cursor-pointer items-center gap-4 rounded-md border p-5 text-left transition',
                 paymentMode === 'ONLINE'
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-surface-input hover:border-accent',
+                  ? 'border-primary bg-primary'
+                  : 'border-white/10 bg-background hover:border-accent/50',
               )}
             >
-              <span className="text-caption font-bold text-text">Pagar online</span>
-              <span className="text-micro text-muted">PIX ou cartão via Mercado Pago</span>
+              <span
+                aria-hidden
+                className={cn(
+                  'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-[1.5px]',
+                  paymentMode === 'ONLINE' ? 'border-white' : 'border-muted',
+                )}
+              >
+                {paymentMode === 'ONLINE' ? (
+                  <span className="h-2 w-2 rounded-full bg-white" />
+                ) : null}
+              </span>
+              <span className="flex flex-col gap-2">
+                <span
+                  className={cn(
+                    'text-sm font-bold leading-[17px]',
+                    paymentMode === 'ONLINE' ? 'text-white' : 'text-muted',
+                  )}
+                >
+                  Pagar online
+                </span>
+                <span
+                  className={cn(
+                    'text-label',
+                    paymentMode === 'ONLINE' ? 'text-white' : 'text-muted',
+                  )}
+                >
+                  PIX ou cartão
+                </span>
+              </span>
             </button>
           </div>
-        </div>
 
-        {customer && hasCredit && paymentMode === 'ON_SITE' ? (
-          <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-input p-3 text-caption text-text">
-            <input
-              id="checkout-credit"
-              type="checkbox"
-              checked={useCredit}
-              onChange={(event) => setUseCredit(event.target.checked)}
-              className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
-            />
-            <label
-              htmlFor="checkout-credit"
-              className="flex cursor-pointer flex-col gap-0.5"
-            >
-              Usar crédito de fidelidade
-              <span className="text-micro text-muted">
-                Um serviço grátis, válido no pagamento na barbearia.
-              </span>
-            </label>
-          </div>
-        ) : null}
+          {customer && hasCredit && paymentMode === 'ON_SITE' ? (
+            <div className="flex items-start gap-3 rounded-md border border-white/10 bg-background p-4 text-caption text-text">
+              <input
+                id="checkout-credit"
+                type="checkbox"
+                checked={useCredit}
+                onChange={(event) => setUseCredit(event.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+              />
+              <label
+                htmlFor="checkout-credit"
+                className="flex cursor-pointer flex-col gap-0.5"
+              >
+                Usar crédito de fidelidade
+                <span className="text-micro text-muted">
+                  Um serviço grátis, válido no pagamento na barbearia.
+                </span>
+              </label>
+            </div>
+          ) : null}
 
-        {customer ? (
           <p className="text-caption text-muted">
-            Reservando como <span className="font-bold text-text">{customer.name}</span> ·{' '}
-            {customer.email || customer.phone}
+            {paymentMode === 'ON_SITE'
+              ? 'Pague na barbearia após o atendimento.'
+              : 'Pagamento online via Mercado Pago, com PIX ou cartão.'}
           </p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <Field
-              label="Seu nome"
-              htmlFor="checkout-name"
-            >
-              <Input
-                id="checkout-name"
-                required
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </Field>
-            <Field
-              label="E-mail"
-              htmlFor="checkout-email"
-              hint="Opcional se informar WhatsApp"
-            >
-              <Input
-                id="checkout-email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </Field>
-            <Field
-              label="WhatsApp"
-              htmlFor="checkout-phone"
-              hint="Com DDI, ex: +55 31 98881-5243"
-            >
-              <Input
-                id="checkout-phone"
-                type="tel"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-              />
-            </Field>
-          </div>
-        )}
+        </section>
+      </div>
 
-        {error ? <FormMessage>{error}</FormMessage> : null}
+      <BookingOverview
+        title="Seu pedido"
+        titleClassName="text-[19px] leading-[23px]"
+        className="gap-6 xl:w-[400px] xl:min-h-[596px]"
+      >
+        <div className="flex flex-col gap-4">
+          {items.map((item) => {
+            const when = formatInTimeZone(
+              new Date(item.startAt),
+              BUSINESS_TIMEZONE,
+              "EEE, d MMM '·' HH:mm",
+              { locale: ptBR },
+            )
 
-        <form onSubmit={submit}>
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full"
-            disabled={pending}
-          >
-            {pending ? 'Finalizando…' : 'Finalizar pedido'}
-          </Button>
-        </form>
+            return (
+              <div
+                key={item.id}
+                className="flex items-center gap-3.5"
+              >
+                <span className="flex h-[76px] w-[68px] shrink-0 items-center justify-center rounded-md bg-surface-input">
+                  <Scissors
+                    aria-hidden
+                    className="h-5 w-5 text-muted"
+                  />
+                </span>
+                <div className="flex min-w-0 flex-1 flex-col gap-[7px]">
+                  <h3 className="truncate text-base font-bold leading-[19px] text-text">
+                    {item.serviceName}
+                  </h3>
+                  <span className="text-label leading-[1.6] text-muted">
+                    {item.barberName} · {when}
+                  </span>
+                  <span className="text-[15px] font-bold leading-[18px] text-accent">
+                    {formatBRL(item.priceCents)}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeCartItem(item.id)}
+                  aria-label={`Remover ${item.serviceName}`}
+                  className="flex h-[18px] w-[18px] shrink-0 cursor-pointer items-center justify-center text-danger transition hover:text-danger/80"
+                >
+                  <Trash2
+                    className="h-[18px] w-[18px]"
+                    aria-hidden
+                  />
+                </button>
+              </div>
+            )
+          })}
+        </div>
 
         <Link
           href="/servicos"
-          className="text-center text-caption font-semibold text-muted hover:text-text"
+          className="w-fit text-[13px] font-bold leading-4 text-primary underline underline-offset-2 transition hover:text-primary-hover"
         >
           Adicionar mais serviços
         </Link>
-      </Card>
-    </div>
+
+        <div className="h-px w-full bg-white/10" />
+
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-body text-muted">Subtotal</span>
+          <span className="text-sm text-text">{formatBRL(total)}</span>
+        </div>
+
+        {creditApplied > 0 ? (
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-body text-muted">Crédito de fidelidade</span>
+            <span className="text-sm font-semibold text-success">− {formatBRL(creditApplied)}</span>
+          </div>
+        ) : null}
+
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-[15px] font-bold leading-[18px] text-text">Total</span>
+          <span className="text-[30px] font-bold leading-[36px] text-accent">
+            {formatBRL(total - creditApplied)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 rounded-md bg-background p-3">
+          <ShieldCheck
+            aria-hidden
+            className="h-4 w-4 shrink-0 text-success"
+          />
+          <span className="text-caption text-muted">
+            {paymentMode === 'ONLINE' ? 'Pagamento online' : 'Pagamento na barbearia'}
+          </span>
+        </div>
+
+        {error ? <FormMessage>{error}</FormMessage> : null}
+
+        <Button
+          type="submit"
+          size="lg"
+          className="h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm"
+          disabled={pending}
+        >
+          {pending ? 'Finalizando…' : 'Finalizar pedido'}
+          <ChevronRight
+            aria-hidden
+            className="h-[18px] w-[18px]"
+          />
+        </Button>
+
+        <p className="text-center text-caption leading-[1.6] text-muted">
+          Você receberá a confirmação por WhatsApp ou e-mail.
+        </p>
+
+        <div className="h-px w-full bg-white/10" />
+
+        <p className="flex items-start gap-2.5 text-caption leading-[1.6] text-muted">
+          <ShieldCheck
+            aria-hidden
+            className="mt-0.5 h-[18px] w-[18px] shrink-0 text-success"
+          />
+          Cancelamento gratuito com até 2h de antecedência.
+        </p>
+      </BookingOverview>
+    </form>
   )
 }

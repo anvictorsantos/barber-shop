@@ -11,5 +11,5 @@ test('health endpoint answers', async ({ request }) => {
 
 test('landing renders the brand', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByText('BARBEARIA DO LUIZ')).toBeVisible()
+  await expect(page.getByRole('link', { name: /BARBEARIA DO LUIZ/i }).first()).toBeVisible()
 })

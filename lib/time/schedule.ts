@@ -27,6 +27,50 @@ export function formatTimeRange(startMinute: number, endMinute: number): string 
   return `${minutesToTime(startMinute)} às ${minutesToTime(endMinute)}`
 }
 
+export interface ShopHoursRow {
+  weekday: number
+  openMinute: number
+  closeMinute: number
+  closed: boolean
+}
+
+export function formatHourLabel(minutes: number): string {
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return mins === 0 ? `${hours}h` : `${hours}h${String(mins).padStart(2, '0')}`
+}
+
+export function describeHoursGroup(
+  hours: readonly ShopHoursRow[],
+  weekdays: readonly number[],
+  label: string,
+): string | null {
+  const rows = weekdays.map((weekday) => hours.find((hour) => hour.weekday === weekday))
+  const first = rows[0]
+  if (!first || first.closed) return null
+
+  for (const row of rows) {
+    if (
+      !row ||
+      row.closed ||
+      row.openMinute !== first.openMinute ||
+      row.closeMinute !== first.closeMinute
+    ) {
+      return null
+    }
+  }
+
+  return `${label}: ${formatHourLabel(first.openMinute)} às ${formatHourLabel(first.closeMinute)}`
+}
+
+export function shopHoursLines(hours: readonly ShopHoursRow[]): string[] {
+  return [
+    describeHoursGroup(hours, [1, 2, 3, 4, 5], 'Segunda a Sexta'),
+    describeHoursGroup(hours, [6], 'Sábado'),
+    describeHoursGroup(hours, [0], 'Domingo'),
+  ].filter((line): line is string => line !== null)
+}
+
 export function formatBlockSchedule(block: {
   recurring: boolean
   weekday: number | null

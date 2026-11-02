@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatBlockSchedule, minutesToTime, parseTimeToMinutes } from '@/lib/time/schedule'
+import {
+  formatBlockSchedule,
+  minutesToTime,
+  parseTimeToMinutes,
+  shopHoursLines,
+} from '@/lib/time/schedule'
 import {
   createBarberSchema,
   hoursSchema,
@@ -35,6 +40,20 @@ describe('time helpers', () => {
         endMinute: 960,
       }),
     ).toContain('2026-11-15 · 15:00 às 16:00')
+  })
+
+  it('describes opening hours by day group', () => {
+    const hours = [
+      { weekday: 0, openMinute: 0, closeMinute: 0, closed: true },
+      { weekday: 1, openMinute: 540, closeMinute: 1200, closed: false },
+      { weekday: 2, openMinute: 540, closeMinute: 1200, closed: false },
+      { weekday: 3, openMinute: 540, closeMinute: 1200, closed: false },
+      { weekday: 4, openMinute: 540, closeMinute: 1200, closed: false },
+      { weekday: 5, openMinute: 540, closeMinute: 1200, closed: false },
+      { weekday: 6, openMinute: 540, closeMinute: 1080, closed: false },
+    ]
+
+    expect(shopHoursLines(hours)).toEqual(['Segunda a Sexta: 9h às 20h', 'Sábado: 9h às 18h'])
   })
 })
 

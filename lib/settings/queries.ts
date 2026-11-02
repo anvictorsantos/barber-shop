@@ -23,7 +23,7 @@ export async function getShopSettings(): Promise<ShopSettings | null> {
   })
 }
 
-export async function getAdminShopHours(): Promise<AdminShopHours[]> {
+export async function getShopHours(): Promise<AdminShopHours[]> {
   return prisma.shopHours.findMany({
     orderBy: { weekday: 'asc' },
     select: {
@@ -34,6 +34,10 @@ export async function getAdminShopHours(): Promise<AdminShopHours[]> {
       closed: true,
     },
   })
+}
+
+export async function getAdminShopHours(): Promise<AdminShopHours[]> {
+  return getShopHours()
 }
 
 export async function getAdminBarbers(): Promise<AdminBarber[]> {
