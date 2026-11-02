@@ -17,7 +17,13 @@ function escapeHtml(value: string): string {
   })
 }
 
-function layout(title: string, intro: string, cta: string, url: string, footer: string): string {
+export function renderEmailLayout(
+  title: string,
+  intro: string,
+  cta: string,
+  url: string,
+  footer: string,
+): string {
   const safeUrl = escapeHtml(url)
   return `<!doctype html>
 <html lang="pt-BR">
@@ -87,7 +93,7 @@ export function renderVerificationEmail(name: string, url: string): RenderedEmai
 
   return {
     subject,
-    html: layout(title, intro, 'Confirmar e-mail', url, footer),
+    html: renderEmailLayout(title, intro, 'Confirmar e-mail', url, footer),
     text: [
       'Barbearia do Luiz',
       '',
@@ -111,7 +117,7 @@ export function renderPasswordResetEmail(name: string, url: string): RenderedEma
 
   return {
     subject,
-    html: layout(title, intro, 'Redefinir senha', url, footer),
+    html: renderEmailLayout(title, intro, 'Redefinir senha', url, footer),
     text: [
       'Barbearia do Luiz',
       '',
