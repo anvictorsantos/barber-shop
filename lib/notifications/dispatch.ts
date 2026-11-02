@@ -121,7 +121,16 @@ export async function notifyAppointment(
       include: {
         service: { select: { name: true } },
         barber: { select: { displayName: true } },
-        customer: { select: { id: true, name: true, email: true, phone: true } },
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            notifyEmail: true,
+            notifyWhatsapp: true,
+          },
+        },
         order: {
           select: {
             id: true,
@@ -184,9 +193,12 @@ export async function notifyAppointment(
           ]
         : []
 
+    const wantsEmail = appointment.customer?.notifyEmail ?? true
+    const wantsWhatsapp = appointment.customer?.notifyWhatsapp ?? true
+
     const channels: { channel: NotificationChannel; contact: string }[] = []
-    if (email) channels.push({ channel: 'EMAIL', contact: email })
-    if (phone) channels.push({ channel: 'WHATSAPP', contact: phone })
+    if (email && wantsEmail) channels.push({ channel: 'EMAIL', contact: email })
+    if (phone && wantsWhatsapp) channels.push({ channel: 'WHATSAPP', contact: phone })
 
     for (const { channel, contact } of channels) {
       await logSend({

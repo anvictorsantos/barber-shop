@@ -166,6 +166,8 @@ model User {
   noShowCount     Int       @default(0) @map("no_show_count")
   bookingBlocked  Boolean   @default(false) @map("booking_blocked")
   blockedAt       DateTime? @map("blocked_at")
+  notifyEmail     Boolean   @default(true) @map("notify_email")
+  notifyWhatsapp  Boolean   @default(true) @map("notify_whatsapp")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 

@@ -1,16 +1,32 @@
 import { Package } from 'lucide-react'
 import Image from 'next/image'
 
+import { FavoriteButton } from '@/components/customer/FavoriteButton'
 import { StatusPill } from '@/components/ui/StatusPill'
 import { formatBRL } from '@/lib/format/money'
 
 import type { Product } from '@prisma/client'
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  favorite,
+}: {
+  product: Product
+  favorite?: { canFavorite: boolean; saved: boolean }
+}) {
   const available = product.stock - product.reserved > 0
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface">
+    <article className="relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface">
+      {favorite?.canFavorite ? (
+        <FavoriteButton
+          kind="product"
+          id={product.id}
+          initial={favorite.saved}
+          label={product.name}
+          className="absolute right-3 top-3 z-10"
+        />
+      ) : null}
       <div className="relative aspect-square w-full overflow-hidden bg-surface-input">
         {product.imageUrl ? (
           <Image

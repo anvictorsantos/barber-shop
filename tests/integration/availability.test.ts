@@ -9,7 +9,9 @@ import { prisma } from '@/lib/db/prisma'
 describe('availability query', () => {
   it('returns slots and applies the seeded lunch block', async () => {
     const service = await prisma.service.findFirst({ where: { active: true } })
-    const barber = await prisma.barberProfile.findFirst({ where: { active: true } })
+    const barber = await prisma.barberProfile.findFirst({
+      where: { active: true, user: { email: 'luiz@barbeariadoluiz.com.br' } },
+    })
     expect(service).not.toBeNull()
     expect(barber).not.toBeNull()
     if (!service || !barber) return

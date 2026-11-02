@@ -3,9 +3,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { FavoriteButton } from '@/components/customer/FavoriteButton'
 import { PublicShell } from '@/components/layout/PublicShell'
 import { buttonClasses } from '@/components/ui/Button'
+import { getSessionUser } from '@/lib/auth/session'
 import { getServiceBySlug } from '@/lib/catalog/queries'
+import { getFavoriteIds } from '@/lib/customer/queries'
 import { formatBRL } from '@/lib/format/money'
 
 import type { Metadata } from 'next'
@@ -30,6 +33,12 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   const { slug } = await params
   const service = await getServiceBySlug(slug)
   if (!service) notFound()
+
+  const user = await getSessionUser()
+  const favoriteIds =
+    user?.role === 'CUSTOMER'
+      ? await getFavoriteIds(user.id)
+      : { barbers: new Set<string>(), services: new Set<string>(), products: new Set<string>() }
 
   return (
     <PublicShell>
@@ -67,12 +76,22 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="flex flex-col gap-5">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-brand font-extrabold text-text">{service.name}</h1>
-              {service.promoLabel ? (
-                <span className="rounded-xs bg-primary px-2 py-1 text-micro font-bold text-white">
-                  {service.promoLabel}
-                </span>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-brand font-extrabold text-text">{service.name}</h1>
+                {service.promoLabel ? (
+                  <span className="rounded-xs bg-primary px-2 py-1 text-micro font-bold text-white">
+                    {service.promoLabel}
+                  </span>
+                ) : null}
+              </div>
+              {user?.role === 'CUSTOMER' ? (
+                <FavoriteButton
+                  kind="service"
+                  id={service.id}
+                  initial={favoriteIds.services.has(service.id)}
+                  label={service.name}
+                />
               ) : null}
             </div>
 

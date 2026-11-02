@@ -5,7 +5,9 @@ import { PublicShell } from '@/components/layout/PublicShell'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { getSessionUser } from '@/lib/auth/session'
 import { getActiveProducts } from '@/lib/catalog/queries'
+import { getFavoriteIds } from '@/lib/customer/queries'
 
 import type { Metadata } from 'next'
 
@@ -17,7 +19,12 @@ export const metadata: Metadata = {
 }
 
 export default async function StorePage() {
-  const products = await getActiveProducts()
+  const user = await getSessionUser()
+  const [products, favoriteIds] = await Promise.all([
+    getActiveProducts(),
+    getFavoriteIds(user?.role === 'CUSTOMER' ? user.id : null),
+  ])
+  const canFavorite = user?.role === 'CUSTOMER'
 
   return (
     <PublicShell>
@@ -49,6 +56,10 @@ export default async function StorePage() {
               <ProductCard
                 key={product.id}
                 product={product}
+                favorite={{
+                  canFavorite,
+                  saved: favoriteIds.products.has(product.id),
+                }}
               />
             ))}
           </div>

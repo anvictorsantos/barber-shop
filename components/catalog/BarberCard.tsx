@@ -1,6 +1,8 @@
 import { Star } from 'lucide-react'
 import Image from 'next/image'
 
+import { FavoriteButton } from '@/components/customer/FavoriteButton'
+
 export interface BarberSummary {
   id: string
   displayName: string
@@ -19,7 +21,13 @@ function initials(name: string): string {
     .join('')
 }
 
-export function BarberCard({ barber }: { barber: BarberSummary }) {
+export function BarberCard({
+  barber,
+  favorite,
+}: {
+  barber: BarberSummary
+  favorite?: { canFavorite: boolean; saved: boolean }
+}) {
   const rating = Number(barber.ratingAvg.toString()).toFixed(1)
 
   return (
@@ -40,7 +48,7 @@ export function BarberCard({ barber }: { barber: BarberSummary }) {
         )}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="truncate text-lead font-bold text-text">{barber.displayName}</p>
         <p className="truncate text-caption text-muted">{barber.title}</p>
         <p className="flex items-center gap-1 text-caption font-bold text-accent">
@@ -52,6 +60,15 @@ export function BarberCard({ barber }: { barber: BarberSummary }) {
           <span className="font-normal text-subtle">({barber.ratingCount})</span>
         </p>
       </div>
+
+      {favorite?.canFavorite ? (
+        <FavoriteButton
+          kind="barber"
+          id={barber.id}
+          initial={favorite.saved}
+          label={barber.displayName}
+        />
+      ) : null}
     </article>
   )
 }
