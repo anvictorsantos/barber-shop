@@ -4,7 +4,10 @@ import { buttonClasses } from '@/components/ui/Button'
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-background px-5 py-16">
+    <main
+      id="main-content"
+      className="flex min-h-dvh items-center justify-center bg-background px-5 py-16"
+    >
       <div className="w-full max-w-narrow">
         <p className="font-display text-brand text-accent">BARBEARIA DO LUIZ</p>
         <h1 className="mt-4 text-page font-extrabold text-text">

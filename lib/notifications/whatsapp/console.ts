@@ -10,4 +10,9 @@ export class ConsoleWhatsAppSender implements WhatsAppSender {
     console.info(`[whatsapp] to=${phone}`)
     console.info(text)
   }
+
+  async sendTemplate(phone: string, templateName: string, parameters: string[]): Promise<void> {
+    console.info(`[whatsapp] to=${phone} template=${templateName}`)
+    console.info(parameters.join(' | '))
+  }
 }

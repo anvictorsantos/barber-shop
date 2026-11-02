@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { AdminNav } from '@/components/layout/AdminNav'
+import { SkipLink } from '@/components/layout/SkipLink'
 import { StatusPill } from '@/components/ui/StatusPill'
 import { getSessionUser } from '@/lib/auth/session'
 
@@ -24,6 +25,7 @@ export async function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-dvh bg-background">
+      <SkipLink />
       <aside className="hidden w-[260px] shrink-0 flex-col gap-10 border-r border-border bg-shell p-6 lg:flex">
         <div className="flex flex-col gap-1.5">
           <Link
@@ -79,7 +81,12 @@ export async function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 p-6 lg:p-8">{children}</main>
+        <main
+          id="main-content"
+          className="flex-1 p-6 lg:p-8"
+        >
+          {children}
+        </main>
       </div>
     </div>
   )

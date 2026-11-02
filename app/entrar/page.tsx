@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation'
 
+import { DemoLoginButtons } from '@/components/auth/DemoLoginButtons'
 import { LoginForm } from '@/components/auth/LoginForm'
 import { PublicShell } from '@/components/layout/PublicShell'
 import { postAuthPath } from '@/lib/auth/redirect'
 import { getSessionUser } from '@/lib/auth/session'
+import { getServerEnv } from '@/lib/env'
 
 import type { Metadata } from 'next'
 
@@ -28,7 +30,10 @@ export default async function LoginPage({
   return (
     <PublicShell>
       <div className="mx-auto w-full max-w-md px-4 py-12 sm:px-6">
-        <LoginForm next={next} />
+        <div className="flex flex-col gap-6">
+          <LoginForm next={next} />
+          {getServerEnv().DEMO_MODE ? <DemoLoginButtons /> : null}
+        </div>
       </div>
     </PublicShell>
   )

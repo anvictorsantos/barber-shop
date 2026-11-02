@@ -95,9 +95,43 @@ services:
       - key: MERCADO_PAGO_WEBHOOK_SECRET
         sync: false
 
-  # Cron jobs are added in Phase 5, after their route handlers exist.
-  # - type: cron
-  #   name: barbearia-reminders
-  #   runtime: node
-  #   schedule: "0 * * * *"
-  #   command: curl -fsS -X POST "$APP_URL/api/cron/reminders" -H "Authorization: Bearer $CRON_SECRET"
+  # Cron jobs call the web service with the shared CRON_SECRET.
+  # Set the same APP_URL and CRON_SECRET values on each job.
+  - type: cron
+    name: barbearia-reminders
+    runtime: node
+    plan: starter
+    schedule: '0 * * * *'
+    command: >-
+      curl -fsS -X POST "$APP_URL/api/cron/reminders" -H "Authorization: Bearer $CRON_SECRET"
+    envVars:
+      - key: APP_URL
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+
+  - type: cron
+    name: barbearia-expire-holds
+    runtime: node
+    plan: starter
+    schedule: '*/5 * * * *'
+    command: >-
+      curl -fsS -X POST "$APP_URL/api/cron/expire-holds" -H "Authorization: Bearer $CRON_SECRET"
+    envVars:
+      - key: APP_URL
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+
+  - type: cron
+    name: barbearia-expire-credits
+    runtime: node
+    plan: starter
+    schedule: '0 * * * *'
+    command: >-
+      curl -fsS -X POST "$APP_URL/api/cron/expire-credits" -H "Authorization: Bearer $CRON_SECRET"
+    envVars:
+      - key: APP_URL
+        sync: false
+      - key: CRON_SECRET
+        sync: false

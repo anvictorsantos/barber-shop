@@ -278,18 +278,25 @@ Seeded shell and role-scoping E2E tests are skipped unless `E2E_SEEDED=true`. Ru
 2. Create a Render Blueprint from `render.yaml`; set `APP_URL` to the service URL.
 3. Add all provider env vars: Resend, WhatsApp, Mercado Pago, GTM, Sentry.
 4. Render build runs `npm ci && npm run build`; start runs `npm run db:deploy && npm start`.
-5. Configure Render Cron jobs after Phase 5:
+5. Render Cron jobs (declared in `render.yaml`; set the same `APP_URL` and `CRON_SECRET` on each):
    - hourly: `/api/cron/reminders`
-   - every 5 minutes: `/api/cron/expire-holds` and `/api/cron/expire-credits`
+   - every 5 minutes: `/api/cron/expire-holds`
+   - hourly: `/api/cron/expire-credits`
    - every job sends `Authorization: Bearer $CRON_SECRET`
 6. Configure Mercado Pago webhook URL: `https://<domain>/api/webhooks/mercadopago`.
 7. Configure WhatsApp webhook URL and verify token.
 8. Verify the Resend sender domain.
-9. Submit and approve Meta WhatsApp templates.
+9. Submit and approve Meta WhatsApp templates. Body parameter order:
+   - confirmation, reminder, canceled, rescheduled: `{{1}}` customer, `{{2}}` service, `{{3}}` date/time, `{{4}}` shop
+   - no-show block: `{{1}}` customer, `{{2}}` shop
+   - without a template name the sender falls back to free-form text, delivered only inside the 24h service window.
 10. Create the Sentry project and set `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` for source maps.
 11. Create the GTM container and set `NEXT_PUBLIC_GTM_ID`.
-12. Do not run the demo seed in production. A catalog-only seed is required before launch.
+12. Do not run the demo seed in production (`DEMO_MODE=true` is required for the demo seed and is
+   refused in production). A catalog-only seed is required before launch.
 13. Set `DEMO_MODE=false` and confirm the startup guard.
+14. Run the catalog-only seed before launch (shop, services, products, barbers, hours, blocks).
+15. Open `/admin`, then `/admin/agenda`, and confirm Render cron logs show 200 responses.
 
 ## Required inputs before production
 
