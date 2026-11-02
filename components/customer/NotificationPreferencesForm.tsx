@@ -1,10 +1,38 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { Button } from '@/components/ui/Button'
 import { updateNotificationPreferencesAction } from '@/lib/customer/actions'
+import { cn } from '@/lib/utils'
+
+function Toggle({
+  checked,
+  disabled,
+  label,
+  onChange,
+}: {
+  checked: boolean
+  disabled?: boolean
+  label: string
+  onChange: (checked: boolean) => void
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className={cn(
+        'flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition disabled:cursor-not-allowed disabled:opacity-40',
+        checked ? 'justify-end bg-primary' : 'justify-start bg-surface-subtle',
+      )}
+    >
+      <span className="h-5 w-5 rounded-full bg-white" />
+    </button>
+  )
+}
 
 export function NotificationPreferencesForm({
   initial,
@@ -15,102 +43,59 @@ export function NotificationPreferencesForm({
   hasEmail: boolean
   hasWhatsapp: boolean
 }) {
-  const router = useRouter()
   const [values, setValues] = useState(initial)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
 
-  async function submit() {
+  async function save(next: { email: boolean; whatsapp: boolean }) {
+    setValues(next)
     setPending(true)
     setError(null)
-    const result = await updateNotificationPreferencesAction(values)
+    const result = await updateNotificationPreferencesAction(next)
     setPending(false)
-
-    if (!result.ok) {
-      setError(result.error)
-      return
-    }
-
-    setSaved(true)
-    router.refresh()
+    if (!result.ok) setError(result.error)
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-input px-4 py-3">
-        <label
-          htmlFor="notify-email"
-          className="flex cursor-pointer flex-col"
-        >
-          E-mail
-          <span className="text-micro text-muted">
-            {hasEmail ? 'Confirmações, lembretes e recibos.' : 'Sem e-mail cadastrado.'}
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between gap-4 border-b border-white/[0.07] py-3">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm font-bold leading-[17px] text-text">Lembretes por WhatsApp</span>
+          <span className="text-caption leading-[15px] text-muted">
+            {hasWhatsapp ? 'Avisos 24 horas antes do agendamento' : 'Sem WhatsApp cadastrado.'}
           </span>
-        </label>
-        <input
-          id="notify-email"
-          type="checkbox"
-          checked={values.email}
-          disabled={!hasEmail}
-          onChange={(event) => {
-            setValues((current) => ({ ...current, email: event.target.checked }))
-            setSaved(false)
-          }}
-          className="h-4 w-4 accent-[var(--accent)]"
+        </div>
+        <Toggle
+          label="Lembretes por WhatsApp"
+          checked={values.whatsapp}
+          disabled={!hasWhatsapp || pending}
+          onChange={(checked) => save({ ...values, whatsapp: checked })}
         />
       </div>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-input px-4 py-3">
-        <label
-          htmlFor="notify-whatsapp"
-          className="flex cursor-pointer flex-col"
-        >
-          WhatsApp
-          <span className="text-micro text-muted">
-            {hasWhatsapp ? 'Lembretes e avisos de agendamento.' : 'Sem WhatsApp cadastrado.'}
+      <div className="flex items-center justify-between gap-4 border-b border-white/[0.07] py-3">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm font-bold leading-[17px] text-text">E-mail de Confirmação</span>
+          <span className="text-caption leading-[15px] text-muted">
+            {hasEmail ? 'Receber recibos e detalhes da vaga' : 'Sem e-mail cadastrado.'}
           </span>
-        </label>
-        <input
-          id="notify-whatsapp"
-          type="checkbox"
-          checked={values.whatsapp}
-          disabled={!hasWhatsapp}
-          onChange={(event) => {
-            setValues((current) => ({ ...current, whatsapp: event.target.checked }))
-            setSaved(false)
-          }}
-          className="h-4 w-4 accent-[var(--accent)]"
+        </div>
+        <Toggle
+          label="E-mail de confirmação"
+          checked={values.email}
+          disabled={!hasEmail || pending}
+          onChange={(checked) => save({ ...values, email: checked })}
         />
       </div>
 
       {error ? (
         <p
           role="alert"
-          className="text-caption text-danger"
+          className="pt-2 text-caption text-danger"
         >
           {error}
         </p>
       ) : null}
-      {saved ? (
-        <p
-          role="status"
-          className="text-caption text-success"
-        >
-          Preferências salvas.
-        </p>
-      ) : null}
-
-      <div className="flex justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={submit}
-          disabled={pending}
-        >
-          {pending ? 'Salvando…' : 'Salvar preferências'}
-        </Button>
-      </div>
     </div>
   )
 }
