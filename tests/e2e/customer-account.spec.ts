@@ -28,12 +28,12 @@ test.describe('customer account', () => {
     await expect(page.getByRole('heading', { name: 'Histórico' })).toBeVisible()
 
     await page.goto('/conta/favoritos')
-    await expect(page.getByRole('heading', { name: 'Favoritos' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Favoritos', exact: true })).toBeVisible()
 
     await page.goto('/conta/perfil')
     await expect(page.getByRole('heading', { name: 'Perfil' })).toBeVisible()
-    await expect(page.getByText('Programa de fidelidade')).toBeVisible()
-    await expect(page.getByLabel('E-mail')).toBeVisible()
+    await expect(page.getByText('Dados Pessoais')).toBeVisible()
+    await expect(page.getByLabel('E-mail', { exact: true })).toBeVisible()
   })
 
   test('persists a service favorite through a reload', async ({ page }) => {
