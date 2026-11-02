@@ -147,3 +147,44 @@ export async function fetchMercadoPagoPayment(paymentId: string): Promise<Mercad
     paidAt: typeof body.date_approved === 'string' ? new Date(body.date_approved) : null,
   }
 }
+
+export async function createMercadoPagoRefund(
+  providerPaymentId: string,
+  amountCents: number,
+): Promise<string> {
+  const env = getServerEnv()
+
+  if (!env.MERCADO_PAGO_ENABLED || !env.MERCADO_PAGO_ACCESS_TOKEN) {
+    throw new AppError(503, 'payment_unavailable', 'Reembolso online indisponível no momento.')
+  }
+
+  const response = await fetch(
+    `${MP_PAYMENT_ENDPOINT}/${encodeURIComponent(providerPaymentId)}/refunds`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.MERCADO_PAGO_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json',
+        'X-Idempotency-Key': `refund-${providerPaymentId}-${amountCents}`,
+      },
+      body: JSON.stringify({ amount: amountCents / 100 }),
+      signal: AbortSignal.timeout(15_000),
+    },
+  )
+
+  if (!response.ok) {
+    const detail = (await response.text()).slice(0, 200)
+    throw new AppError(
+      502,
+      'refund_error',
+      `Mercado Pago recusou o reembolso (${response.status}): ${detail}`,
+    )
+  }
+
+  const body = (await response.json()) as { id?: unknown }
+  if (body.id === undefined) {
+    throw new AppError(502, 'refund_error', 'Mercado Pago não retornou o reembolso.')
+  }
+
+  return String(body.id)
+}

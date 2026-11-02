@@ -23,7 +23,7 @@ export async function settleOrderPayment(input: SettlePaymentInput) {
     async (tx) => {
       const order = await tx.order.findUnique({
         where: { code: input.orderCode },
-        include: { products: true },
+        include: { products: true, appointments: { select: { id: true } } },
       })
 
       if (!order) throw new AppError(404, 'not_found', 'Pedido não encontrado.')
@@ -48,6 +48,7 @@ export async function settleOrderPayment(input: SettlePaymentInput) {
       const paidAt = input.paidAt ?? new Date()
       const data = {
         orderId: order.id,
+        appointmentId: order.appointments.length === 1 ? order.appointments[0]!.id : null,
         provider: input.provider,
         method: input.method,
         status: 'PAID' as const,
