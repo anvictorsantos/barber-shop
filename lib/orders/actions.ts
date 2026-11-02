@@ -1,0 +1,60 @@
+'use server'
+
+import { headers } from 'next/headers'
+
+import { getSessionUser } from '@/lib/auth/session'
+import { AppError } from '@/lib/http/errors'
+import { enforceRateLimit } from '@/lib/http/rate-limit'
+import { createOrder, expirePendingOrder } from '@/lib/orders/create-order'
+import { getOrderByCode } from '@/lib/orders/queries'
+import type { OrderActor, CreateOrderActionResult } from '@/lib/orders/types'
+import { createMercadoPagoPreference } from '@/lib/payments/mercado-pago'
+import { createOrderSchema } from '@/lib/validation/orders'
+
+function failure(error: unknown): CreateOrderActionResult {
+  if (error instanceof AppError) return { ok: false, error: error.message }
+  console.error('[create-order]', error instanceof Error ? error.name : 'unknown')
+  return { ok: false, error: 'Não foi possível criar o pedido. Tente novamente.' }
+}
+
+export async function createOrderAction(input: unknown): Promise<CreateOrderActionResult> {
+  try {
+    const headerList = await headers()
+    const forwarded = headerList.get('x-forwarded-for')
+    const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
+    enforceRateLimit(`checkout:${ip}`, 10, 10 * 60 * 1000)
+
+    const parsed = createOrderSchema.safeParse(input)
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos.' }
+    }
+
+    const sessionUser = await getSessionUser()
+    const actor: OrderActor | null = sessionUser
+      ? {
+          id: sessionUser.id,
+          name: sessionUser.name,
+          email: sessionUser.email,
+          phone: sessionUser.phone,
+        }
+      : null
+
+    const order = await createOrder(parsed.data, actor)
+
+    if (parsed.data.paymentMode === 'ONLINE') {
+      try {
+        const detailed = await getOrderByCode(order.code)
+        if (!detailed) throw new AppError(500, 'order_missing', 'Pedido não encontrado.')
+        const preference = await createMercadoPagoPreference(detailed)
+        return { ok: true, code: order.code, initPoint: preference.initPoint }
+      } catch (error) {
+        await expirePendingOrder(order.code).catch(() => undefined)
+        return failure(error)
+      }
+    }
+
+    return { ok: true, code: order.code }
+  } catch (error) {
+    return failure(error)
+  }
+}
