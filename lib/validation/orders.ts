@@ -34,6 +34,7 @@ export const createOrderSchema = z.object({
     .min(1, 'Adicione pelo menos um item.')
     .max(20, 'Muitos itens no pedido.'),
   note: z.string().trim().max(500).optional().default(''),
+  useCredit: z.boolean().optional(),
 })
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>

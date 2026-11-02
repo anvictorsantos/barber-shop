@@ -5,6 +5,7 @@ import { getAvailability } from '@/lib/availability/queries'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { prisma } from '@/lib/db/prisma'
 import { AppError } from '@/lib/http/errors'
+import { findAvailableCredit, releaseOrderCredit } from '@/lib/loyalty/service'
 import { uniqueOrderCode } from '@/lib/orders/code'
 import { isExclusionError } from '@/lib/orders/conflict'
 import type { OrderActor } from '@/lib/orders/types'
@@ -185,7 +186,35 @@ export async function createOrder(input: CreateOrderInput, actor: OrderActor | n
     (sum, line) => sum + line.product.priceCents * line.quantity,
     0,
   )
-  const totalCents = serviceCents + productCents
+  let creditCents = 0
+  let credit: { id: string; accountId: string } | null = null
+
+  if (input.useCredit) {
+    if (!actor) {
+      throw new AppError(400, 'login_required', 'Entre na sua conta para usar o crédito.')
+    }
+    if (input.paymentMode === 'ONLINE') {
+      throw new AppError(
+        400,
+        'credit_on_site_only',
+        'O crédito é usado apenas no pagamento na barbearia.',
+      )
+    }
+
+    const available = await findAvailableCredit(actor.id)
+    if (!available) {
+      throw new AppError(409, 'credit_unavailable', 'Você não tem crédito disponível.')
+    }
+
+    const freeServiceCents = preparedServices.reduce(
+      (max, line) => Math.max(max, line.service.priceCents),
+      0,
+    )
+    creditCents = Math.min(freeServiceCents, serviceCents + productCents)
+    credit = { id: available.id, accountId: available.accountId }
+  }
+
+  const totalCents = serviceCents + productCents - creditCents
   const code = await uniqueOrderCode()
   const online = input.paymentMode === 'ONLINE'
   const now = new Date()
@@ -204,12 +233,32 @@ export async function createOrder(input: CreateOrderInput, actor: OrderActor | n
             paymentMode: input.paymentMode,
             serviceCents,
             productCents,
-            creditCents: 0,
+            creditCents,
             totalCents,
             expiresAt: online ? new Date(now.getTime() + 15 * 60 * 1000) : null,
             note: input.note || null,
           },
         })
+
+        if (credit) {
+          const claimed = await tx.loyaltyCredit.updateMany({
+            where: { id: credit.id, status: 'AVAILABLE', usedOrderId: null },
+            data: { status: 'USED', usedOrderId: order.id, usedAt: now },
+          })
+
+          if (claimed.count === 0) {
+            throw new AppError(409, 'credit_unavailable', 'Crédito indisponível.')
+          }
+
+          await tx.loyaltyEntry.create({
+            data: {
+              accountId: credit.accountId,
+              type: 'CREDIT_USED',
+              creditId: credit.id,
+              note: `Pedido ${order.code}`,
+            },
+          })
+        }
 
         for (const line of preparedServices) {
           await tx.appointment.create({
@@ -295,6 +344,8 @@ export async function expirePendingOrder(code: string): Promise<boolean> {
       where: { orderId: order.id, status: 'PENDING' },
       data: { status: 'CANCELED', canceledAt: new Date() },
     })
+
+    await releaseOrderCredit(tx, order.id)
 
     for (const line of order.products) {
       await tx.$executeRaw`
