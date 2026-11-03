@@ -19,7 +19,7 @@ export function PublicDesktopFooter({
   return (
     <footer className="mt-auto flex flex-col items-center justify-between gap-4 border-t border-white/10 px-5 py-6 text-center text-caption text-muted lg:min-h-[88px] lg:flex-row lg:px-20 lg:text-left">
       <p>
-        © {new Date().getFullYear()} {shopName} · Feito em Belo Horizonte
+        © {new Date().getFullYear()} {shopName} · Corte, Barba e Resenha de Alto Padrão
       </p>
 
       <nav
