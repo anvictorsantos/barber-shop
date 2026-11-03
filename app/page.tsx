@@ -1,5 +1,6 @@
 import { formatInTimeZone } from 'date-fns-tz'
 import {
+  ArrowRight,
   Beer,
   Camera,
   ChevronRight,
@@ -369,12 +370,16 @@ export default async function HomePage() {
                   <Link
                     href={accountHref}
                     className={buttonClasses({
-                      variant: 'outline',
+                      variant: 'ghost',
                       size: 'lg',
-                      className: 'h-[52px] min-w-[87px] flex-none rounded-md px-[22px] text-sm',
+                      className: 'h-[52px] flex-none gap-2.5 rounded-md px-[22px] text-sm',
                     })}
                   >
                     {accountLabel}
+                    <ArrowRight
+                      aria-hidden
+                      className="w-[18px] h-[18px]"
+                    />
                   </Link>
                 </div>
                 <p className="text-body text-muted">

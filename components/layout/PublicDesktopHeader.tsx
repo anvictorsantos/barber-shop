@@ -1,4 +1,4 @@
-import { UserRound } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 import { postAuthPath } from '@/lib/auth/redirect'
@@ -59,19 +59,22 @@ export function PublicDesktopHeader({
           ))}
         </nav>
 
-        <div className="flex items-center gap-5">
-          <span className="hidden text-caption text-muted xl:inline">
-            {user ? 'Minha conta' : 'Já é cliente?'}
-          </span>
+        <div className="flex items-center gap-3">
           <Link
             href={accountHref}
-            className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md border border-white/10 px-[22px] text-sm font-bold text-text transition hover:border-white/30"
+            className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-white/10 px-[22px] text-sm font-bold text-text transition hover:bg-white/15"
           >
-            {user ? 'Conta' : 'Entrar'}
-            <UserRound
+            {user ? 'Minha conta' : 'Entrar'}
+            <ArrowRight
               aria-hidden
-              className="h-4 w-4"
+              className="h-[18px] w-[18px]"
             />
+          </Link>
+          <Link
+            href={user ? accountHref : '/criar-conta'}
+            className="inline-flex h-[52px] items-center justify-center rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
+          >
+            {user ? 'Conta' : 'Criar conta'}
           </Link>
         </div>
       </div>
