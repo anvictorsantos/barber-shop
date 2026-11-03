@@ -107,8 +107,8 @@ export default async function HomePage() {
   const phone = shop?.phone ?? '+5531988815243'
   const whatsapp = (shop?.whatsapp ?? '+5531988815243').replace(/\D/g, '')
   const cityLabel = city === 'Belo Horizonte' ? 'BH' : city
-  const [streetLine = addressLine, neighborhood = ''] = addressLine.split(' — ')
-  const locationLabel = neighborhood ? `${neighborhood} · ${cityLabel}` : `${city}, ${state}`
+  const [, neighborhood = ''] = addressLine.split(' — ')
+  const captionLocation = neighborhood ? `${neighborhood}, ${city}` : `${city}, ${state}`
 
   const accountHref = user
     ? user.role === 'CUSTOMER'
@@ -326,7 +326,11 @@ export default async function HomePage() {
               <div className="flex items-center gap-2">
                 <span
                   aria-hidden
-                  className={open ? 'h-[7px] w-[7px] bg-success' : 'h-[7px] w-[7px] bg-muted'}
+                  className={
+                    open
+                      ? 'h-[7px] w-[7px] rounded-full bg-success'
+                      : 'h-[7px] w-[7px] rounded-full bg-muted'
+                  }
                 />
                 <span
                   className={
@@ -340,11 +344,11 @@ export default async function HomePage() {
               </div>
 
               <h1 className="font-display font-bold text-[40px] text-text xl:text-[52px] leading-[1.13]">
-                Seu próximo corte começa aqui.
+                Corte, Barba e Resenha de Alto Padrão
               </h1>
 
               <p className="text-[17px] text-accent leading-[1.5]">
-                Corte, barba e resenha de alto padrão.
+                Pronto para dar um tapa no visual?
               </p>
 
               <div className="flex flex-col gap-3.5">
@@ -363,24 +367,24 @@ export default async function HomePage() {
                     />
                   </Link>
                   <Link
-                    href="/loja"
+                    href={accountHref}
                     className={buttonClasses({
                       variant: 'outline',
                       size: 'lg',
-                      className: 'h-[52px] w-[87px] flex-none rounded-md px-[22px] text-sm',
+                      className: 'h-[52px] min-w-[87px] flex-none rounded-md px-[22px] text-sm',
                     })}
                   >
-                    Loja
+                    {accountLabel}
                   </Link>
                 </div>
                 <p className="text-body text-muted">
-                  Escolha o serviço, o profissional e o horário. Agende como visitante.
+                  Agende como convidado. Não é preciso fazer login.
                 </p>
                 <Link
                   href="/servicos"
                   className="w-fit font-semibold text-body text-primary hover:text-primary-hover underline underline-offset-2 transition"
                 >
-                  Ver serviços sem agendar
+                  Continuar navegando sem entrar
                 </Link>
               </div>
             </div>
@@ -397,12 +401,12 @@ export default async function HomePage() {
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,19,22,0.13)_0%,rgba(18,19,22,0.4)_50%,rgba(18,19,22,0.96)_100%)]" />
               <div className="bottom-8 left-8 absolute flex flex-col gap-2">
                 <span className="font-semibold text-accent text-label uppercase tracking-[2px]">
-                  {locationLabel}
+                  Seu estilo. Seu momento.
                 </span>
                 <span className="font-display font-black text-[29px] text-accent leading-[39px]">
                   {shopName.toUpperCase()}
                 </span>
-                <span className="text-body text-white">{streetLine}</span>
+                <span className="text-body text-white">{captionLocation}</span>
               </div>
             </div>
           </section>
