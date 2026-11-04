@@ -36,7 +36,7 @@ export function HeaderMenu({ links }: { links: { href: string; label: string }[]
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-[70] flex flex-col bg-background/98 backdrop-blur">
+        <div className="fixed inset-0 z-[70] flex flex-col bg-background">
           <div className="flex h-[88px] shrink-0 items-center justify-end px-5 lg:px-20">
             <button
               type="button"

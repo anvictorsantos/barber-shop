@@ -136,6 +136,7 @@ export default async function HomePage() {
             state={state}
             user={user}
             active="home"
+            overlay
           />
         </div>
 
