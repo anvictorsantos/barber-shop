@@ -2,7 +2,6 @@ import { ptBR } from 'date-fns/locale'
 import { formatInTimeZone } from 'date-fns-tz'
 import { Camera, Clock, Scissors, UserRound } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { AddressForm } from '@/components/customer/AddressForm'
@@ -197,32 +196,6 @@ export default async function CustomerProfilePage() {
               personal={personal}
             />
           </div>
-
-          <section className="flex min-w-0 flex-1 flex-col gap-4 rounded-[20px] border border-white/[0.07] bg-surface p-6">
-            <h2 className="text-base font-extrabold leading-[19px] text-text">
-              Segurança da Conta
-            </h2>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/recuperar-senha"
-                className="inline-flex h-8 items-center rounded-sm border border-inactive px-4 text-[13px] font-bold leading-4 text-text transition hover:border-white/30"
-              >
-                Alterar Senha
-              </Link>
-
-              <span className="flex items-center gap-2">
-                <span className="text-[13px] leading-4 text-muted">Autenticação em 2 Etapas</span>
-                <span
-                  aria-hidden
-                  title="Em breve"
-                  className="flex h-[18px] w-8 items-center rounded-full bg-surface-subtle p-0.5"
-                >
-                  <span className="h-3.5 w-3.5 rounded-full bg-white" />
-                </span>
-              </span>
-            </div>
-          </section>
         </div>
       </div>
 
