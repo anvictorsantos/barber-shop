@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
+import { PhoneInput } from '@/components/ui/PhoneInput'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { clearCart, removeCartItem } from '@/lib/cart/store'
 import { useCart } from '@/lib/cart/useCart'
@@ -179,13 +180,10 @@ export function CartContents({
             >
               WhatsApp
             </label>
-            <Input
+            <PhoneInput
               id="checkout-phone"
-              type="tel"
-              placeholder="Com DDI, ex: +55 31 98881-5243"
               value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              className={fieldClass}
+              onChange={setPhone}
             />
           </div>
 
