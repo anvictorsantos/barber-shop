@@ -8,10 +8,16 @@ import { formatBRL } from '@/lib/format/money'
 
 import type { Service } from '@prisma/client'
 
-export function ServiceCard({ service }: { service: Service }) {
+export function ServiceCard({
+  service,
+  continuar = false,
+}: {
+  service: Service
+  continuar?: boolean
+}) {
   return (
     <Link
-      href={`/servicos/${service.slug}`}
+      href={`/servicos/${service.slug}${continuar ? '?continuar=1' : ''}`}
       className={`group flex flex-col gap-4 rounded-xl border bg-surface p-4 transition hover:border-accent/50 lg:min-h-[206px] lg:flex-row lg:gap-5 ${
         service.promoLabel ? 'border-primary' : 'border-white/10'
       }`}

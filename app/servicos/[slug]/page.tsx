@@ -1,14 +1,14 @@
-import { Check, ChevronLeft, ChevronRight, Clock, Scissors, ShieldCheck } from 'lucide-react'
+import { Check, ChevronLeft, Clock, Scissors, ShieldCheck } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { ServiceBookingAction } from '@/components/booking/ServiceBookingAction'
 import { FavoriteButton } from '@/components/customer/FavoriteButton'
 import { PublicDesktopFooter } from '@/components/layout/PublicDesktopFooter'
 import { PublicDesktopHeader } from '@/components/layout/PublicDesktopHeader'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SkipLink } from '@/components/layout/SkipLink'
-import { buttonClasses } from '@/components/ui/Button'
 import { getSessionUser } from '@/lib/auth/session'
 import { getServiceBySlug } from '@/lib/catalog/queries'
 import { getFavoriteIds } from '@/lib/customer/queries'
@@ -35,8 +35,16 @@ export async function generateMetadata({
   }
 }
 
-export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ServiceDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ continuar?: string | string[] }>
+}) {
   const { slug } = await params
+  const query = await searchParams
+  const continuar = query.continuar === '1'
   const service = await getServiceBySlug(slug)
   if (!service) notFound()
 
@@ -180,19 +188,15 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 Duração estimada: {service.durationMin} minutos
               </p>
 
-              <Link
-                href={`/agendar/${service.id}/profissional`}
-                className={buttonClasses({
-                  size: 'lg',
-                  className: 'h-[52px] w-fit gap-2.5 rounded-md px-[22px] text-sm',
-                })}
-              >
-                Agendar este serviço
-                <ChevronRight
-                  aria-hidden
-                  className="h-[18px] w-[18px]"
-                />
-              </Link>
+              <ServiceBookingAction
+                service={{
+                  id: service.id,
+                  name: service.name,
+                  durationMin: service.durationMin,
+                  priceCents: service.priceCents,
+                }}
+                continuar={continuar}
+              />
 
               <p className="text-caption text-muted">Não precisa de conta para agendar.</p>
 
