@@ -20,6 +20,7 @@ export function PublicDesktopHeader({
   user,
   active,
   overlay = false,
+  hideAccount = false,
 }: {
   shopName: string
   city: string
@@ -27,6 +28,7 @@ export function PublicDesktopHeader({
   user: SessionUser | null
   active?: ActivePage | 'store'
   overlay?: boolean
+  hideAccount?: boolean
 }) {
   const accountHref = user ? postAuthPath(user.role) : '/entrar'
 
@@ -64,31 +66,35 @@ export function PublicDesktopHeader({
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href={accountHref}
-            className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-white/10 px-[22px] text-sm font-bold text-text transition hover:bg-white/15"
-          >
-            {user ? 'Minha conta' : 'Entrar'}
-            <UserRound
-              aria-hidden
-              className="h-[18px] w-[18px]"
-            />
-          </Link>
-
-          {user ? null : (
+        {hideAccount ? (
+          <div className="w-[1px]" />
+        ) : (
+          <div className="flex items-center gap-3">
             <Link
-              href="/criar-conta"
-              className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
+              href={accountHref}
+              className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-white/10 px-[22px] text-sm font-bold text-text transition hover:bg-white/15"
             >
-              Criar conta
-              <ArrowRight
+              {user ? 'Minha conta' : 'Entrar'}
+              <UserRound
                 aria-hidden
                 className="h-[18px] w-[18px]"
               />
             </Link>
-          )}
-        </div>
+
+            {user ? null : (
+              <Link
+                href="/criar-conta"
+                className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
+              >
+                Criar conta
+                <ArrowRight
+                  aria-hidden
+                  className="h-[18px] w-[18px]"
+                />
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </header>
   )

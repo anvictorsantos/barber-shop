@@ -65,6 +65,7 @@ export default async function LoginPage({
             city={city}
             state={state}
             user={user}
+            hideAccount
           />
         </div>
 
