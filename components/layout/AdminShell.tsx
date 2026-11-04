@@ -1,4 +1,5 @@
 import { Bell } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -30,9 +31,16 @@ export async function AdminShell({ children }: { children: ReactNode }) {
         <div className="flex flex-col gap-1.5">
           <Link
             href="/admin"
-            className="font-display text-xl font-black leading-tight tracking-wider text-accent"
+            className="flex items-center"
           >
-            BARBEARIA DO LUIZ
+            <Image
+              src="/brand/logo.png"
+              alt="Barbearia do Luiz"
+              width={774}
+              height={880}
+              priority
+              className="h-14 w-auto"
+            />
           </Link>
           <p className="text-label uppercase tracking-wider text-muted">Painel de controle</p>
         </div>
@@ -57,9 +65,15 @@ export async function AdminShell({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3 lg:hidden">
             <Link
               href="/admin"
-              className="font-display text-lg font-black text-accent"
+              className="flex items-center"
             >
-              BARBEARIA DO LUIZ
+              <Image
+                src="/brand/logo.png"
+                alt="Barbearia do Luiz"
+                width={774}
+                height={880}
+                className="h-9 w-auto"
+              />
             </Link>
           </div>
 

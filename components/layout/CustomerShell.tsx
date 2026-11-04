@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -39,14 +40,16 @@ export async function CustomerShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:h-[97px] lg:px-10">
           <Link
             href="/"
-            className="flex flex-col gap-0.5 lg:gap-1"
+            className="flex items-center"
           >
-            <span className="font-display text-lg font-black leading-7 tracking-[1px] text-accent lg:text-2xl">
-              BARBEARIA DO LUIZ
-            </span>
-            <span className="hidden text-label font-semibold tracking-[1px] text-muted lg:block">
-              PREMIUM MEN&apos;S GROOMING
-            </span>
+            <Image
+              src="/brand/logo.png"
+              alt="Barbearia do Luiz"
+              width={774}
+              height={880}
+              priority
+              className="h-10 w-auto lg:h-[52px]"
+            />
           </Link>
 
           <CustomerNav variant="horizontal" />
