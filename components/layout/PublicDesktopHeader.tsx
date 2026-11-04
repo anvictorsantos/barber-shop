@@ -1,24 +1,18 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, UserRound } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { HeaderMenu } from '@/components/layout/HeaderMenu'
 import { postAuthPath } from '@/lib/auth/redirect'
 import type { SessionUser } from '@/lib/auth/session'
 
 type ActivePage = 'home' | 'services' | 'booking'
-
-const NAV_LINKS = [
-  { href: '/', label: 'Início', page: 'home' },
-  { href: '/servicos', label: 'Serviços', page: 'services' },
-  { href: '/servicos', label: 'Agendar', page: 'booking' },
-] as const
 
 export function PublicDesktopHeader({
   shopName,
   city,
   state,
   user,
-  active,
 }: {
   shopName: string
   city: string
@@ -27,6 +21,15 @@ export function PublicDesktopHeader({
   active?: ActivePage
 }) {
   const accountHref = user ? postAuthPath(user.role) : '/entrar'
+
+  const menuLinks = [
+    { href: '/', label: 'Início' },
+    { href: '/servicos', label: 'Serviços' },
+    { href: '/servicos', label: 'Agendar' },
+    { href: '/loja', label: 'Loja' },
+    { href: accountHref, label: user ? 'Minha conta' : 'Entrar' },
+    ...(user ? [] : [{ href: '/criar-conta', label: 'Criar conta' }]),
+  ]
 
   return (
     <header className="border-b border-white/10">
@@ -45,40 +48,32 @@ export function PublicDesktopHeader({
           />
         </Link>
 
-        <nav className="flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              aria-current={link.page === active ? 'page' : undefined}
-              className={
-                link.page === active
-                  ? 'text-sm font-bold text-accent'
-                  : 'text-sm font-medium text-muted transition hover:text-text'
-              }
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
         <div className="flex items-center gap-3">
           <Link
             href={accountHref}
             className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-white/10 px-[22px] text-sm font-bold text-text transition hover:bg-white/15"
           >
             {user ? 'Minha conta' : 'Entrar'}
-            <ArrowRight
+            <UserRound
               aria-hidden
               className="h-[18px] w-[18px]"
             />
           </Link>
-          <Link
-            href={user ? accountHref : '/criar-conta'}
-            className="inline-flex h-[52px] items-center justify-center rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
-          >
-            {user ? 'Conta' : 'Criar conta'}
-          </Link>
+
+          {user ? null : (
+            <Link
+              href="/criar-conta"
+              className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
+            >
+              Criar conta
+              <ArrowRight
+                aria-hidden
+                className="h-[18px] w-[18px]"
+              />
+            </Link>
+          )}
+
+          <HeaderMenu links={menuLinks} />
         </div>
       </div>
     </header>
