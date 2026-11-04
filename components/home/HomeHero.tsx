@@ -21,11 +21,11 @@ export function HomeHero({
         fill
         priority
         sizes="100vw"
-        className="object-cover"
+        className="scale-110 object-cover blur-[6px] brightness-[0.45]"
       />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,12,0.75)_0%,rgba(10,10,12,0.5)_50%,rgba(18,19,22,0.92)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(10,10,12,0.55)_0%,rgba(10,10,12,0.88)_100%)]" />
 
-      <div className="relative flex w-full flex-col items-center gap-5 px-5 py-16 text-center lg:gap-6">
+      <div className="relative flex w-full flex-col items-center px-5 py-20 text-center">
         <span className="flex items-center gap-2">
           <span className="relative flex h-[7px] w-[7px]">
             {open ? (
@@ -50,24 +50,35 @@ export function HomeHero({
           </span>
         </span>
 
-        <Image
-          src="/brand/logo.png"
-          alt={shopName}
-          width={774}
-          height={880}
-          priority
-          className="h-28 w-auto lg:h-36"
-        />
+        <div className="mt-10 flex w-full max-w-[560px] items-center justify-center px-10 py-10 lg:mt-12 lg:px-16 lg:py-14">
+          <Image
+            src="/brand/logo.png"
+            alt={shopName}
+            width={774}
+            height={880}
+            priority
+            className="h-44 w-auto lg:h-64"
+          />
+        </div>
 
-        <h1 className="max-w-4xl text-[26px] font-extrabold uppercase leading-[1.2] text-white lg:text-[40px]">
+        <h1 className="mt-8 text-[22px] font-extrabold uppercase leading-[1.25] text-white lg:text-[34px]">
           Estilo é um reflexo da sua atitude e da sua personalidade.
         </h1>
 
-        <p className="text-sm leading-relaxed text-white/85 lg:text-[17px]">{hoursLabel}</p>
+        <div className="mt-6 flex items-center gap-3">
+          <span className="h-px w-10 bg-accent/60" />
+          <p className="text-sm leading-relaxed text-white/85 lg:text-[15px]">
+            Horário de funcionamento
+          </p>
+          <span className="h-px w-10 bg-accent/60" />
+        </div>
+        <p className="mt-1 text-label font-semibold uppercase tracking-[2px] text-accent">
+          {hoursLabel.replace('Horário de funcionamento das ', '')}
+        </p>
 
         <Link
           href="/servicos"
-          className="mt-2 inline-flex h-[52px] items-center justify-center rounded-md bg-primary px-8 text-sm font-bold text-white transition hover:bg-primary-hover"
+          className="mt-8 inline-flex h-[52px] items-center justify-center rounded-md bg-primary px-8 text-sm font-bold text-white transition hover:bg-primary-hover"
         >
           Agendar Horário
         </Link>
