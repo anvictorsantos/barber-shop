@@ -200,7 +200,7 @@ export function SlotPicker({
             <span className="flex items-center gap-2 text-caption text-muted">
               <span
                 aria-hidden
-                className="h-[7px] w-[7px] bg-primary"
+                className="h-[7px] w-[7px] rounded-full bg-primary"
               />
               {capitalize(format(selectedDate, "d 'de' MMMM", { locale: ptBR }))}
             </span>

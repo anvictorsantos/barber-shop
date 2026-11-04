@@ -10,6 +10,7 @@ import { Button, buttonClasses } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Field, Input } from '@/components/ui/Input'
+import { Modal } from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Select'
 import { StatusPill, type StatusTone } from '@/components/ui/StatusPill'
 import {
@@ -83,6 +84,13 @@ export function AgendaView({
   const [showForm, setShowForm] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [dialog, setDialog] = useState<{
+    action: 'complete' | 'noShow' | 'cancel'
+    id: string
+    customerName: string
+    serviceName: string
+    timeLabel: string
+  } | null>(null)
 
   const previous = format(addDays(parseISO(day.date), -1), 'yyyy-MM-dd')
   const next = format(addDays(parseISO(day.date), 1), 'yyyy-MM-dd')
@@ -101,6 +109,39 @@ export function AgendaView({
     if (!result.ok) setError(result.error ?? 'Não foi possível concluir.')
     else router.refresh()
   }
+
+  async function confirmDialog() {
+    if (!dialog) return
+    const { action, id } = dialog
+    setDialog(null)
+    await run(id, () =>
+      action === 'complete'
+        ? completeAppointmentAction({ appointmentId: id })
+        : action === 'noShow'
+          ? markNoShowAction({ appointmentId: id })
+          : cancelAppointmentAction({ appointmentId: id }),
+    )
+  }
+
+  const dialogCopy = dialog
+    ? dialog.action === 'complete'
+      ? {
+          title: 'Concluir atendimento',
+          description: `${dialog.serviceName} de ${dialog.customerName} às ${dialog.timeLabel}. Marcar como concluído?`,
+          confirm: 'Concluir',
+        }
+      : dialog.action === 'noShow'
+        ? {
+            title: 'Marcar falta',
+            description: `Marcar falta sem aviso de ${dialog.customerName}? Isso fica no histórico do cliente.`,
+            confirm: 'Marcar falta',
+          }
+        : {
+            title: 'Cancelar agendamento',
+            description: `Cancelar ${dialog.serviceName} de ${dialog.customerName} às ${dialog.timeLabel}?`,
+            confirm: 'Cancelar agendamento',
+          }
+    : null
 
   return (
     <div className="flex flex-col gap-6">
@@ -258,9 +299,13 @@ export function AgendaView({
                           variant="outline"
                           disabled={busyId === appointment.id}
                           onClick={() =>
-                            run(appointment.id, () =>
-                              completeAppointmentAction({ appointmentId: appointment.id }),
-                            )
+                            setDialog({
+                              action: 'complete',
+                              id: appointment.id,
+                              customerName: appointment.customerName,
+                              serviceName: appointment.serviceName,
+                              timeLabel: appointment.timeLabel,
+                            })
                           }
                         >
                           Concluir
@@ -269,12 +314,15 @@ export function AgendaView({
                           size="sm"
                           variant="outline"
                           disabled={busyId === appointment.id}
-                          onClick={() => {
-                            if (!window.confirm('Marcar falta sem aviso deste cliente?')) return
-                            run(appointment.id, () =>
-                              markNoShowAction({ appointmentId: appointment.id }),
-                            )
-                          }}
+                          onClick={() =>
+                            setDialog({
+                              action: 'noShow',
+                              id: appointment.id,
+                              customerName: appointment.customerName,
+                              serviceName: appointment.serviceName,
+                              timeLabel: appointment.timeLabel,
+                            })
+                          }
                         >
                           Falta
                         </Button>
@@ -282,12 +330,15 @@ export function AgendaView({
                           size="sm"
                           variant="danger"
                           disabled={busyId === appointment.id}
-                          onClick={() => {
-                            if (!window.confirm('Cancelar este agendamento?')) return
-                            run(appointment.id, () =>
-                              cancelAppointmentAction({ appointmentId: appointment.id }),
-                            )
-                          }}
+                          onClick={() =>
+                            setDialog({
+                              action: 'cancel',
+                              id: appointment.id,
+                              customerName: appointment.customerName,
+                              serviceName: appointment.serviceName,
+                              timeLabel: appointment.timeLabel,
+                            })
+                          }
                         >
                           Cancelar
                         </Button>
@@ -295,25 +346,30 @@ export function AgendaView({
                     ) : null}
 
                     {canPay ? (
-                      <div className="flex items-center gap-1">
-                        {(['PIX', 'CREDIT_CARD', 'CASH'] as const).map((method) => (
-                          <button
-                            key={method}
-                            type="button"
-                            disabled={busyId === appointment.id}
-                            onClick={() =>
-                              run(appointment.id, () =>
-                                recordPaymentAction({
-                                  orderCode: appointment.order.code,
-                                  method,
-                                }),
-                              )
-                            }
-                            className="cursor-pointer rounded-md border border-border bg-white/5 px-2 py-1 text-micro font-bold text-muted transition hover:border-accent hover:text-text disabled:opacity-40"
-                          >
-                            {method === 'PIX' ? 'PIX' : method === 'CASH' ? 'Dinheiro' : 'Cartão'}
-                          </button>
-                        ))}
+                      <div className="flex basis-full flex-col gap-1.5">
+                        <span className="text-micro font-bold uppercase tracking-wider text-muted">
+                          Método de pagamento
+                        </span>
+                        <div className="flex flex-wrap items-center gap-1">
+                          {(['PIX', 'CREDIT_CARD', 'CASH'] as const).map((method) => (
+                            <button
+                              key={method}
+                              type="button"
+                              disabled={busyId === appointment.id}
+                              onClick={() =>
+                                run(appointment.id, () =>
+                                  recordPaymentAction({
+                                    orderCode: appointment.order.code,
+                                    method,
+                                  }),
+                                )
+                              }
+                              className="cursor-pointer rounded-md border border-border bg-white/5 px-2 py-1 text-micro font-bold text-muted transition hover:border-accent hover:text-text disabled:opacity-40"
+                            >
+                              {method === 'PIX' ? 'PIX' : method === 'CASH' ? 'Dinheiro' : 'Cartão'}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     ) : null}
 
@@ -351,6 +407,31 @@ export function AgendaView({
           )}
         </Card>
       </div>
+
+      <Modal
+        open={dialog !== null}
+        onClose={() => setDialog(null)}
+        title={dialogCopy?.title ?? ''}
+        description={dialogCopy?.description}
+      >
+        <div className="mt-6 flex justify-end gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setDialog(null)}
+          >
+            Voltar
+          </Button>
+          <Button
+            size="sm"
+            variant={dialog?.action === 'complete' ? 'primary' : 'danger'}
+            onClick={confirmDialog}
+            disabled={busyId !== null}
+          >
+            {dialogCopy?.confirm}
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }
