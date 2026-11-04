@@ -147,7 +147,7 @@ export default async function HomePage() {
         />
 
         <section className="bg-surface">
-          <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-5 py-8 lg:flex-row lg:items-center lg:gap-10 lg:px-20 lg:py-7">
+          <div className="flex w-full flex-col gap-6 px-5 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:px-10 lg:py-7 xl:px-20">
             <div className="flex items-start gap-4">
               <MapPin
                 aria-hidden
@@ -155,7 +155,7 @@ export default async function HomePage() {
               />
               <div className="flex min-w-0 flex-col gap-2">
                 <span className="text-label uppercase tracking-[1.5px] text-accent">
-                  Onde nos encontrar
+                  Venha nos visitar
                 </span>
                 <span className="text-lead font-semibold text-text">
                   {addressLine}, {cityLabel}
