@@ -143,10 +143,8 @@ export default async function HomePage() {
 
         <div
           aria-hidden
-          className="relative h-20 overflow-hidden bg-background lg:h-24"
-        >
-          <div className="absolute -left-4 -right-4 top-1/2 h-[3px] bg-[linear-gradient(90deg,#D35F27_0%,#EAA83A_50%,#D35F27_100%)] shadow-[0_0_24px_rgba(211,95,39,0.65)]" />
-        </div>
+          className="h-[3px] w-full bg-[linear-gradient(90deg,#D35F27_0%,#EAA83A_50%,#D35F27_100%)] shadow-[0_0_24px_rgba(211,95,39,0.65)]"
+        />
 
         <TeamSection
           barbers={barbers}
