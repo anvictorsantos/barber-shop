@@ -10,7 +10,6 @@ type ActivePage = 'home' | 'services' | 'booking'
 const NAV_LINKS = [
   { href: '/', label: 'Início', page: 'home' },
   { href: '/servicos', label: 'Serviços', page: 'services' },
-  { href: '/servicos', label: 'Agendar', page: 'booking' },
   { href: '/loja', label: 'Loja', page: 'store' },
 ] as const
 
