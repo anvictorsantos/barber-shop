@@ -14,7 +14,7 @@ export function HomeHero({
   hoursLabel: string
 }) {
   return (
-    <section className="relative isolate flex min-h-[540px] items-center justify-center overflow-hidden lg:min-h-[680px]">
+    <section className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden">
       <Image
         src={HERO_IMAGE}
         alt=""

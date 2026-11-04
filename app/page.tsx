@@ -1,6 +1,4 @@
 import { formatInTimeZone } from 'date-fns-tz'
-import { ArrowRight, Clock, MapPin } from 'lucide-react'
-import Link from 'next/link'
 
 import { HomeHero } from '@/components/home/HomeHero'
 import { ReviewsSection } from '@/components/home/ReviewsSection'
@@ -15,7 +13,7 @@ import { BUSINESS_TIMEZONE, isShopOpen } from '@/lib/availability/slots'
 import { getActiveBarbers } from '@/lib/catalog/queries'
 import { getHomeReviews, getHomeStats } from '@/lib/home/queries'
 import { getShopHours, getShopSettings } from '@/lib/settings/queries'
-import { minutesToTime, shopHoursLines } from '@/lib/time/schedule'
+import { minutesToTime } from '@/lib/time/schedule'
 import type { ShopHoursRow } from '@/lib/time/schedule'
 
 import type { Metadata } from 'next'
@@ -84,14 +82,11 @@ export default async function HomePage() {
   const state = shop?.state ?? 'MG'
   const phone = shop?.phone ?? '+5531988815243'
   const whatsapp = (shop?.whatsapp ?? '+5531988815243').replace(/\D/g, '')
-  const cityLabel = city === 'Belo Horizonte' ? 'BH' : city
 
   const hoursLabel =
     todayHours && !todayHours.closed
       ? `Horário de funcionamento das ${minutesToTime(todayHours.openMinute)} às ${minutesToTime(todayHours.closeMinute)}`
       : 'Hoje fechado — confira os horários da semana'
-
-  const hoursLines = shopHoursLines(hours)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -146,57 +141,12 @@ export default async function HomePage() {
           hoursLabel={hoursLabel}
         />
 
-        <section className="bg-surface">
-          <div className="flex w-full flex-col gap-6 px-5 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:px-10 lg:py-7 xl:px-20">
-            <div className="flex items-start gap-4">
-              <MapPin
-                aria-hidden
-                className="mt-1 h-6 w-6 shrink-0 text-primary"
-              />
-              <div className="flex min-w-0 flex-col gap-2">
-                <span className="text-label uppercase tracking-[1.5px] text-accent">
-                  Venha nos visitar
-                </span>
-                <span className="text-lead font-semibold text-text">
-                  {addressLine}, {cityLabel}
-                </span>
-              </div>
-            </div>
-
-            <div
-              aria-hidden
-              className="hidden h-12 w-px shrink-0 bg-white/10 lg:block"
-            />
-
-            <div className="flex items-start gap-4">
-              <Clock
-                aria-hidden
-                className="mt-1 h-6 w-6 text-primary"
-              />
-              <div className="flex flex-col gap-1.5">
-                {hoursLines.map((line, index) => (
-                  <span
-                    key={line}
-                    className={index === 0 ? 'text-sm text-text' : 'text-sm text-muted'}
-                  >
-                    {line}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <Link
-              href="/servicos"
-              className="inline-flex h-[52px] w-fit items-center justify-center gap-2.5 rounded-md bg-white/10 px-[22px] text-sm font-bold text-text transition hover:bg-white/15 lg:ml-auto"
-            >
-              Ver serviços
-              <ArrowRight
-                aria-hidden
-                className="h-[18px] w-[18px]"
-              />
-            </Link>
-          </div>
-        </section>
+        <div
+          aria-hidden
+          className="relative h-20 overflow-hidden bg-background lg:h-24"
+        >
+          <div className="absolute -left-4 -right-4 top-1/2 h-[3px] -rotate-[2deg] bg-[linear-gradient(90deg,#D35F27_0%,#EAA83A_50%,#D35F27_100%)] shadow-[0_0_24px_rgba(211,95,39,0.65)]" />
+        </div>
 
         <TeamSection
           barbers={barbers}
