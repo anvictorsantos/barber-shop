@@ -4,15 +4,6 @@ import Link from 'next/link'
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1600&q=80'
 
-function Corner({ className }: { className: string }) {
-  return (
-    <span
-      aria-hidden
-      className={`absolute h-10 w-10 border-accent/80 lg:h-14 lg:w-14 ${className}`}
-    />
-  )
-}
-
 export function HomeHero({
   shopName,
   open,
@@ -59,12 +50,7 @@ export function HomeHero({
           </span>
         </span>
 
-        <div className="relative mt-10 flex w-full max-w-[560px] items-center justify-center px-10 py-10 lg:mt-12 lg:px-16 lg:py-14">
-          <Corner className="left-0 top-0 border-l-2 border-t-2" />
-          <Corner className="right-0 top-0 border-r-2 border-t-2" />
-          <Corner className="bottom-0 left-0 border-b-2 border-l-2" />
-          <Corner className="bottom-0 right-0 border-b-2 border-r-2" />
-
+        <div className="mt-10 flex w-full max-w-[560px] items-center justify-center px-10 py-10 lg:mt-12 lg:px-16 lg:py-14">
           <Image
             src="/brand/logo.png"
             alt={shopName}
