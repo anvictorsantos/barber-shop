@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 export default async function ServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string | string[] }>
+  searchParams: Promise<{ categoria?: string | string[]; continuar?: string | string[] }>
 }) {
   const [user, services, shop, storedHours, params] = await Promise.all([
     getSessionUser(),
@@ -46,6 +46,7 @@ export default async function ServicesPage({
 
   const groups = groupServicesByCategory(services)
   const requested = typeof params.categoria === 'string' ? params.categoria : undefined
+  const continuar = params.continuar === '1'
   const activeCategory = groups.find((group) => group.category === requested)?.category
   const visibleServices = activeCategory
     ? services.filter((service) => service.category === activeCategory)
@@ -147,6 +148,7 @@ export default async function ServicesPage({
                     <ServiceCard
                       key={service.id}
                       service={service}
+                      continuar={continuar}
                     />
                   ))}
                 </div>

@@ -35,6 +35,15 @@ export function CartContents({
   const router = useRouter()
   const items = useCart()
   const total = items.reduce((sum, item) => sum + item.priceCents, 0)
+  const totalMinutes = items.reduce((sum, item) => sum + item.durationMin, 0)
+  const durationLabel = (() => {
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+    return (
+      [hours ? `${hours}h` : '', minutes ? `${minutes}min` : ''].filter(Boolean).join(' ') ||
+      '0 min'
+    )
+  })()
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('ON_SITE')
   const [useCredit, setUseCredit] = useState(false)
   const [name, setName] = useState(customer?.name ?? '')
@@ -364,7 +373,7 @@ export function CartContents({
         </div>
 
         <Link
-          href="/servicos"
+          href="/servicos?continuar=1"
           className="w-fit text-[13px] font-bold leading-4 text-primary underline underline-offset-2 transition hover:text-primary-hover"
         >
           Adicionar mais serviços
@@ -375,6 +384,11 @@ export function CartContents({
         <div className="flex items-center justify-between gap-4">
           <span className="text-body text-muted">Subtotal</span>
           <span className="text-sm text-text">{formatBRL(total)}</span>
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-body text-muted">Duração total</span>
+          <span className="text-sm text-text">{durationLabel}</span>
         </div>
 
         {creditApplied > 0 ? (
