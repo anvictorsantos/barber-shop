@@ -283,7 +283,7 @@ export function SlotPicker({
               href={scheduleHref}
               className={buttonClasses({
                 size: 'lg',
-                className: 'h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm sm:w-[196px]',
+                className: 'h-[52px] w-fit gap-2.5 rounded-md px-[22px] text-sm',
               })}
             >
               Continuar
@@ -296,7 +296,7 @@ export function SlotPicker({
             <Button
               size="lg"
               disabled
-              className="h-[52px] w-full rounded-md px-[22px] text-sm sm:w-[196px]"
+              className="h-[52px] w-fit rounded-md px-[22px] text-sm"
             >
               Continuar
             </Button>

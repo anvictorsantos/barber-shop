@@ -157,7 +157,7 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
               <div className="flex flex-col gap-3">
                 <Link
                   href={user ? '/conta/agendamentos' : '/'}
-                  className="inline-flex h-[52px] w-full items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
+                  className="inline-flex h-[52px] w-fit items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
                 >
                   {user ? 'Ver meus agendamentos' : 'Voltar ao início'}
                   <ChevronRight
@@ -169,7 +169,7 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
                 {settled && user ? (
                   <a
                     href={`/api/pedidos/${order.code}/recibo`}
-                    className="inline-flex h-[52px] w-full items-center justify-center rounded-md border border-white/10 px-[22px] text-sm font-bold text-text transition hover:border-white/30"
+                    className="inline-flex h-[52px] w-fit items-center justify-center rounded-md border border-white/10 px-[22px] text-sm font-bold text-text transition hover:border-white/30"
                   >
                     Baixar recibo
                   </a>
@@ -178,7 +178,7 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
                     href={`https://wa.me/${whatsapp}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-[52px] w-full items-center justify-center rounded-md border border-white/10 px-[22px] text-sm font-bold text-text transition hover:border-white/30"
+                    className="inline-flex h-[52px] w-fit items-center justify-center rounded-md border border-white/10 px-[22px] text-sm font-bold text-text transition hover:border-white/30"
                   >
                     Falar no WhatsApp
                   </a>

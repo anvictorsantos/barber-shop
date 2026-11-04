@@ -124,7 +124,7 @@ export function BarberSelector({
                     href={scheduleHref}
                     className={buttonClasses({
                       size: 'lg',
-                      className: 'h-[52px] w-full rounded-md px-[22px] text-sm',
+                      className: 'h-[52px] w-fit rounded-md px-[22px] text-sm',
                     })}
                   >
                     Continuar
@@ -136,7 +136,7 @@ export function BarberSelector({
                     className={buttonClasses({
                       variant: 'outline',
                       size: 'lg',
-                      className: 'h-[52px] w-full rounded-md px-[22px] text-sm',
+                      className: 'h-[52px] w-fit rounded-md px-[22px] text-sm',
                     })}
                   >
                     Escolher
@@ -153,7 +153,7 @@ export function BarberSelector({
             href={scheduleHref}
             className={buttonClasses({
               size: 'lg',
-              className: 'h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm sm:w-[230px]',
+              className: 'h-[52px] w-fit gap-2.5 rounded-md px-[22px] text-sm sm:w-[230px]',
             })}
           >
             Continuar para horário

@@ -46,7 +46,7 @@ export function ServiceCard({ service }: { service: Service }) {
         <span
           className={buttonClasses({
             size: 'lg',
-            className: 'mt-auto h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm',
+            className: 'mt-auto h-[52px] w-fit gap-2.5 rounded-md px-[22px] text-sm',
           })}
         >
           Agendar

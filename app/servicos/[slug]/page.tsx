@@ -184,7 +184,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 href={`/agendar/${service.id}/profissional`}
                 className={buttonClasses({
                   size: 'lg',
-                  className: 'h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm',
+                  className: 'h-[52px] w-fit gap-2.5 rounded-md px-[22px] text-sm',
                 })}
               >
                 Agendar este serviço
