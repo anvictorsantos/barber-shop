@@ -154,7 +154,7 @@ export function LoginForm({ next }: { next?: string | null }) {
           <Button
             type="submit"
             size="lg"
-            className="h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm"
+            className="h-[52px] w-fit gap-2.5 rounded-md px-[22px] text-sm"
             disabled={pending}
           >
             {pending ? 'Entrando…' : 'Entrar'}
@@ -184,7 +184,7 @@ export function LoginForm({ next }: { next?: string | null }) {
         <div className="flex flex-col gap-3">
           <Link
             href="/servicos"
-            className="inline-flex h-[52px] w-full items-center justify-center rounded-md border border-primary px-[22px] text-sm font-bold text-text transition hover:bg-primary/10"
+            className="inline-flex h-[52px] w-fit items-center justify-center rounded-md border border-primary px-[22px] text-sm font-bold text-text transition hover:bg-primary/10"
           >
             Continuar como visitante
           </Link>

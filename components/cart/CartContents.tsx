@@ -408,7 +408,7 @@ export function CartContents({
         <Button
           type="submit"
           size="lg"
-          className="h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm"
+          className="h-[52px] w-fit gap-2.5 self-end rounded-md px-[22px] text-sm"
           disabled={pending}
         >
           {pending ? 'Finalizando…' : 'Finalizar pedido'}
