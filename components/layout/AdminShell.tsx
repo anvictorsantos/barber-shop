@@ -42,7 +42,6 @@ export async function AdminShell({ children }: { children: ReactNode }) {
               className="h-14 w-auto"
             />
           </Link>
-          <p className="text-label uppercase tracking-wider text-muted">Painel de controle</p>
         </div>
 
         <AdminNav role={user.role} />
