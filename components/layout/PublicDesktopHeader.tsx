@@ -2,37 +2,37 @@ import { ArrowRight, UserRound } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { HeaderMenu } from '@/components/layout/HeaderMenu'
 import { postAuthPath } from '@/lib/auth/redirect'
 import type { SessionUser } from '@/lib/auth/session'
 
 type ActivePage = 'home' | 'services' | 'booking'
+
+const NAV_LINKS = [
+  { href: '/', label: 'Início', page: 'home' },
+  { href: '/servicos', label: 'Serviços', page: 'services' },
+  { href: '/servicos', label: 'Agendar', page: 'booking' },
+  { href: '/loja', label: 'Loja', page: 'store' },
+] as const
 
 export function PublicDesktopHeader({
   shopName,
   city,
   state,
   user,
+  active,
+  overlay = false,
 }: {
   shopName: string
   city: string
   state: string
   user: SessionUser | null
-  active?: ActivePage
+  active?: ActivePage | 'store'
+  overlay?: boolean
 }) {
   const accountHref = user ? postAuthPath(user.role) : '/entrar'
 
-  const menuLinks = [
-    { href: '/', label: 'Início' },
-    { href: '/servicos', label: 'Serviços' },
-    { href: '/servicos', label: 'Agendar' },
-    { href: '/loja', label: 'Loja' },
-    { href: accountHref, label: user ? 'Minha conta' : 'Entrar' },
-    ...(user ? [] : [{ href: '/criar-conta', label: 'Criar conta' }]),
-  ]
-
   return (
-    <header className="border-b border-white/10">
+    <header className={overlay ? 'absolute inset-x-0 top-0 z-40' : 'border-b border-white/10'}>
       <div className="flex h-[88px] items-center justify-between gap-8 px-10 xl:px-20">
         <Link
           href="/"
@@ -47,6 +47,23 @@ export function PublicDesktopHeader({
             className="h-[60px] w-auto"
           />
         </Link>
+
+        <nav className="flex items-center gap-8">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              aria-current={link.page === active ? 'page' : undefined}
+              className={
+                link.page === active
+                  ? 'text-sm font-bold text-accent'
+                  : 'text-sm font-medium text-muted transition hover:text-text'
+              }
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
         <div className="flex items-center gap-3">
           <Link
@@ -72,8 +89,6 @@ export function PublicDesktopHeader({
               />
             </Link>
           )}
-
-          <HeaderMenu links={menuLinks} />
         </div>
       </div>
     </header>
