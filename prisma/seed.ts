@@ -812,6 +812,11 @@ async function main() {
     (appointment) => appointment.status === 'COMPLETED' && appointment.customerId,
   )
   const ratings = [5, 5, 4]
+  const comments = [
+    'Atendimento impecável do começo ao fim. Saí com o corte exatamente como pedi.',
+    'Ambiente agradável, profissionais atenciosos e um acabamento de primeira.',
+    'Corte muito bem feito e horário respeitado. Volto sempre que preciso.',
+  ]
 
   for (const [index, appointment] of completed.slice(0, ratings.length).entries()) {
     const rating = ratings[index]
@@ -822,7 +827,7 @@ async function main() {
         customerId: appointment.customerId,
         barberId: appointment.barberId,
         rating,
-        comment: index === 0 ? 'Atendimento impecável.' : null,
+        comment: comments[index] ?? null,
       },
     })
   }
