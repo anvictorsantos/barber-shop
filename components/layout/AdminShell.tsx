@@ -1,11 +1,12 @@
-import { Bell } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { NotificationsBell } from '@/components/admin/NotificationsBell'
 import { AdminNav } from '@/components/layout/AdminNav'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { StatusPill } from '@/components/ui/StatusPill'
+import { getAdminNotifications } from '@/lib/admin/notifications'
 import { getSessionUser } from '@/lib/auth/session'
 
 import type { ReactNode } from 'react'
@@ -24,6 +25,8 @@ export async function AdminShell({ children }: { children: ReactNode }) {
   if (!user) redirect('/entrar?next=/admin')
   if (user.role === 'CUSTOMER') redirect('/conta/agendamentos')
 
+  const notifications = await getAdminNotifications(user)
+
   return (
     <div className="flex min-h-dvh bg-background">
       <SkipLink />
@@ -39,7 +42,7 @@ export async function AdminShell({ children }: { children: ReactNode }) {
               width={774}
               height={880}
               priority
-              className="h-14 w-auto"
+              className="h-14 w-auto m-auto"
             />
           </Link>
         </div>
@@ -71,7 +74,7 @@ export async function AdminShell({ children }: { children: ReactNode }) {
                 alt="Barbearia do Luiz"
                 width={774}
                 height={880}
-                className="h-9 w-auto"
+                className="h-9 w-auto m-auto"
               />
             </Link>
           </div>
@@ -81,16 +84,10 @@ export async function AdminShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Notificações"
-              className="flex h-10 w-10 items-center justify-center rounded-md border border-border bg-surface text-accent"
-            >
-              <Bell
-                className="h-[18px] w-[18px]"
-                aria-hidden
-              />
-            </button>
+            <NotificationsBell
+              count={notifications.count}
+              items={notifications.items}
+            />
           </div>
         </header>
 
