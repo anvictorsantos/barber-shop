@@ -1,7 +1,10 @@
+import { Home } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { AdminMobileMenu } from '@/components/admin/AdminMobileMenu'
+import { LogoutButton } from '@/components/admin/LogoutButton'
 import { NotificationsBell } from '@/components/admin/NotificationsBell'
 import { AdminNav } from '@/components/layout/AdminNav'
 import { SkipLink } from '@/components/layout/SkipLink'
@@ -49,15 +52,32 @@ export async function AdminShell({ children }: { children: ReactNode }) {
 
         <AdminNav role={user.role} />
 
-        <div className="mt-auto flex items-center gap-3 rounded-lg border border-border bg-surface p-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-accent bg-primary/10 text-caption font-bold text-accent">
-            {initials(user.name)}
-          </span>
-          <div className="flex min-w-0 flex-col">
-            <p className="truncate text-caption font-bold text-text">{user.name}</p>
-            <p className="text-micro text-muted">
-              {user.role === 'OWNER' ? 'Administrador' : 'Barbeiro'}
-            </p>
+        <div className="mt-auto flex flex-col gap-4">
+          <Link
+            href="/"
+            className="flex items-center gap-3 rounded-lg px-4 py-3 text-body font-semibold text-muted transition hover:bg-white/5 hover:text-text"
+          >
+            <Home
+              className="h-[18px] w-[18px]"
+              aria-hidden
+            />
+            Ver site
+          </Link>
+
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-accent bg-primary/10 text-caption font-bold text-accent">
+              {initials(user.name)}
+            </span>
+            <div className="flex min-w-0 flex-col">
+              <p className="truncate text-caption font-bold text-text">{user.name}</p>
+              <p className="text-micro text-muted">
+                {user.role === 'OWNER' ? 'Administrador' : 'Barbeiro'}
+              </p>
+            </div>
+            <LogoutButton
+              className="ml-auto"
+              label=""
+            />
           </div>
         </div>
       </aside>
@@ -65,6 +85,7 @@ export async function AdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-20 items-center justify-between border-b border-border px-6 lg:px-8">
           <div className="flex items-center gap-3 lg:hidden">
+            <AdminMobileMenu role={user.role} />
             <Link
               href="/admin"
               className="flex items-center"
