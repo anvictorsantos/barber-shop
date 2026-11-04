@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { CartLink } from '@/components/cart/CartLink'
@@ -9,9 +10,15 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-shell items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="font-display text-lg font-black tracking-wider text-accent"
+          className="flex items-center"
         >
-          BARBEARIA DO LUIZ
+          <Image
+            src="/brand/logo.png"
+            alt="Barbearia do Luiz"
+            width={774}
+            height={880}
+            className="h-10 w-auto"
+          />
         </Link>
 
         <nav className="hidden items-center gap-6 sm:flex">

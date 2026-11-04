@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { postAuthPath } from '@/lib/auth/redirect'
@@ -32,14 +33,16 @@ export function PublicDesktopHeader({
       <div className="flex h-[88px] items-center justify-between gap-8 px-10 xl:px-20">
         <Link
           href="/"
-          className="flex flex-col gap-0.5"
+          className="flex items-center"
         >
-          <span className="font-display text-[21px] font-black leading-7 tracking-[0.5px] text-accent">
-            {shopName.toUpperCase()}
-          </span>
-          <span className="text-micro tracking-[2.5px] text-muted">
-            {city.toUpperCase()} · {state}
-          </span>
+          <Image
+            src="/brand/logo.png"
+            alt={`${shopName} — ${city}, ${state}`}
+            width={774}
+            height={880}
+            priority
+            className="h-[60px] w-auto"
+          />
         </Link>
 
         <nav className="flex items-center gap-8">
