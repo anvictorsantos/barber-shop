@@ -187,13 +187,13 @@ export function AgendaView({
           ) : null}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:flex-wrap sm:gap-3">
           {isOwner ? (
             <Select
               aria-label="Filtrar por profissional"
               value={selectedBarberId ?? ''}
               onChange={(event) => navigate(day.date, event.target.value || null)}
-              className="w-48"
+              className="w-full sm:w-48"
             >
               <option value="">Todos os profissionais</option>
               {barbers.map((barber) => (
