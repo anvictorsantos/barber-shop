@@ -17,13 +17,14 @@ export function ProductCard({
   const available = product.stock - product.reserved > 0
 
   return (
-    <article className="relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-white/[0.07] bg-surface transition hover:border-white/20">
       {favorite?.canFavorite ? (
         <FavoriteButton
           kind="product"
           id={product.id}
           initial={favorite.saved}
           label={product.name}
+          variant="bare"
           className="absolute right-3 top-3 z-10"
         />
       ) : null}
@@ -47,10 +48,10 @@ export function ProductCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <h2 className="text-lead font-bold text-text">{product.name}</h2>
-        <p className="text-caption text-muted">{product.description}</p>
+        <h2 className="text-sm font-extrabold leading-[17px] text-text">{product.name}</h2>
+        <p className="line-clamp-2 text-caption text-muted">{product.description}</p>
         <div className="mt-auto flex items-center justify-between gap-3 pt-2">
-          <span className="text-lead font-extrabold text-accent">
+          <span className="text-[15px] font-extrabold leading-[18px] text-accent">
             {formatBRL(product.priceCents)}
           </span>
           <StatusPill tone={available ? 'success' : 'neutral'}>
