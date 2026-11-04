@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Field, Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
+import { PhoneInput } from '@/components/ui/PhoneInput'
 import { Select } from '@/components/ui/Select'
 import { StatusPill, type StatusTone } from '@/components/ui/StatusPill'
 import {
@@ -650,13 +651,11 @@ function ManualBookingForm({
         <Field
           label="WhatsApp"
           htmlFor="booking-phone"
-          hint="Com DDI, ex: +55 31 98881-5243"
         >
-          <Input
+          <PhoneInput
             id="booking-phone"
-            type="tel"
             value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            onChange={setPhone}
           />
         </Field>
         <Field
