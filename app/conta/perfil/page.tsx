@@ -1,7 +1,8 @@
 import { ptBR } from 'date-fns/locale'
 import { formatInTimeZone } from 'date-fns-tz'
-import { Camera, Clock, Scissors, UserRound } from 'lucide-react'
+import { ArrowLeft, Camera, Clock, Scissors, UserRound } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { AddressForm } from '@/components/customer/AddressForm'
@@ -197,6 +198,17 @@ export default async function CustomerProfilePage() {
             />
           </div>
         </div>
+
+        <Link
+          href="/"
+          className="inline-flex w-fit items-center gap-2 text-caption font-semibold text-primary transition hover:text-primary-hover"
+        >
+          <ArrowLeft
+            aria-hidden
+            className="h-4 w-4"
+          />
+          Voltar para o site
+        </Link>
       </div>
 
       <div className="flex w-full shrink-0 flex-col gap-6 lg:w-[380px]">
