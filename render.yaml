@@ -102,7 +102,8 @@ services:
     runtime: node
     plan: starter
     schedule: '0 * * * *'
-    command: >-
+    buildCommand: "true"
+    startCommand: >-
       curl -fsS -X POST "$APP_URL/api/cron/reminders" -H "Authorization: Bearer $CRON_SECRET"
     envVars:
       - key: APP_URL
@@ -115,7 +116,8 @@ services:
     runtime: node
     plan: starter
     schedule: '*/5 * * * *'
-    command: >-
+    buildCommand: "true"
+    startCommand: >-
       curl -fsS -X POST "$APP_URL/api/cron/expire-holds" -H "Authorization: Bearer $CRON_SECRET"
     envVars:
       - key: APP_URL
@@ -128,7 +130,8 @@ services:
     runtime: node
     plan: starter
     schedule: '0 * * * *'
-    command: >-
+    buildCommand: "true"
+    startCommand: >-
       curl -fsS -X POST "$APP_URL/api/cron/expire-credits" -H "Authorization: Bearer $CRON_SECRET"
     envVars:
       - key: APP_URL
