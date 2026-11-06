@@ -41,6 +41,8 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@neon/config": "^1.11.3",
+    "@neon/env": "^1.6.15",
     "@node-rs/argon2": "^2.2.2",
     "@prisma/client": "^6.19.3",
     "@sentry/core": "^11.10.0",
