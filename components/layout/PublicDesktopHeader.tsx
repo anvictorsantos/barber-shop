@@ -83,7 +83,7 @@ export function PublicDesktopHeader({
 
             {user ? null : (
               <Link
-                href="/criar-conta"
+                href="/entrar?modo=criar"
                 className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
               >
                 Criar conta

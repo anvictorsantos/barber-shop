@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
-import { AuthCard } from '@/components/auth/AuthCard'
+import { AuthField, AuthInput } from '@/components/auth/AuthField'
+import { AuthHeading } from '@/components/auth/AuthHeading'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { Button } from '@/components/ui/Button'
-import { Field, Input } from '@/components/ui/Input'
 import { postAuthPath } from '@/lib/auth/redirect'
 import { postJson } from '@/lib/http/client'
 
@@ -62,22 +62,24 @@ export function PhoneVerification({
   }
 
   return (
-    <AuthCard
-      title="Confirme seu WhatsApp"
-      description={`Enviamos um código de 6 dígitos para ${phone}.`}
-    >
+    <div className="flex w-full flex-col gap-7">
+      <AuthHeading
+        title="Confirme seu WhatsApp"
+        description={`Enviamos um código de 6 dígitos para ${phone}.`}
+      />
+
       <form
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-7"
         onSubmit={verify}
       >
         {notice ? <FormMessage tone="success">{notice}</FormMessage> : null}
         {error ? <FormMessage>{error}</FormMessage> : null}
 
-        <Field
+        <AuthField
           label="Código"
           htmlFor="otp-code"
         >
-          <Input
+          <AuthInput
             id="otp-code"
             name="code"
             inputMode="numeric"
@@ -87,47 +89,51 @@ export function PhoneVerification({
             required
             value={code}
             onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
-            className="text-center text-title tracking-[0.3em]"
+            className="text-center text-lg tracking-[0.3em]"
           />
-        </Field>
+        </AuthField>
 
-        <Button
-          type="submit"
-          disabled={pending || code.length !== 6}
-        >
-          {pending ? 'Confirmando…' : 'Confirmar'}
-        </Button>
-
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-5">
           <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={resend}
+            type="submit"
+            size="lg"
+            className="h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm"
+            disabled={pending || code.length !== 6}
           >
-            Reenviar código
+            {pending ? 'Confirmando…' : 'Confirmar'}
           </Button>
-          {onBack ? (
-            <button
-              type="button"
-              onClick={onBack}
-              className="cursor-pointer text-caption font-semibold text-muted underline hover:text-text"
-            >
-              Voltar
-            </button>
-          ) : null}
-        </div>
 
-        <p className="text-center text-caption text-muted">
-          Já confirmou?{' '}
-          <Link
-            href="/entrar"
-            className="font-semibold text-accent hover:text-accent-hover"
-          >
-            Entrar
-          </Link>
-        </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={resend}
+            >
+              Reenviar código
+            </Button>
+            {onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                className="cursor-pointer text-caption font-semibold text-muted underline hover:text-text"
+              >
+                Voltar
+              </button>
+            ) : null}
+          </div>
+
+          <p className="text-center text-[13px] leading-4 text-muted">
+            Já confirmou?{' '}
+            <Link
+              href="/entrar"
+              className="font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
+            >
+              Entrar
+            </Link>
+          </p>
+        </div>
       </form>
-    </AuthCard>
+    </div>
   )
 }

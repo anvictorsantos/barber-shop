@@ -1,7 +1,8 @@
-import { PasswordResetForm } from '@/components/auth/PasswordResetForm'
-import { PublicShell } from '@/components/layout/PublicShell'
+import { redirect } from 'next/navigation'
 
 import type { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Recuperar senha — Barbearia do Luiz',
@@ -14,13 +15,8 @@ export default async function ResetPasswordPage({
   searchParams: Promise<{ token?: string | string[] }>
 }) {
   const params = await searchParams
-  const token = typeof params.token === 'string' ? params.token : null
+  const query = new URLSearchParams({ modo: 'recuperar' })
+  if (typeof params.token === 'string') query.set('token', params.token)
 
-  return (
-    <PublicShell>
-      <div className="mx-auto w-full max-w-md px-4 py-12 sm:px-6">
-        <PasswordResetForm token={token} />
-      </div>
-    </PublicShell>
-  )
+  redirect(`/entrar?${query.toString()}`)
 }
