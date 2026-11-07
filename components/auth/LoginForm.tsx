@@ -5,12 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
+import { AuthField, AuthInput } from '@/components/auth/AuthField'
+import { AuthHeading } from '@/components/auth/AuthHeading'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { PhoneVerification } from '@/components/auth/PhoneVerification'
 import { Button } from '@/components/ui/Button'
 import { postAuthPath } from '@/lib/auth/redirect'
 import { postJson } from '@/lib/http/client'
-import { cn } from '@/lib/utils'
 
 type RoleName = 'CUSTOMER' | 'BARBER' | 'OWNER'
 
@@ -18,10 +19,15 @@ interface UserResponse {
   user: { id: string; name: string; role: RoleName }
 }
 
-const fieldClass =
-  'h-[52px] w-full rounded-md border border-white/10 bg-background px-4 text-sm text-text placeholder:text-muted transition focus:border-accent'
-
-export function LoginForm({ next }: { next?: string | null }) {
+export function LoginForm({
+  next,
+  onCreateAccount,
+  onForgotPassword,
+}: {
+  next?: string | null
+  onCreateAccount: () => void
+  onForgotPassword: () => void
+}) {
   const router = useRouter()
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
@@ -64,13 +70,11 @@ export function LoginForm({ next }: { next?: string | null }) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-7 rounded-xl border border-white/10 bg-surface p-6 sm:p-10">
-      <div className="flex flex-col gap-2.5">
-        <h2 className="font-display text-[30px] font-bold leading-[1.2] text-text sm:text-[38px]">
-          Entrar
-        </h2>
-        <p className="text-sm leading-[1.5] text-muted">Use seu telefone ou e-mail e sua senha.</p>
-      </div>
+    <div className="flex w-full flex-col gap-7">
+      <AuthHeading
+        title="Entrar"
+        description="Use seu telefone ou e-mail e sua senha."
+      />
 
       <form
         className="flex flex-col gap-7"
@@ -79,14 +83,11 @@ export function LoginForm({ next }: { next?: string | null }) {
         {error ? <FormMessage>{error}</FormMessage> : null}
 
         <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2.5">
-            <label
-              htmlFor="login-identifier"
-              className="text-[13px] font-medium leading-4 text-text"
-            >
-              Telefone ou e-mail
-            </label>
-            <input
+          <AuthField
+            label="Telefone ou e-mail"
+            htmlFor="login-identifier"
+          >
+            <AuthInput
               id="login-identifier"
               name="identifier"
               autoComplete="username"
@@ -94,19 +95,15 @@ export function LoginForm({ next }: { next?: string | null }) {
               value={identifier}
               onChange={(event) => setIdentifier(event.target.value)}
               placeholder="seu@email.com"
-              className={fieldClass}
             />
-          </div>
+          </AuthField>
 
-          <div className="flex flex-col gap-2.5">
-            <label
-              htmlFor="login-password"
-              className="text-[13px] font-medium leading-4 text-text"
-            >
-              Senha
-            </label>
+          <AuthField
+            label="Senha"
+            htmlFor="login-password"
+          >
             <div className="relative">
-              <input
+              <AuthInput
                 id="login-password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
@@ -115,7 +112,7 @@ export function LoginForm({ next }: { next?: string | null }) {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Sua senha"
-                className={cn(fieldClass, 'pr-12')}
+                className="pr-12"
               />
               <button
                 type="button"
@@ -138,15 +135,16 @@ export function LoginForm({ next }: { next?: string | null }) {
                 )}
               </button>
             </div>
-          </div>
+          </AuthField>
 
           <div className="flex justify-end">
-            <Link
-              href="/recuperar-senha"
-              className="text-[13px] font-semibold leading-4 text-primary underline underline-offset-2 transition hover:text-primary-hover"
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="cursor-pointer text-[13px] font-semibold leading-4 text-primary underline underline-offset-2 transition hover:text-primary-hover"
             >
               Esqueci minha senha
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -166,12 +164,13 @@ export function LoginForm({ next }: { next?: string | null }) {
 
           <p className="text-center text-[13px] leading-4 text-muted">
             Não tem conta?{' '}
-            <Link
-              href="/criar-conta"
-              className="font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
+            <button
+              type="button"
+              onClick={onCreateAccount}
+              className="cursor-pointer font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
             >
               Criar conta
-            </Link>
+            </button>
           </p>
         </div>
 

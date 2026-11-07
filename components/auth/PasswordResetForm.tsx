@@ -1,17 +1,40 @@
 'use client'
 
-import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 
-import { AuthCard } from '@/components/auth/AuthCard'
+import { AuthField, AuthInput } from '@/components/auth/AuthField'
+import { AuthHeading } from '@/components/auth/AuthHeading'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { Button } from '@/components/ui/Button'
-import { Field, Input } from '@/components/ui/Input'
 import { postJson } from '@/lib/http/client'
 
 type Mode = 'request' | 'requested' | 'token' | 'done'
 
-export function PasswordResetForm({ token }: { token: string | null }) {
+const submitClass = 'h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm'
+
+function BackToLogin({ onLogin }: { onLogin: () => void }) {
+  return (
+    <p className="text-center text-[13px] leading-4 text-muted">
+      Lembrou a senha?{' '}
+      <button
+        type="button"
+        onClick={onLogin}
+        className="cursor-pointer font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
+      >
+        Entrar
+      </button>
+    </p>
+  )
+}
+
+export function PasswordResetForm({
+  token,
+  onLogin,
+}: {
+  token: string | null
+  onLogin: () => void
+}) {
   const [mode, setMode] = useState<Mode>(token ? 'token' : 'request')
   const [identifier, setIdentifier] = useState('')
   const [phone, setPhone] = useState('')
@@ -98,152 +121,48 @@ export function PasswordResetForm({ token }: { token: string | null }) {
 
   if (mode === 'done') {
     return (
-      <AuthCard
-        title="Senha alterada"
-        description="Use a nova senha para entrar."
-      >
-        <Link
-          href="/entrar"
-          className="font-semibold text-accent hover:text-accent-hover"
+      <div className="flex w-full flex-col gap-7">
+        <AuthHeading
+          title="Senha alterada"
+          description="Use a nova senha para entrar."
+        />
+        <Button
+          type="button"
+          size="lg"
+          className={submitClass}
+          onClick={onLogin}
         >
           Entrar
-        </Link>
-      </AuthCard>
+          <ChevronRight
+            aria-hidden
+            className="h-[18px] w-[18px]"
+          />
+        </Button>
+      </div>
     )
   }
 
   if (mode === 'token') {
     return (
-      <AuthCard
-        title="Nova senha"
-        description="Escolha uma senha com pelo menos 8 caracteres."
-      >
+      <div className="flex w-full flex-col gap-7">
+        <AuthHeading
+          title="Nova senha"
+          description="Escolha uma senha com pelo menos 8 caracteres."
+        />
+
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-7"
           onSubmit={resetWithToken}
         >
           {error ? <FormMessage>{error}</FormMessage> : null}
 
-          <Field
-            label="Nova senha"
-            htmlFor="reset-token-password"
-          >
-            <Input
-              id="reset-token-password"
-              type="password"
-              autoComplete="new-password"
-              minLength={8}
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </Field>
-
-          <Field
-            label="Confirmar senha"
-            htmlFor="reset-token-confirm"
-          >
-            <Input
-              id="reset-token-confirm"
-              type="password"
-              autoComplete="new-password"
-              minLength={8}
-              required
-              value={confirm}
-              onChange={(event) => setConfirm(event.target.value)}
-            />
-          </Field>
-
-          <Button
-            type="submit"
-            disabled={pending}
-          >
-            {pending ? 'Salvando…' : 'Salvar nova senha'}
-          </Button>
-        </form>
-      </AuthCard>
-    )
-  }
-
-  return (
-    <AuthCard
-      title="Recuperar senha"
-      description="Informe o telefone ou e-mail da sua conta."
-    >
-      {mode === 'request' ? (
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={request}
-        >
-          {error ? <FormMessage>{error}</FormMessage> : null}
-
-          <Field
-            label="Telefone ou e-mail"
-            htmlFor="reset-identifier"
-          >
-            <Input
-              id="reset-identifier"
-              autoComplete="username"
-              required
-              value={identifier}
-              onChange={(event) => setIdentifier(event.target.value)}
-            />
-          </Field>
-
-          <Button
-            type="submit"
-            disabled={pending}
-          >
-            {pending ? 'Enviando…' : 'Enviar instruções'}
-          </Button>
-        </form>
-      ) : (
-        <div className="flex flex-col gap-5">
-          {notice ? <FormMessage tone="info">{notice}</FormMessage> : null}
-          {error ? <FormMessage>{error}</FormMessage> : null}
-
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={resetWithOtp}
-          >
-            <Field
-              label="Telefone"
-              htmlFor="reset-phone"
-            >
-              <Input
-                id="reset-phone"
-                type="tel"
-                autoComplete="tel"
-                placeholder="+55 31 98881-5243"
-                required
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-              />
-            </Field>
-
-            <Field
-              label="Código do WhatsApp"
-              htmlFor="reset-code"
-            >
-              <Input
-                id="reset-code"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                required
-                value={code}
-                onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
-                className="text-center tracking-[0.3em]"
-              />
-            </Field>
-
-            <Field
+          <div className="flex flex-col gap-5">
+            <AuthField
               label="Nova senha"
-              htmlFor="reset-password"
+              htmlFor="reset-token-password"
             >
-              <Input
-                id="reset-password"
+              <AuthInput
+                id="reset-token-password"
                 type="password"
                 autoComplete="new-password"
                 minLength={8}
@@ -251,14 +170,14 @@ export function PasswordResetForm({ token }: { token: string | null }) {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
-            </Field>
+            </AuthField>
 
-            <Field
+            <AuthField
               label="Confirmar senha"
-              htmlFor="reset-confirm"
+              htmlFor="reset-token-confirm"
             >
-              <Input
-                id="reset-confirm"
+              <AuthInput
+                id="reset-token-confirm"
                 type="password"
                 autoComplete="new-password"
                 minLength={8}
@@ -266,27 +185,155 @@ export function PasswordResetForm({ token }: { token: string | null }) {
                 value={confirm}
                 onChange={(event) => setConfirm(event.target.value)}
               />
-            </Field>
+            </AuthField>
+          </div>
 
+          <div className="flex flex-col gap-5">
             <Button
               type="submit"
+              size="lg"
+              className={submitClass}
               disabled={pending}
             >
               {pending ? 'Salvando…' : 'Salvar nova senha'}
             </Button>
+
+            <BackToLogin onLogin={onLogin} />
+          </div>
+        </form>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex w-full flex-col gap-7">
+      <AuthHeading
+        title="Recuperar senha"
+        description="Informe o telefone ou e-mail da sua conta."
+      />
+
+      {mode === 'request' ? (
+        <form
+          className="flex flex-col gap-7"
+          onSubmit={request}
+        >
+          {error ? <FormMessage>{error}</FormMessage> : null}
+
+          <AuthField
+            label="Telefone ou e-mail"
+            htmlFor="reset-identifier"
+          >
+            <AuthInput
+              id="reset-identifier"
+              autoComplete="username"
+              placeholder="seu@email.com"
+              required
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
+            />
+          </AuthField>
+
+          <div className="flex flex-col gap-5">
+            <Button
+              type="submit"
+              size="lg"
+              className={submitClass}
+              disabled={pending}
+            >
+              {pending ? 'Enviando…' : 'Enviar instruções'}
+            </Button>
+
+            <BackToLogin onLogin={onLogin} />
+          </div>
+        </form>
+      ) : (
+        <div className="flex flex-col gap-5">
+          {notice ? <FormMessage tone="info">{notice}</FormMessage> : null}
+          {error ? <FormMessage>{error}</FormMessage> : null}
+
+          <form
+            className="flex flex-col gap-7"
+            onSubmit={resetWithOtp}
+          >
+            <div className="flex flex-col gap-5">
+              <AuthField
+                label="Telefone"
+                htmlFor="reset-phone"
+              >
+                <AuthInput
+                  id="reset-phone"
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="+55 31 98881-5243"
+                  required
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                />
+              </AuthField>
+
+              <AuthField
+                label="Código do WhatsApp"
+                htmlFor="reset-code"
+              >
+                <AuthInput
+                  id="reset-code"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  required
+                  value={code}
+                  onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
+                  className="text-center tracking-[0.3em]"
+                />
+              </AuthField>
+
+              <AuthField
+                label="Nova senha"
+                htmlFor="reset-password"
+              >
+                <AuthInput
+                  id="reset-password"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+              </AuthField>
+
+              <AuthField
+                label="Confirmar senha"
+                htmlFor="reset-confirm"
+              >
+                <AuthInput
+                  id="reset-confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                  value={confirm}
+                  onChange={(event) => setConfirm(event.target.value)}
+                />
+              </AuthField>
+            </div>
+
+            <div className="flex flex-col gap-5">
+              <Button
+                type="submit"
+                size="lg"
+                className={submitClass}
+                disabled={pending}
+              >
+                {pending ? 'Salvando…' : 'Salvar nova senha'}
+              </Button>
+
+              <BackToLogin onLogin={onLogin} />
+            </div>
           </form>
         </div>
       )}
-
-      <p className="mt-4 text-center text-caption text-muted">
-        Lembrou a senha?{' '}
-        <Link
-          href="/entrar"
-          className="font-semibold text-accent hover:text-accent-hover"
-        >
-          Entrar
-        </Link>
-      </p>
-    </AuthCard>
+    </div>
   )
 }

@@ -9,7 +9,7 @@ const MENU_LINKS = [
   { href: '/servicos', label: 'Serviços' },
   { href: '/loja', label: 'Loja' },
   { href: '/entrar', label: 'Entrar' },
-  { href: '/criar-conta', label: 'Criar conta' },
+  { href: '/entrar?modo=criar', label: 'Criar conta' },
 ]
 
 export function SiteHeader() {

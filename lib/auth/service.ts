@@ -82,7 +82,8 @@ function identifierWhere(identifier: NormalizedIdentifier) {
 
 function emailUrl(path: string, token: string): string {
   const base = getServerEnv().APP_URL.replace(/\/+$/, '')
-  return `${base}${path}?token=${encodeURIComponent(token)}`
+  const separator = path.includes('?') ? '&' : '?'
+  return `${base}${path}${separator}token=${encodeURIComponent(token)}`
 }
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -249,7 +250,7 @@ export async function requestPasswordReset(
       await deps.delivery.sendPasswordResetEmail(
         user.email,
         user.name,
-        emailUrl('/recuperar-senha', token),
+        emailUrl('/entrar?modo=recuperar', token),
       )
       return
     }
