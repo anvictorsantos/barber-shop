@@ -23,6 +23,7 @@ concurrency:
 jobs:
   tick:
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - name: Call due endpoints
         env:
