@@ -24,7 +24,7 @@ export interface EmailLayoutContent {
   body: string
   details?: EmailDetail[]
   cta?: string
-  secondary?: EmailLink
+  links?: EmailLink[]
   expiry?: string
   ignore?: string
   footer: string
@@ -111,10 +111,10 @@ function renderDetails(details?: EmailDetail[]): string {
 
 export function renderEmailLayout(
   content: EmailLayoutContent,
-  url: string,
+  url?: string | null,
   values: Record<string, string> = {},
 ): string {
-  const safeUrl = escapeHtml(url)
+  const safeUrl = url ? escapeHtml(url) : null
   const siteUrl = escapeHtml(appUrl())
   const logoUrl = escapeHtml(`${appUrl()}/brand/logo.png`)
 
@@ -124,8 +124,9 @@ export function renderEmailLayout(
   const kicker = content.kicker
     ? `<td style="padding-left:8px;font-family:${SANS};font-size:11px;line-height:16px;color:${MUTED};">${escapeHtml(content.kicker)}</td>`
     : ''
-  const cta = content.cta
-    ? `<tr>
+  const cta =
+    content.cta && safeUrl
+      ? `<tr>
             <td class="px" style="padding:24px 32px 0 32px;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
@@ -136,11 +137,19 @@ export function renderEmailLayout(
               </table>
             </td>
           </tr>`
-    : ''
-  const secondary = content.secondary
+      : ''
+  const links = content.links?.length
     ? `<tr>
             <td class="px" style="padding:14px 32px 0 32px;">
-              <a href="${escapeHtml(content.secondary.url)}" target="_blank" rel="noopener" style="font-family:${SANS};font-size:13px;line-height:20px;color:${LINK};text-decoration:underline;">${escapeHtml(content.secondary.label)}</a>
+              <p style="margin:0;font-family:${SANS};font-size:13px;line-height:20px;color:${MUTED};">
+                Adicionar à sua agenda:
+                ${content.links
+                  .map(
+                    (link, index) =>
+                      `${index > 0 ? `<span style="color:${HAIRLINE};"> · </span>` : ' '}<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener" style="color:${LINK};text-decoration:underline;">${escapeHtml(link.label)}</a>`,
+                  )
+                  .join('')}
+              </p>
             </td>
           </tr>`
     : ''
@@ -158,6 +167,16 @@ export function renderEmailLayout(
             </td>
           </tr>`
       : ''
+  const fallback = safeUrl
+    ? `<tr>
+            <td class="px" style="padding:18px 32px 0 32px;">
+              <p style="margin:0;font-family:${SANS};font-size:11px;line-height:18px;color:${MUTED};">
+                Se o botão não abrir, copie este endereço:<br>
+                <a href="${safeUrl}" target="_blank" rel="noopener" style="color:${LINK};text-decoration:underline;word-break:break-all;">${safeUrl}</a>
+              </p>
+            </td>
+          </tr>`
+    : ''
 
   return `<!doctype html>
 <html lang="pt-BR">
@@ -213,16 +232,9 @@ export function renderEmailLayout(
           </tr>
           ${renderDetails(content.details)}
           ${cta}
-          ${secondary}
+          ${links}
           ${finePrint}
-          <tr>
-            <td class="px" style="padding:18px 32px 0 32px;">
-              <p style="margin:0;font-family:${SANS};font-size:11px;line-height:18px;color:${MUTED};">
-                Se o botão não abrir, copie este endereço:<br>
-                <a href="${safeUrl}" target="_blank" rel="noopener" style="color:${LINK};text-decoration:underline;word-break:break-all;">${safeUrl}</a>
-              </p>
-            </td>
-          </tr>
+          ${fallback}
           <tr>
             <td class="px" style="padding:28px 32px 28px 32px;">
               <div style="border-top:1px solid ${HAIRLINE};padding-top:16px;font-family:${SANS};font-size:11px;line-height:18px;color:${MUTED};">${escapeHtml(content.footer)}</div>

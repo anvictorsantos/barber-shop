@@ -46,7 +46,16 @@ describe('email templates', () => {
       shopAddress: 'Rua dos Geólogos, 698',
       orderCode: 'BL-1022',
       orderUrl: 'https://example.com/pedido/BL-1022',
-      calendarUrl: 'https://calendar.google.com/calendar/render?action=TEMPLATE',
+      calendarLinks: [
+        {
+          label: 'Google Agenda',
+          url: 'https://calendar.google.com/calendar/render?action=TEMPLATE',
+        },
+        {
+          label: 'Outlook',
+          url: 'https://outlook.live.com/calendar/0/deeplink/compose?rru=addevent',
+        },
+      ],
     })
 
     expect(email).not.toBeNull()
@@ -54,7 +63,8 @@ describe('email templates', () => {
     expect(email?.html).not.toContain('<Silva>')
     expect(email?.html).toContain('Corte + Barba')
     expect(email?.html).toContain('Luiz Silva')
-    expect(email?.html).toContain('Adicionar ao Google Agenda')
+    expect(email?.html).toContain('Adicionar à sua agenda:')
+    expect(email?.html).toContain('Outlook')
     expect(email?.html).toContain('#BL-1022')
     expect(email?.text).toContain('Serviço: Corte + Barba')
   })
@@ -73,6 +83,6 @@ describe('email templates', () => {
     })
 
     expect(email?.html).toContain('Motivo: Imprevisto.')
-    expect(email?.html).not.toContain('Adicionar ao Google Agenda')
+    expect(email?.html).not.toContain('Adicionar à sua agenda:')
   })
 })
