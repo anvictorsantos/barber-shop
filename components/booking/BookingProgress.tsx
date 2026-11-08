@@ -19,7 +19,7 @@ export function BookingProgress({ current }: { current: BookingStep }) {
     <>
       <div className="flex items-center justify-between gap-4 py-6 lg:hidden">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-label font-bold text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-label font-bold text-accent-ink">
             {currentIndex}
           </span>
           <span className="text-caption font-bold text-white">{STEPS[currentIndex]?.label}</span>
@@ -44,7 +44,7 @@ export function BookingProgress({ current }: { current: BookingStep }) {
                     done
                       ? 'bg-[#302119] text-accent'
                       : active
-                        ? 'bg-primary text-white'
+                        ? 'bg-primary text-accent-ink'
                         : 'bg-surface text-muted',
                   )}
                 >

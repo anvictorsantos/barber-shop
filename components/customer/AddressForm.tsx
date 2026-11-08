@@ -112,7 +112,7 @@ export function AddressForm({
               type="button"
               onClick={save}
               disabled={pending}
-              className="h-[41px] cursor-pointer rounded-sm bg-primary px-6 text-sm font-bold text-white transition hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-40"
+              className="h-[41px] cursor-pointer rounded-sm bg-primary px-6 text-sm font-bold text-accent-ink transition hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-40"
             >
               {pending ? 'Salvando…' : 'Salvar Alterações'}
             </button>

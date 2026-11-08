@@ -27,7 +27,7 @@ export function HeaderMenu({ links }: { links: { href: string; label: string }[]
         aria-label="Abrir menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="flex h-[52px] w-[52px] cursor-pointer items-center justify-center rounded-md border border-white/10 text-text transition hover:border-white/30"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-border-strong text-text transition-colors hover:border-accent/60"
       >
         <Menu
           aria-hidden
@@ -37,12 +37,12 @@ export function HeaderMenu({ links }: { links: { href: string; label: string }[]
 
       {open ? (
         <div className="fixed inset-0 z-[70] flex flex-col bg-background">
-          <div className="flex h-[88px] shrink-0 items-center justify-end px-5 lg:px-20">
+          <div className="flex h-16 shrink-0 items-center justify-end px-4 sm:px-6">
             <button
               type="button"
               aria-label="Fechar menu"
               onClick={() => setOpen(false)}
-              className="flex h-[52px] w-[52px] cursor-pointer items-center justify-center rounded-md border border-white/10 text-text transition hover:border-white/30"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-border-strong text-text transition-colors hover:border-accent/60"
             >
               <X
                 aria-hidden
@@ -53,14 +53,17 @@ export function HeaderMenu({ links }: { links: { href: string; label: string }[]
 
           <nav
             aria-label="Menu principal"
-            className="flex flex-1 flex-col justify-center gap-3 px-6 pb-24 lg:px-20"
+            className="flex flex-1 flex-col justify-center gap-2 px-6 pb-24"
           >
-            {links.map((link) => (
+            {links.map((link, index) => (
               <Link
                 key={`${link.href}-${link.label}`}
                 href={link.href}
-                className="font-display text-[32px] font-bold leading-tight text-text transition hover:text-accent lg:text-[44px]"
+                className="flex items-baseline gap-4 border-b border-border py-4 font-display text-[32px] font-medium leading-tight text-text transition-colors hover:text-accent lg:text-[40px]"
               >
+                <span className="text-caption tabular-nums text-subtle">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
                 {link.label}
               </Link>
             ))}

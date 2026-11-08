@@ -6,17 +6,17 @@ export type ButtonVariant = 'primary' | 'gold' | 'outline' | 'ghost' | 'danger'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-hover',
-  gold: 'bg-accent text-background hover:bg-accent-hover',
-  outline: 'border border-border-strong bg-transparent text-text hover:border-white/30',
-  ghost: 'bg-white/10 text-text hover:bg-white/15',
-  danger: 'border border-danger text-danger hover:bg-danger/10',
+  primary: 'bg-primary text-accent-ink hover:bg-primary-hover',
+  gold: 'bg-primary text-accent-ink hover:bg-primary-hover',
+  outline: 'border border-border-strong bg-transparent text-text hover:border-accent/60',
+  ghost: 'bg-white/[0.06] text-text hover:bg-white/[0.1]',
+  danger: 'border border-danger/50 text-danger hover:bg-danger/10',
 }
 
 const sizes: Record<ButtonSize, string> = {
   sm: 'h-9 px-3 text-caption',
-  md: 'h-11 px-5 text-body',
-  lg: 'h-12 px-6 text-lead',
+  md: 'h-10 px-4 text-body',
+  lg: 'h-11 px-5 text-body',
 }
 
 export function buttonClasses({
@@ -29,7 +29,7 @@ export function buttonClasses({
   className?: string | undefined
 } = {}): string {
   return cn(
-    'inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-bold transition disabled:pointer-events-none disabled:opacity-40',
+    'inline-flex cursor-pointer items-center justify-center gap-2 rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-40',
     variants[variant],
     sizes[size],
     className,

@@ -46,7 +46,9 @@ export function SettingsManager({
             onClick={() => setTab(item.id)}
             className={cn(
               'cursor-pointer rounded-lg px-4 py-2 text-caption font-bold transition',
-              tab === item.id ? 'bg-primary text-white' : 'bg-surface text-muted hover:text-text',
+              tab === item.id
+                ? 'bg-primary text-accent-ink'
+                : 'bg-surface text-muted hover:text-text',
             )}
           >
             {item.label}
