@@ -1,10 +1,18 @@
 import { emailReputationChecker } from '@/lib/auth/email-reputation'
 import type { EmailReputationChecker } from '@/lib/auth/email-reputation-types'
-import { normalizeIdentifier, normalizePhone, type NormalizedIdentifier } from '@/lib/auth/identity'
+import {
+  normalizeEmail,
+  normalizeIdentifier,
+  normalizePhone,
+  type NormalizedIdentifier,
+} from '@/lib/auth/identity'
 import { hashPassword, verifyPassword } from '@/lib/auth/password'
 import {
+  consumeAccountActivation,
   consumeEmailVerification,
   consumePasswordResetToken,
+  invalidatePendingActivation,
+  issueAccountActivation,
   issueEmailVerification,
   issuePasswordResetEmail,
   issuePasswordResetOtp,
@@ -15,7 +23,11 @@ import {
 import { prisma } from '@/lib/db/prisma'
 import { getServerEnv } from '@/lib/env'
 import { AppError } from '@/lib/http/errors'
-import { sendPasswordResetEmail, sendVerificationEmail } from '@/lib/notifications/email'
+import {
+  sendAccountActivationEmail,
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from '@/lib/notifications/email'
 import { sendPhoneOtp } from '@/lib/notifications/whatsapp'
 
 import type { Role, User } from '@prisma/client'
@@ -40,6 +52,7 @@ export interface AuthDelivery {
   sendPhoneOtp(phone: string, code: string): Promise<void>
   sendVerificationEmail(to: string, name: string, url: string): Promise<void>
   sendPasswordResetEmail(to: string, name: string, url: string): Promise<void>
+  sendAccountActivationEmail(to: string, name: string, url: string): Promise<void>
 }
 
 export interface AuthDeps {
@@ -52,6 +65,7 @@ const defaultDeps: AuthDeps = {
     sendPhoneOtp,
     sendVerificationEmail,
     sendPasswordResetEmail,
+    sendAccountActivationEmail,
   },
   emailReputation: emailReputationChecker(),
 }
@@ -212,12 +226,35 @@ export async function verifyPhoneSignup(phoneInput: string, code: string): Promi
     throw new AppError(400, 'invalid_code', 'Código inválido ou expirado.')
   }
 
-  const user = await prisma.user.update({
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user || (user.passwordHash && user.phoneVerifiedAt)) {
+    throw new AppError(400, 'invalid_code', 'Código inválido ou expirado.')
+  }
+
+  const updated = await prisma.user.update({
     where: { id: userId },
     data: { phoneVerifiedAt: new Date() },
   })
 
-  return toAuthUser(user)
+  return toAuthUser(updated)
+}
+
+export async function requestPhoneLogin(
+  phoneInput: string,
+  deps: AuthDeps = defaultDeps,
+): Promise<void> {
+  const phone = normalizePhone(phoneInput)
+  if (!phone) return
+
+  const user = await prisma.user.findFirst({ where: { phone } })
+  if (!user || user.passwordHash) return
+
+  try {
+    const code = await issuePhoneOtp(user.id, phone)
+    await deps.delivery.sendPhoneOtp(phone, code)
+  } catch (error) {
+    logDeliveryFailure('phone login', error)
+  }
 }
 
 export async function verifyEmailToken(token: string): Promise<AuthUser> {
@@ -232,6 +269,97 @@ export async function verifyEmailToken(token: string): Promise<AuthUser> {
   })
 
   return toAuthUser(user)
+}
+
+export interface ActivationContacts {
+  email: string | null
+  phone: string | null
+}
+
+export async function sendAccountActivation(
+  userId: string,
+  contacts: ActivationContacts,
+  deps: AuthDeps = defaultDeps,
+): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, phone: true, passwordHash: true },
+  })
+  if (!user || user.passwordHash) return
+
+  const email = contacts.email ? normalizeEmail(contacts.email) : null
+  if (email && user.email && user.email === email) {
+    try {
+      const token = await issueAccountActivation(user.id, user.email)
+      await deps.delivery.sendAccountActivationEmail(
+        user.email,
+        user.name,
+        emailUrl('/ativar-conta', token),
+      )
+    } catch (error) {
+      logDeliveryFailure('account activation email', error)
+    }
+  }
+
+  const phone = contacts.phone ? normalizePhone(contacts.phone) : null
+  if (phone && user.phone && user.phone === phone) {
+    try {
+      const code = await issuePhoneOtp(user.id, user.phone)
+      await deps.delivery.sendPhoneOtp(user.phone, code)
+    } catch (error) {
+      logDeliveryFailure('account activation WhatsApp', error)
+    }
+  }
+}
+
+export async function activateAccountWithToken(token: string, password: string): Promise<AuthUser> {
+  const userId = await consumeAccountActivation(token)
+  if (!userId) {
+    throw new AppError(400, 'invalid_token', 'Este link expirou. Peça um novo.')
+  }
+
+  return setActivationPassword(userId, password, 'email')
+}
+
+export async function activateAccountWithOtp(
+  phoneInput: string,
+  code: string,
+  password: string,
+): Promise<AuthUser> {
+  const phone = normalizePhone(phoneInput)
+  if (!phone) {
+    throw new AppError(400, 'invalid_phone', 'Telefone inválido.')
+  }
+
+  const userId = await verifyPhoneOtp(phone, code)
+  if (!userId) {
+    throw new AppError(400, 'invalid_code', 'Código inválido ou expirado.')
+  }
+
+  await invalidatePendingActivation(userId)
+  return setActivationPassword(userId, password, 'phone')
+}
+
+async function setActivationPassword(
+  userId: string,
+  password: string,
+  channel: 'email' | 'phone',
+): Promise<AuthUser> {
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user || user.passwordHash) {
+    throw new AppError(400, 'invalid_token', 'Este link expirou. Peça um novo.')
+  }
+
+  const passwordHash = await hashPassword(password)
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      passwordHash,
+      ...(channel === 'email' ? { emailVerifiedAt: new Date() } : { phoneVerifiedAt: new Date() }),
+    },
+  })
+
+  return toAuthUser(updated)
 }
 
 export async function requestPasswordReset(
@@ -302,6 +430,24 @@ export async function resendVerification(
   if (!user) return
 
   try {
+    if (!user.passwordHash) {
+      if (identifier.kind === 'email' && user.email) {
+        const token = await issueAccountActivation(user.id, user.email)
+        await deps.delivery.sendAccountActivationEmail(
+          user.email,
+          user.name,
+          emailUrl('/ativar-conta', token),
+        )
+        return
+      }
+
+      if (identifier.kind === 'phone' && user.phone) {
+        const code = await issuePhoneOtp(user.id, user.phone)
+        await deps.delivery.sendPhoneOtp(user.phone, code)
+        return
+      }
+    }
+
     if (identifier.kind === 'email' && user.email && !user.emailVerifiedAt) {
       const token = await issueEmailVerification(user.id, user.email)
       await deps.delivery.sendVerificationEmail(

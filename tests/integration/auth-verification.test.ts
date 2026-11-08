@@ -1,8 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import {
+  consumeAccountActivation,
   consumeEmailVerification,
   consumePasswordResetToken,
+  issueAccountActivation,
   issueEmailVerification,
   issuePasswordResetEmail,
   issuePhoneOtp,
@@ -52,5 +54,25 @@ describe('verification tokens', () => {
 
     await expect(consumePasswordResetToken(token)).resolves.toBe(ownerId)
     await expect(consumePasswordResetToken(token)).resolves.toBeNull()
+  })
+
+  it('consumes an account activation link once and invalidates a pending OTP', async () => {
+    const otp = await issuePhoneOtp(ownerId, ownerPhone)
+    const token = await issueAccountActivation(ownerId, ownerEmail)
+
+    await expect(consumeAccountActivation(token)).resolves.toBe(ownerId)
+    await expect(consumeAccountActivation(token)).resolves.toBeNull()
+    await expect(verifyPhoneOtp(ownerPhone, otp)).resolves.toBeNull()
+  })
+
+  it('rejects an expired account activation link', async () => {
+    const token = await issueAccountActivation(ownerId, ownerEmail)
+
+    await prisma.verificationToken.updateMany({
+      where: { userId: ownerId, purpose: 'ACCOUNT_ACTIVATION', consumedAt: null },
+      data: { expiresAt: new Date(Date.now() - 1000) },
+    })
+
+    await expect(consumeAccountActivation(token)).resolves.toBeNull()
   })
 })

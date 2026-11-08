@@ -33,12 +33,16 @@ export function PhoneInput({
   onChange,
   className,
   placeholder = 'Seu WhatsApp',
+  invalid = false,
+  describedBy,
 }: {
   id?: string
   value: string
   onChange: (value: string) => void
   className?: string
   placeholder?: string
+  invalid?: boolean
+  describedBy?: string
 }) {
   const [country, setCountry] = useState<CountryCode>('BR')
   const [display, setDisplay] = useState(() => formatFor(value, 'BR'))
@@ -85,6 +89,8 @@ export function PhoneInput({
         value={display}
         placeholder={placeholder}
         onChange={(event) => emit(event.target.value, country)}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         className="h-full min-w-0 flex-1 bg-transparent text-sm text-text placeholder:text-muted outline-none"
       />
     </div>

@@ -158,7 +158,7 @@ export default async function ServicesPage({
               )}
 
               <div className="flex flex-col justify-between gap-2 text-caption text-muted lg:flex-row lg:items-center">
-                <span>Agende como visitante. Crie sua conta depois, se quiser.</span>
+                <span>Agende como visitante. Sua conta é criada ao confirmar.</span>
                 <span>{businessHours}</span>
               </div>
             </div>

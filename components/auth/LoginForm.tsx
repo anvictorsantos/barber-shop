@@ -33,8 +33,13 @@ export function LoginForm({
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [phoneLoginPending, setPhoneLoginPending] = useState(false)
   const [phonePending, setPhonePending] = useState<string | null>(null)
+
+  const phoneLike = identifier.trim().length >= 8 && !identifier.includes('@')
 
   if (phonePending) {
     return (
@@ -69,6 +74,29 @@ export function LoginForm({
     router.refresh()
   }
 
+  async function resendActivation() {
+    if (!identifier.trim()) {
+      setError('Informe seu telefone ou e-mail.')
+      return
+    }
+
+    setError(null)
+    setNotice(null)
+    setResending(true)
+    await postJson('/api/auth/resend', { identifier })
+    setResending(false)
+    setNotice('Se este contato tiver um agendamento, enviamos as instruções.')
+  }
+
+  async function requestPhoneCode() {
+    setError(null)
+    setNotice(null)
+    setPhoneLoginPending(true)
+    await postJson('/api/auth/phone-login', { phone: identifier })
+    setPhoneLoginPending(false)
+    setPhonePending(identifier)
+  }
+
   return (
     <div className="flex w-full flex-col gap-6">
       <AuthHeading
@@ -81,6 +109,7 @@ export function LoginForm({
         onSubmit={submit}
       >
         {error ? <FormMessage>{error}</FormMessage> : null}
+        {notice ? <FormMessage tone="info">{notice}</FormMessage> : null}
 
         <div className="flex flex-col gap-4">
           <AuthField
@@ -135,13 +164,21 @@ export function LoginForm({
             </div>
           </AuthField>
 
-          <div className="flex justify-end">
+          <div className="flex flex-col items-end gap-2">
             <button
               type="button"
               onClick={onForgotPassword}
               className="cursor-pointer text-caption text-accent transition-colors hover:text-accent-hover"
             >
               Esqueci minha senha
+            </button>
+            <button
+              type="button"
+              onClick={resendActivation}
+              disabled={resending}
+              className="cursor-pointer text-caption text-muted transition-colors hover:text-text disabled:opacity-50"
+            >
+              {resending ? 'Enviando…' : 'Receber link para definir minha senha'}
             </button>
           </div>
         </div>
@@ -155,6 +192,19 @@ export function LoginForm({
           >
             {pending ? 'Entrando…' : 'Entrar'}
           </Button>
+
+          {phoneLike ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={requestPhoneCode}
+              disabled={phoneLoginPending}
+            >
+              {phoneLoginPending ? 'Enviando…' : 'Entrar com código no WhatsApp'}
+            </Button>
+          ) : null}
 
           <p className="text-center text-caption text-muted">
             Não tem conta?{' '}

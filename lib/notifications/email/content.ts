@@ -1,4 +1,4 @@
-export type AuthEmailKind = 'verification' | 'reset'
+export type AuthEmailKind = 'verification' | 'reset' | 'activation'
 
 export interface AuthEmailContent {
   subject: string
@@ -37,5 +37,16 @@ export const AUTH_EMAIL_CONTENT: Record<AuthEmailKind, AuthEmailContent> = {
     expiry: 'O link expira em 30 minutos e funciona uma única vez.',
     ignore: 'Se não foi você, ignore este e-mail. Sua senha continua a mesma.',
     footer: 'Você recebeu este e-mail porque tem uma conta na Barbearia do Luiz.',
+  },
+  activation: {
+    subject: 'Defina sua senha — Barbearia do Luiz',
+    preheader: 'Ative sua conta e acompanhe seus agendamentos.',
+    kicker: 'Sua conta',
+    title: 'Defina sua senha',
+    body: 'Olá, {name}. Use o link abaixo para ativar {email} e definir sua senha.',
+    cta: 'Definir senha',
+    expiry: 'O link expira em 24 horas.',
+    ignore: 'Se você não fez um agendamento, ignore este e-mail.',
+    footer: 'Você recebeu este e-mail porque fez um agendamento na Barbearia do Luiz.',
   },
 }

@@ -149,6 +149,74 @@ export async function consumePasswordResetToken(token: string): Promise<string |
   return record.userId
 }
 
+export async function issueAccountActivation(userId: string, email: string): Promise<string> {
+  const token = createOpaqueToken()
+
+  await prisma.verificationToken.updateMany({
+    where: { identifier: email, purpose: 'ACCOUNT_ACTIVATION', consumedAt: null },
+    data: { consumedAt: new Date() },
+  })
+
+  await prisma.verificationToken.create({
+    data: {
+      userId,
+      identifier: email,
+      channel: 'EMAIL',
+      purpose: 'ACCOUNT_ACTIVATION',
+      tokenHash: hashToken(token),
+      expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS),
+    },
+  })
+
+  return token
+}
+
+export async function consumeAccountActivation(token: string): Promise<string | null> {
+  const record = await prisma.verificationToken.findUnique({
+    where: { tokenHash: hashToken(token) },
+  })
+
+  if (
+    !record ||
+    record.purpose !== 'ACCOUNT_ACTIVATION' ||
+    record.consumedAt !== null ||
+    record.expiresAt.getTime() <= Date.now() ||
+    !record.userId
+  ) {
+    return null
+  }
+
+  const userId = record.userId
+
+  await prisma.$transaction([
+    prisma.verificationToken.update({
+      where: { id: record.id },
+      data: { consumedAt: new Date() },
+    }),
+    prisma.verificationToken.updateMany({
+      where: {
+        userId,
+        consumedAt: null,
+        purpose: { in: ['ACCOUNT_ACTIVATION', 'PHONE_OTP'] },
+      },
+      data: { consumedAt: new Date() },
+    }),
+  ])
+
+  return userId
+}
+
+export async function invalidatePendingActivation(userId: string): Promise<void> {
+  await prisma.verificationToken.updateMany({
+    where: {
+      userId,
+      consumedAt: null,
+      purpose: { in: ['ACCOUNT_ACTIVATION', 'PHONE_OTP'] },
+    },
+    data: { consumedAt: new Date() },
+  })
+}
+
 export async function issuePasswordResetOtp(userId: string, phone: string): Promise<string> {
   const code = createOtp()
 

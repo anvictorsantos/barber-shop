@@ -42,6 +42,15 @@ export const resetPasswordSchema = z.union([
 
 export const resendSchema = z.object({ identifier })
 
+export const phoneLoginSchema = z.object({
+  phone: z.string().trim().min(8, 'Informe o telefone.'),
+})
+
+export const activateAccountSchema = z.union([
+  z.object({ token: z.string().min(20, 'Token inválido.'), password }),
+  z.object({ phone: z.string().trim().min(8, 'Informe o telefone.'), code, password }),
+])
+
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type VerifyPhoneInput = z.infer<typeof verifyPhoneSchema>
@@ -49,3 +58,5 @@ export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>
 export type RequestResetInput = z.infer<typeof requestResetSchema>
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
 export type ResendInput = z.infer<typeof resendSchema>
+export type PhoneLoginInput = z.infer<typeof phoneLoginSchema>
+export type ActivateAccountInput = z.infer<typeof activateAccountSchema>

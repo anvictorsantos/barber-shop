@@ -50,6 +50,7 @@ export function CartContents({
   const [email, setEmail] = useState(customer?.email ?? '')
   const [phone, setPhone] = useState(customer?.phone ?? '')
   const [error, setError] = useState<string | null>(null)
+  const [contactError, setContactError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const creditApplied =
     useCredit && paymentMode === 'ON_SITE'
@@ -78,6 +79,13 @@ export function CartContents({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (!email.trim() && !phone.trim()) {
+      setContactError('Informe e-mail ou WhatsApp.')
+      return
+    }
+
+    setContactError(null)
     setError(null)
     setPending(true)
 
@@ -129,7 +137,7 @@ export function CartContents({
             <span className="text-caption leading-[1.5] text-muted">
               {customer
                 ? customer.email || customer.phone
-                : 'Sua conta é criada depois, se quiser acompanhar seus agendamentos.'}
+                : 'Sua conta é criada ao confirmar o agendamento. Enviamos um link para você definir sua senha.'}
             </span>
             {!customer ? (
               <Link
@@ -176,7 +184,13 @@ export function CartContents({
                 id="checkout-email"
                 type="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => {
+                  setEmail(event.target.value)
+                  setContactError(null)
+                }}
+                aria-required
+                aria-invalid={contactError ? true : undefined}
+                aria-describedby={contactError ? 'checkout-contact-error' : 'checkout-contact-hint'}
                 className={fieldClass}
               />
             </div>
@@ -192,9 +206,31 @@ export function CartContents({
             <PhoneInput
               id="checkout-phone"
               value={phone}
-              onChange={setPhone}
+              onChange={(value) => {
+                setPhone(value)
+                setContactError(null)
+              }}
+              invalid={Boolean(contactError)}
+              describedBy={contactError ? 'checkout-contact-error' : 'checkout-contact-hint'}
             />
           </div>
+
+          <p
+            id="checkout-contact-hint"
+            className="text-caption leading-[1.5] text-muted"
+          >
+            Informe e-mail ou WhatsApp.
+          </p>
+
+          {contactError ? (
+            <p
+              id="checkout-contact-error"
+              role="alert"
+              className="text-caption text-danger"
+            >
+              {contactError}
+            </p>
+          ) : null}
 
           <p className="text-caption leading-[1.5] text-muted">
             Usamos seus dados para confirmar o agendamento e enviar lembretes.
@@ -423,7 +459,7 @@ export function CartContents({
           className="h-[52px] w-fit gap-2.5 self-end rounded-md px-[22px] text-sm"
           disabled={pending}
         >
-          {pending ? 'Finalizando…' : 'Finalizar pedido'}
+          {pending ? 'Confirmando…' : 'Confirmar agendamento'}
           <ChevronRight
             aria-hidden
             className="h-[18px] w-[18px]"
