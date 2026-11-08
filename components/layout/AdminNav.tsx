@@ -59,7 +59,7 @@ export function AdminNav({ role }: { role: Role }) {
             aria-current={active ? 'page' : undefined}
             className={cn(
               'flex items-center gap-3 rounded-lg px-4 py-3 text-body font-semibold transition',
-              active ? 'bg-primary text-white' : 'text-muted hover:bg-white/5 hover:text-text',
+              active ? 'bg-primary text-accent-ink' : 'text-muted hover:bg-white/5 hover:text-text',
             )}
           >
             <Icon

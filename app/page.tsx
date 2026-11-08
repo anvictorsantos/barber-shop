@@ -10,6 +10,7 @@ import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { getSessionUser } from '@/lib/auth/session'
 import { BUSINESS_TIMEZONE, isShopOpen } from '@/lib/availability/slots'
+import { HERO_IMAGE } from '@/lib/catalog/images'
 import { getActiveBarbers } from '@/lib/catalog/queries'
 import { getHomeReviews, getHomeStats } from '@/lib/home/queries'
 import { getShopHours, getShopSettings } from '@/lib/settings/queries'
@@ -19,9 +20,6 @@ import type { ShopHoursRow } from '@/lib/time/schedule'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
-
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1600&q=80'
 
 export const metadata: Metadata = {
   title: 'Barbearia do Luiz — Agende seu horário',
@@ -83,10 +81,10 @@ export default async function HomePage() {
   const phone = shop?.phone ?? '+5531988815243'
   const whatsapp = (shop?.whatsapp ?? '+5531988815243').replace(/\D/g, '')
 
-  const hoursLabel =
+  const todayLabel =
     todayHours && !todayHours.closed
-      ? `Horário de funcionamento das ${minutesToTime(todayHours.openMinute)} às ${minutesToTime(todayHours.closeMinute)}`
-      : 'Hoje fechado — confira os horários da semana'
+      ? `Hoje, ${minutesToTime(todayHours.openMinute)} às ${minutesToTime(todayHours.closeMinute)}`
+      : 'Confira os horários da semana'
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -136,14 +134,9 @@ export default async function HomePage() {
         </div>
 
         <HomeHero
-          shopName={shopName}
           open={open}
-          hoursLabel={hoursLabel}
-        />
-
-        <div
-          aria-hidden
-          className="h-[3px] w-full bg-[linear-gradient(90deg,#D35F27_0%,#EAA83A_50%,#D35F27_100%)] shadow-[0_0_24px_rgba(211,95,39,0.65)]"
+          todayLabel={todayLabel}
+          address={addressLine}
         />
 
         <TeamSection

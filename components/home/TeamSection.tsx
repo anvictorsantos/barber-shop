@@ -7,6 +7,7 @@ import {
   InstagramIcon,
   WhatsAppIcon,
 } from '@/components/brand/SocialIcons'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 
 interface TeamMember {
   id: string
@@ -32,66 +33,70 @@ export function TeamSection({ barbers, whatsapp }: { barbers: TeamMember[]; what
   ] as const
 
   return (
-    <section className="overflow-hidden bg-[#0d0e12] py-16 lg:py-20">
-      <div className="mx-auto flex w-full max-w-[1440px] items-center gap-4 px-5 lg:gap-10 lg:px-10">
-        <span className="hidden shrink-0 text-[42px] font-black uppercase tracking-[0.35em] text-white/20 [writing-mode:vertical-rl] lg:block">
-          Nossa equipe
-        </span>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <h2 className="text-2xl font-black uppercase tracking-[0.2em] text-white/40 lg:hidden">
-            Nossa equipe
-          </h2>
-
-          <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {barbers.map((barber) => (
-              <article
-                key={barber.id}
-                className="w-[260px] shrink-0 snap-start lg:w-[300px]"
-              >
-                <div className="relative h-[340px] overflow-hidden rounded-md bg-surface">
-                  {barber.avatarUrl ? (
-                    <Image
-                      src={barber.avatarUrl}
-                      alt={barber.displayName}
-                      fill
-                      sizes="300px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_50%_30%,#2a2118_0%,#14151a_70%)]">
-                      <span className="font-display text-[64px] font-black text-accent/80">
-                        {initials(barber.displayName)}
-                      </span>
-                    </span>
-                  )}
-                  <div className="absolute inset-x-0 bottom-0 h-[45%] bg-[linear-gradient(180deg,rgba(10,10,12,0)_0%,rgba(10,10,12,0.9)_100%)]" />
-                  <div className="absolute inset-x-0 bottom-4 flex flex-col items-center gap-1 px-3 text-center">
-                    <span className="text-sm font-bold text-accent">{barber.displayName}</span>
-                    <span className="text-caption text-white/60">{barber.title}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center justify-center gap-7 text-white/80">
-                  {socials.map((social) => (
-                    <a
-                      key={social.label}
-                      href={social.href}
-                      aria-label={`${social.label} de ${barber.displayName}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="transition hover:text-accent"
-                    >
-                      <social.icon
-                        aria-hidden
-                        className="h-[18px] w-[18px]"
-                      />
-                    </a>
-                  ))}
-                </div>
-              </article>
-            ))}
+    <section className="py-20 lg:py-28">
+      <div className="mx-auto w-full max-w-shell px-6 lg:px-10">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col gap-4">
+            <SectionLabel>Nossa equipe</SectionLabel>
+            <h2 className="font-display text-[34px] font-semibold leading-[1.1] text-text lg:text-[44px]">
+              Quem cuida do seu corte
+            </h2>
           </div>
+          <p className="max-w-[340px] text-body leading-relaxed text-muted">
+            Conheça os profissionais da casa e escolha quem atende você.
+          </p>
+        </div>
+
+        <div className="mt-10 border-t border-border lg:mt-12">
+          {barbers.map((barber, index) => (
+            <div
+              key={barber.id}
+              className="flex items-center gap-3 border-b border-border py-5 sm:gap-5"
+            >
+              <span className="w-5 shrink-0 text-caption tabular-nums text-subtle">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+
+              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-surface-subtle">
+                {barber.avatarUrl ? (
+                  <Image
+                    src={barber.avatarUrl}
+                    alt={barber.displayName}
+                    fill
+                    sizes="44px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="font-display text-lead font-medium text-accent/90">
+                    {initials(barber.displayName)}
+                  </span>
+                )}
+              </span>
+
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <h3 className="truncate text-body font-medium text-text">{barber.displayName}</h3>
+                <p className="truncate text-caption text-muted">{barber.title}</p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-3 text-muted">
+                {socials.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    aria-label={`${social.label} de ${barber.displayName}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="transition-colors hover:text-text"
+                  >
+                    <social.icon
+                      aria-hidden
+                      className="h-4 w-4"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

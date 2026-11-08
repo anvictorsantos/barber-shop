@@ -42,7 +42,7 @@ export function AuthPanel({
   }
 
   return (
-    <div className="flex w-full flex-col gap-7 rounded-xl border border-white/10 bg-surface p-6 sm:p-10">
+    <div className="flex w-full flex-col gap-6 rounded-lg border border-border bg-surface p-6 sm:p-8">
       {mode === 'reset' ? null : (
         <div
           role="group"
@@ -54,8 +54,8 @@ export function AuthPanel({
             aria-pressed={mode === 'login'}
             onClick={() => switchMode('login')}
             className={cn(
-              'h-11 cursor-pointer rounded-sm text-sm font-semibold transition',
-              mode === 'login' ? 'bg-white/10 text-text' : 'text-muted hover:text-text',
+              'h-10 cursor-pointer rounded-sm text-body font-medium transition-colors',
+              mode === 'login' ? 'bg-surface-subtle text-text' : 'text-muted hover:text-text',
             )}
           >
             Entrar
@@ -65,8 +65,8 @@ export function AuthPanel({
             aria-pressed={mode === 'register'}
             onClick={() => switchMode('register')}
             className={cn(
-              'h-11 cursor-pointer rounded-sm text-sm font-semibold transition',
-              mode === 'register' ? 'bg-white/10 text-text' : 'text-muted hover:text-text',
+              'h-10 cursor-pointer rounded-sm text-body font-medium transition-colors',
+              mode === 'register' ? 'bg-surface-subtle text-text' : 'text-muted hover:text-text',
             )}
           >
             Criar conta

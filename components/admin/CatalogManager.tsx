@@ -73,7 +73,7 @@ export function CatalogManager({
             className={cn(
               'cursor-pointer rounded-lg px-4 py-2 text-caption font-bold transition',
               tab === 'services'
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-accent-ink'
                 : 'bg-surface text-muted hover:text-text',
             )}
           >
@@ -85,7 +85,7 @@ export function CatalogManager({
             className={cn(
               'cursor-pointer rounded-lg px-4 py-2 text-caption font-bold transition',
               tab === 'products'
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-accent-ink'
                 : 'bg-surface text-muted hover:text-text',
             )}
           >

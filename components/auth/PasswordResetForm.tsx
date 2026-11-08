@@ -1,6 +1,5 @@
 'use client'
 
-import { ChevronRight } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 
 import { AuthField, AuthInput } from '@/components/auth/AuthField'
@@ -11,16 +10,16 @@ import { postJson } from '@/lib/http/client'
 
 type Mode = 'request' | 'requested' | 'token' | 'done'
 
-const submitClass = 'h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm'
+const submitClass = 'w-full'
 
 function BackToLogin({ onLogin }: { onLogin: () => void }) {
   return (
-    <p className="text-center text-[13px] leading-4 text-muted">
+    <p className="text-center text-caption text-muted">
       Lembrou a senha?{' '}
       <button
         type="button"
         onClick={onLogin}
-        className="cursor-pointer font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
+        className="cursor-pointer font-medium text-accent transition-colors hover:text-accent-hover"
       >
         Entrar
       </button>
@@ -121,7 +120,7 @@ export function PasswordResetForm({
 
   if (mode === 'done') {
     return (
-      <div className="flex w-full flex-col gap-7">
+      <div className="flex w-full flex-col gap-6">
         <AuthHeading
           title="Senha alterada"
           description="Use a nova senha para entrar."
@@ -133,10 +132,6 @@ export function PasswordResetForm({
           onClick={onLogin}
         >
           Entrar
-          <ChevronRight
-            aria-hidden
-            className="h-[18px] w-[18px]"
-          />
         </Button>
       </div>
     )
@@ -144,19 +139,19 @@ export function PasswordResetForm({
 
   if (mode === 'token') {
     return (
-      <div className="flex w-full flex-col gap-7">
+      <div className="flex w-full flex-col gap-6">
         <AuthHeading
           title="Nova senha"
           description="Escolha uma senha com pelo menos 8 caracteres."
         />
 
         <form
-          className="flex flex-col gap-7"
+          className="flex flex-col gap-6"
           onSubmit={resetWithToken}
         >
           {error ? <FormMessage>{error}</FormMessage> : null}
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             <AuthField
               label="Nova senha"
               htmlFor="reset-token-password"
@@ -188,7 +183,7 @@ export function PasswordResetForm({
             </AuthField>
           </div>
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             <Button
               type="submit"
               size="lg"
@@ -206,7 +201,7 @@ export function PasswordResetForm({
   }
 
   return (
-    <div className="flex w-full flex-col gap-7">
+    <div className="flex w-full flex-col gap-6">
       <AuthHeading
         title="Recuperar senha"
         description="Informe o telefone ou e-mail da sua conta."
@@ -214,7 +209,7 @@ export function PasswordResetForm({
 
       {mode === 'request' ? (
         <form
-          className="flex flex-col gap-7"
+          className="flex flex-col gap-6"
           onSubmit={request}
         >
           {error ? <FormMessage>{error}</FormMessage> : null}
@@ -233,7 +228,7 @@ export function PasswordResetForm({
             />
           </AuthField>
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             <Button
               type="submit"
               size="lg"
@@ -247,15 +242,15 @@ export function PasswordResetForm({
           </div>
         </form>
       ) : (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           {notice ? <FormMessage tone="info">{notice}</FormMessage> : null}
           {error ? <FormMessage>{error}</FormMessage> : null}
 
           <form
-            className="flex flex-col gap-7"
+            className="flex flex-col gap-6"
             onSubmit={resetWithOtp}
           >
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4">
               <AuthField
                 label="Telefone"
                 htmlFor="reset-phone"
@@ -319,7 +314,7 @@ export function PasswordResetForm({
               </AuthField>
             </div>
 
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4">
               <Button
                 type="submit"
                 size="lg"

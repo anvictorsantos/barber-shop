@@ -1,5 +1,3 @@
-import { Scissors, Slice, Users } from 'lucide-react'
-
 export function StatsSection({
   beards,
   cuts,
@@ -10,30 +8,23 @@ export function StatsSection({
   clients: number
 }) {
   const items = [
-    { icon: Slice, value: beards, label: 'Barbas feitas' },
-    { icon: Scissors, value: cuts, label: 'Cortes feitos' },
-    { icon: Users, value: clients, label: 'Clientes atendidos' },
+    { value: beards, label: 'Barbas feitas' },
+    { value: cuts, label: 'Cortes feitos' },
+    { value: clients, label: 'Clientes atendidos' },
   ] as const
 
   return (
-    <section className="bg-[#16171b] py-16 lg:py-20">
-      <div className="mx-auto grid w-full max-w-[1200px] grid-cols-1 gap-12 px-5 sm:grid-cols-3 lg:px-10">
+    <section className="border-b border-border">
+      <div className="mx-auto grid w-full max-w-shell grid-cols-3 divide-x divide-border px-6 lg:px-10">
         {items.map((item) => (
           <div
             key={item.label}
-            className="flex flex-col items-center gap-4 text-center"
+            className="flex flex-col gap-1 px-3 py-8 first:pl-0 last:pr-0 sm:gap-2 sm:px-8 sm:py-12"
           >
-            <item.icon
-              aria-hidden
-              strokeWidth={1.5}
-              className="h-10 w-10 text-accent"
-            />
-            <span className="font-display text-[56px] font-bold leading-none text-accent lg:text-[72px]">
+            <span className="font-display text-[36px] font-medium leading-none tabular-nums text-text sm:text-[56px] lg:text-[64px]">
               {item.value.toLocaleString('pt-BR')}
             </span>
-            <span className="text-sm font-bold uppercase tracking-[2px] text-white">
-              {item.label}
-            </span>
+            <span className="text-caption leading-snug text-muted sm:text-body">{item.label}</span>
           </div>
         ))}
       </div>

@@ -1,25 +1,33 @@
+import { SectionLabel } from '@/components/ui/SectionLabel'
 import type { HomeReview } from '@/lib/home/queries'
 
 export function ReviewsSection({ reviews }: { reviews: HomeReview[] }) {
   if (reviews.length === 0) return null
 
   return (
-    <section className="bg-[#f4f1ec] py-16 lg:py-20">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-5 lg:gap-14 lg:px-10">
-        <h2 className="text-center text-2xl font-black uppercase tracking-[0.15em] text-[#1c1d22] lg:text-[32px]">
-          Avaliações dos nossos clientes
-        </h2>
+    <section className="bg-[#efe9dd] py-20 text-[#211d17] lg:py-28">
+      <div className="mx-auto grid w-full max-w-shell gap-10 px-6 lg:grid-cols-[0.8fr_2fr] lg:gap-16 lg:px-10">
+        <div className="flex flex-col gap-4">
+          <SectionLabel tone="paper">Avaliações</SectionLabel>
+          <h2 className="font-display text-[34px] font-semibold leading-[1.1] lg:text-[44px]">
+            O que dizem os clientes
+          </h2>
+        </div>
 
-        <div className="flex flex-wrap justify-center gap-10 lg:gap-14">
+        <div className="grid gap-8 sm:grid-cols-3">
           {reviews.map((review) => (
             <figure
               key={review.id}
-              className="flex w-full max-w-[320px] flex-col items-center gap-6 text-center sm:w-[300px]"
+              className="flex flex-col gap-5 border-t border-[#211d17]/15 pt-5"
             >
-              <blockquote className="text-sm leading-relaxed text-[#1c1d22] lg:text-[15px]">
+              <blockquote className="text-body leading-relaxed text-[#211d17]">
                 “{review.comment}”
               </blockquote>
-              <figcaption className="text-label font-bold uppercase tracking-[1.5px] text-[#c9a24a]">
+              <figcaption className="mt-auto flex items-center gap-3 text-caption text-[#6b6255]">
+                <span
+                  aria-hidden
+                  className="h-px w-5 bg-[#a8792f]"
+                />
                 {review.customerName}
               </figcaption>
             </figure>

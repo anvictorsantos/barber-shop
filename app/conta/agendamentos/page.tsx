@@ -227,7 +227,7 @@ export default async function CustomerAppointmentsPage() {
                   />
                   <Link
                     href={`/agendar/${next.serviceId}/horario?barberId=${next.barberId}`}
-                    className="inline-flex h-9 items-center rounded-sm bg-primary px-5 text-[13px] font-bold leading-4 text-white transition hover:bg-primary-hover"
+                    className="inline-flex h-9 items-center rounded-sm bg-primary px-5 text-[13px] font-bold leading-4 text-accent-ink transition hover:bg-primary-hover"
                   >
                     Reagendar
                   </Link>
@@ -240,7 +240,7 @@ export default async function CustomerAppointmentsPage() {
                 </p>
                 <Link
                   href="/servicos"
-                  className="inline-flex h-9 items-center rounded-sm bg-primary px-5 text-[13px] font-bold leading-4 text-white transition hover:bg-primary-hover"
+                  className="inline-flex h-9 items-center rounded-sm bg-primary px-5 text-[13px] font-bold leading-4 text-accent-ink transition hover:bg-primary-hover"
                 >
                   Agendar agora
                 </Link>

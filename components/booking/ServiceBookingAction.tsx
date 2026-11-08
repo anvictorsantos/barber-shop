@@ -41,13 +41,13 @@ export function ServiceBookingAction({
         href={`/agendar/${service.id}/profissional`}
         className={buttonClasses({
           size: 'lg',
-          className: 'h-[52px] w-fit gap-2.5 rounded-md px-[22px] text-sm',
+          className: 'w-fit',
         })}
       >
         Agendar este serviço
         <ChevronRight
           aria-hidden
-          className="h-[18px] w-[18px]"
+          className="h-4 w-4"
         />
       </Link>
     )
@@ -105,13 +105,13 @@ export function ServiceBookingAction({
         disabled={pending}
         className={buttonClasses({
           size: 'lg',
-          className: 'h-[52px] w-fit gap-2.5 rounded-md px-[22px] text-sm',
+          className: 'w-fit',
         })}
       >
         {pending ? 'Verificando…' : 'Adicionar ao agendamento'}
         <ChevronRight
           aria-hidden
-          className="h-[18px] w-[18px]"
+          className="h-4 w-4"
         />
       </button>
       <span className="text-caption text-muted">
