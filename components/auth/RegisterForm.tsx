@@ -1,14 +1,14 @@
 'use client'
 
-import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
-import { AuthCard } from '@/components/auth/AuthCard'
+import { AuthField, AuthInput } from '@/components/auth/AuthField'
+import { AuthHeading } from '@/components/auth/AuthHeading'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { PhoneVerification } from '@/components/auth/PhoneVerification'
 import { Button } from '@/components/ui/Button'
-import { Field, Input } from '@/components/ui/Input'
 import { postAuthPath } from '@/lib/auth/redirect'
 import { postJson } from '@/lib/http/client'
 
@@ -20,7 +20,7 @@ interface RegisterResponse {
   verificationEmailSent: boolean
 }
 
-export function RegisterForm({ next }: { next?: string | null }) {
+export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin: () => void }) {
   const router = useRouter()
   const [name, setName] = useState('')
   const [identifier, setIdentifier] = useState('')
@@ -34,6 +34,9 @@ export function RegisterForm({ next }: { next?: string | null }) {
       <PhoneVerification
         phone={phonePending}
         next={next ?? null}
+        onBack={() => {
+          setPhonePending(null)
+        }}
       />
     )
   }
@@ -69,79 +72,93 @@ export function RegisterForm({ next }: { next?: string | null }) {
   }
 
   return (
-    <AuthCard
-      title="Criar conta"
-      description="Escolha como quer entrar: telefone ou e-mail."
-    >
+    <div className="flex w-full flex-col gap-7">
+      <AuthHeading
+        title="Criar conta"
+        description="Informe seu nome, telefone ou e-mail e uma senha."
+      />
+
       <form
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-7"
         onSubmit={submit}
       >
         {error ? <FormMessage>{error}</FormMessage> : null}
 
-        <Field
-          label="Nome"
-          htmlFor="register-name"
-        >
-          <Input
-            id="register-name"
-            name="name"
-            autoComplete="name"
-            required
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </Field>
-
-        <Field
-          label="Telefone ou e-mail"
-          htmlFor="register-identifier"
-          hint="Telefone com DDI, ex: +55 31 98881-5243."
-        >
-          <Input
-            id="register-identifier"
-            name="identifier"
-            autoComplete="username"
-            required
-            value={identifier}
-            onChange={(event) => setIdentifier(event.target.value)}
-          />
-        </Field>
-
-        <Field
-          label="Senha"
-          htmlFor="register-password"
-          hint="Mínimo de 8 caracteres."
-        >
-          <Input
-            id="register-password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            minLength={8}
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </Field>
-
-        <Button
-          type="submit"
-          disabled={pending}
-        >
-          {pending ? 'Criando conta…' : 'Criar conta'}
-        </Button>
-
-        <p className="text-center text-caption text-muted">
-          Já tem conta?{' '}
-          <Link
-            href="/entrar"
-            className="font-semibold text-accent hover:text-accent-hover"
+        <div className="flex flex-col gap-5">
+          <AuthField
+            label="Nome"
+            htmlFor="register-name"
           >
-            Entrar
-          </Link>
-        </p>
+            <AuthInput
+              id="register-name"
+              name="name"
+              autoComplete="name"
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </AuthField>
+
+          <AuthField
+            label="Telefone ou e-mail"
+            htmlFor="register-identifier"
+            hint="Telefone com DDI, ex: +55 31 98881-5243."
+          >
+            <AuthInput
+              id="register-identifier"
+              name="identifier"
+              autoComplete="username"
+              placeholder="seu@email.com"
+              required
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
+            />
+          </AuthField>
+
+          <AuthField
+            label="Senha"
+            htmlFor="register-password"
+            hint="Mínimo de 8 caracteres."
+          >
+            <AuthInput
+              id="register-password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </AuthField>
+        </div>
+
+        <div className="flex flex-col gap-5">
+          <Button
+            type="submit"
+            size="lg"
+            className="h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm"
+            disabled={pending}
+          >
+            {pending ? 'Criando conta…' : 'Criar conta'}
+            <ChevronRight
+              aria-hidden
+              className="h-[18px] w-[18px]"
+            />
+          </Button>
+
+          <p className="text-center text-[13px] leading-4 text-muted">
+            Já tem conta?{' '}
+            <button
+              type="button"
+              onClick={onLogin}
+              className="cursor-pointer font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
+            >
+              Entrar
+            </button>
+          </p>
+        </div>
       </form>
-    </AuthCard>
+    </div>
   )
 }

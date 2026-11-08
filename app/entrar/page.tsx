@@ -1,8 +1,8 @@
 import { CalendarDays, Check, History } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
+import { AuthPanel, type AuthMode } from '@/components/auth/AuthPanel'
 import { DemoLoginButtons } from '@/components/auth/DemoLoginButtons'
-import { LoginForm } from '@/components/auth/LoginForm'
 import { PublicDesktopFooter } from '@/components/layout/PublicDesktopFooter'
 import { PublicDesktopHeader } from '@/components/layout/PublicDesktopHeader'
 import { SiteHeader } from '@/components/layout/SiteHeader'
@@ -37,13 +37,21 @@ const BENEFITS = [
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string | string[] }>
+  searchParams: Promise<{
+    next?: string | string[]
+    modo?: string | string[]
+    token?: string | string[]
+  }>
 }) {
   const user = await getSessionUser()
   if (user) redirect(postAuthPath(user.role, null))
 
   const [params, shop] = await Promise.all([searchParams, getShopSettings()])
   const next = typeof params.next === 'string' ? params.next : null
+  const token = typeof params.token === 'string' ? params.token : null
+  const modo = typeof params.modo === 'string' ? params.modo : null
+  const initialMode: AuthMode =
+    token || modo === 'recuperar' ? 'reset' : modo === 'criar' ? 'register' : 'login'
   const shopName = shop?.name ?? 'Barbearia do Luiz'
   const city = shop?.city ?? 'Belo Horizonte'
   const state = shop?.state ?? 'MG'
@@ -123,7 +131,11 @@ export default async function LoginPage({
             </div>
 
             <div className="flex w-full flex-col gap-4">
-              <LoginForm next={next} />
+              <AuthPanel
+                next={next}
+                initialMode={initialMode}
+                token={token}
+              />
               {getServerEnv().DEMO_MODE ? <DemoLoginButtons /> : null}
             </div>
           </div>
