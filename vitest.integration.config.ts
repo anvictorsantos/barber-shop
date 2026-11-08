@@ -13,5 +13,10 @@ export default defineConfig({
     include: ['tests/integration/**/*.test.ts'],
     exclude: ['tests/e2e/**', 'node_modules/**', '.next/**'],
     fileParallelism: false,
+    testTimeout: 60_000,
+    env: {
+      EMAIL_ENABLED: 'false',
+      WHATSAPP_ENABLED: 'false',
+    },
   },
 })

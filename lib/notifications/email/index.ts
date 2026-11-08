@@ -1,5 +1,6 @@
 import { emailSender } from '@/lib/notifications/email/factory'
 import {
+  renderAccountActivationEmail,
   renderPasswordResetEmail,
   renderVerificationEmail,
 } from '@/lib/notifications/email/templates'
@@ -10,4 +11,12 @@ export async function sendVerificationEmail(to: string, name: string, url: strin
 
 export async function sendPasswordResetEmail(to: string, name: string, url: string): Promise<void> {
   await emailSender().send({ to, ...renderPasswordResetEmail(name, to, url) })
+}
+
+export async function sendAccountActivationEmail(
+  to: string,
+  name: string,
+  url: string,
+): Promise<void> {
+  await emailSender().send({ to, ...renderAccountActivationEmail(name, to, url) })
 }

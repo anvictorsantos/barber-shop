@@ -9,11 +9,13 @@ import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 import { getSessionUser } from '@/lib/auth/session'
 import { groupServicesByCategory } from '@/lib/catalog/labels'
 import { getActiveServices } from '@/lib/catalog/queries'
 import { getShopHours, getShopSettings } from '@/lib/settings/queries'
 import { shopHoursLines } from '@/lib/time/schedule'
+import { cn } from '@/lib/utils'
 
 import type { Metadata } from 'next'
 
@@ -75,41 +77,42 @@ export default async function ServicesPage({
           />
         </div>
 
-        <section className="flex w-full flex-1 flex-col gap-6 px-5 py-8 lg:px-10 lg:pb-14 lg:pt-8 xl:px-20">
-          <Link
-            href="/"
-            className="inline-flex w-fit items-center gap-1.5 text-caption font-semibold text-primary transition hover:text-primary-hover"
-          >
-            <ChevronLeft
-              aria-hidden
-              className="h-3 w-3"
-            />
-            Voltar ao início
-          </Link>
+        <section className="flex w-full flex-1 flex-col gap-8 px-6 pb-16 pt-8 lg:px-10 lg:pt-10 xl:px-10">
+          <div className="flex flex-col gap-8">
+            <Link
+              href="/"
+              className="inline-flex w-fit items-center gap-1.5 text-caption text-muted transition-colors hover:text-text"
+            >
+              <ChevronLeft
+                aria-hidden
+                className="h-3.5 w-3.5"
+              />
+              Voltar ao início
+            </Link>
 
-          <div className="flex flex-col gap-2.5">
-            <span className="text-label font-bold uppercase tracking-[1.8px] text-accent">
-              Catálogo de serviços
-            </span>
-            <h1 className="font-display text-[32px] font-bold leading-[1.2] text-text lg:text-[38px]">
-              Serviços
-            </h1>
-            <p className="text-[15px] leading-[1.5] text-muted">
-              Escolha o serviço, o profissional e o horário. Confirmação em poucos minutos.
-            </p>
+            <div className="flex flex-col gap-4">
+              <SectionLabel>Catálogo</SectionLabel>
+              <h1 className="font-display text-[40px] font-semibold leading-[1.05] text-text lg:text-[48px]">
+                Serviços
+              </h1>
+              <p className="max-w-[560px] text-lead leading-relaxed text-muted">
+                Escolha o serviço, o profissional e o horário. Confirmação em poucos minutos.
+              </p>
+            </div>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start xl:gap-8">
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
             <div className="flex min-w-0 flex-col gap-6">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex flex-wrap gap-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 border-b border-border">
+                <div className="flex flex-wrap items-center gap-x-6">
                   <Link
                     href="/servicos"
-                    className={
+                    className={cn(
+                      '-mb-px border-b-2 py-3 text-body transition-colors',
                       activeCategory === undefined
-                        ? 'rounded-full border border-primary bg-primary/15 px-[18px] py-3 text-caption font-semibold text-accent'
-                        : 'rounded-full border border-white/10 bg-surface px-[18px] py-3 text-caption font-semibold text-muted transition hover:text-text'
-                    }
+                        ? 'border-accent text-text'
+                        : 'border-transparent text-muted hover:text-text',
+                    )}
                   >
                     Todos
                   </Link>
@@ -117,20 +120,20 @@ export default async function ServicesPage({
                     <Link
                       key={group.category}
                       href={`/servicos?categoria=${group.category}`}
-                      className={
+                      className={cn(
+                        '-mb-px border-b-2 py-3 text-body transition-colors',
                         activeCategory === group.category
-                          ? 'rounded-full border border-primary bg-primary/15 px-[18px] py-3 text-caption font-semibold text-accent'
-                          : 'rounded-full border border-white/10 bg-surface px-[18px] py-3 text-caption font-semibold text-muted transition hover:text-text'
-                      }
+                          ? 'border-accent text-text'
+                          : 'border-transparent text-muted hover:text-text',
+                      )}
                     >
                       {group.label}
                     </Link>
                   ))}
                 </div>
 
-                <span className="text-caption text-muted">
-                  {visibleServices.length}{' '}
-                  {visibleServices.length === 1 ? 'serviço disponível' : 'serviços disponíveis'}
+                <span className="pb-3 text-caption text-muted">
+                  {visibleServices.length} {visibleServices.length === 1 ? 'serviço' : 'serviços'}
                 </span>
               </div>
 
@@ -143,7 +146,7 @@ export default async function ServicesPage({
                   />
                 </Card>
               ) : (
-                <div className="grid gap-5 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2">
                   {visibleServices.map((service) => (
                     <ServiceCard
                       key={service.id}
@@ -155,7 +158,7 @@ export default async function ServicesPage({
               )}
 
               <div className="flex flex-col justify-between gap-2 text-caption text-muted lg:flex-row lg:items-center">
-                <span>Agende como visitante. Crie sua conta depois, se quiser.</span>
+                <span>Agende como visitante. Sua conta é criada ao confirmar.</span>
                 <span>{businessHours}</span>
               </div>
             </div>

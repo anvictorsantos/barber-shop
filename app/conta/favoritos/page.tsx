@@ -302,7 +302,7 @@ export default async function CustomerFavoritesPage() {
                 </span>
                 <Link
                   href={`/servicos/${service.slug}`}
-                  className="rounded-xs bg-primary px-3 py-1.5 text-label font-bold leading-[13px] text-white transition hover:bg-primary-hover"
+                  className="rounded-xs bg-primary px-3 py-1.5 text-label font-bold leading-[13px] text-accent-ink transition hover:bg-primary-hover"
                 >
                   Experimentar
                 </Link>

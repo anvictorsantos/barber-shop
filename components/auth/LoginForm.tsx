@@ -33,8 +33,13 @@ export function LoginForm({
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [phoneLoginPending, setPhoneLoginPending] = useState(false)
   const [phonePending, setPhonePending] = useState<string | null>(null)
+
+  const phoneLike = identifier.trim().length >= 8 && !identifier.includes('@')
 
   if (phonePending) {
     return (
@@ -69,20 +74,44 @@ export function LoginForm({
     router.refresh()
   }
 
+  async function resendActivation() {
+    if (!identifier.trim()) {
+      setError('Informe seu telefone ou e-mail.')
+      return
+    }
+
+    setError(null)
+    setNotice(null)
+    setResending(true)
+    await postJson('/api/auth/resend', { identifier })
+    setResending(false)
+    setNotice('Se este contato tiver um agendamento, enviamos as instruções.')
+  }
+
+  async function requestPhoneCode() {
+    setError(null)
+    setNotice(null)
+    setPhoneLoginPending(true)
+    await postJson('/api/auth/phone-login', { phone: identifier })
+    setPhoneLoginPending(false)
+    setPhonePending(identifier)
+  }
+
   return (
-    <div className="flex w-full flex-col gap-7">
+    <div className="flex w-full flex-col gap-6">
       <AuthHeading
         title="Entrar"
         description="Use seu telefone ou e-mail e sua senha."
       />
 
       <form
-        className="flex flex-col gap-7"
+        className="flex flex-col gap-6"
         onSubmit={submit}
       >
         {error ? <FormMessage>{error}</FormMessage> : null}
+        {notice ? <FormMessage tone="info">{notice}</FormMessage> : null}
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <AuthField
             label="Telefone ou e-mail"
             htmlFor="login-identifier"
@@ -112,62 +141,77 @@ export function LoginForm({
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Sua senha"
-                className="pr-12"
+                className="pr-11"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
                 aria-label="Alternar visibilidade"
-                className="absolute right-4 top-1/2 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center text-muted transition hover:text-text"
+                className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center text-muted transition-colors hover:text-text"
               >
                 {showPassword ? (
                   <EyeOff
                     aria-hidden
-                    strokeWidth={1.8}
-                    className="h-5 w-5"
+                    className="h-4 w-4"
                   />
                 ) : (
                   <Eye
                     aria-hidden
-                    strokeWidth={1.8}
-                    className="h-5 w-5"
+                    className="h-4 w-4"
                   />
                 )}
               </button>
             </div>
           </AuthField>
 
-          <div className="flex justify-end">
+          <div className="flex flex-col items-end gap-2">
             <button
               type="button"
               onClick={onForgotPassword}
-              className="cursor-pointer text-[13px] font-semibold leading-4 text-primary underline underline-offset-2 transition hover:text-primary-hover"
+              className="cursor-pointer text-caption text-accent transition-colors hover:text-accent-hover"
             >
               Esqueci minha senha
+            </button>
+            <button
+              type="button"
+              onClick={resendActivation}
+              disabled={resending}
+              className="cursor-pointer text-caption text-muted transition-colors hover:text-text disabled:opacity-50"
+            >
+              {resending ? 'Enviando…' : 'Receber link para definir minha senha'}
             </button>
           </div>
         </div>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <Button
             type="submit"
             size="lg"
-            className="h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm"
+            className="w-full"
             disabled={pending}
           >
             {pending ? 'Entrando…' : 'Entrar'}
-            <ChevronRight
-              aria-hidden
-              className="h-[18px] w-[18px]"
-            />
           </Button>
 
-          <p className="text-center text-[13px] leading-4 text-muted">
+          {phoneLike ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={requestPhoneCode}
+              disabled={phoneLoginPending}
+            >
+              {phoneLoginPending ? 'Enviando…' : 'Entrar com código no WhatsApp'}
+            </Button>
+          ) : null}
+
+          <p className="text-center text-caption text-muted">
             Não tem conta?{' '}
             <button
               type="button"
               onClick={onCreateAccount}
-              className="cursor-pointer font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
+              className="cursor-pointer font-medium text-accent transition-colors hover:text-accent-hover"
             >
               Criar conta
             </button>
@@ -175,22 +219,21 @@ export function LoginForm({
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="h-px flex-1 bg-white/10" />
-          <span className="text-caption text-muted">ou</span>
-          <span className="h-px flex-1 bg-white/10" />
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-caption text-subtle">ou</span>
+          <span className="h-px flex-1 bg-border" />
         </div>
 
-        <div className="flex flex-col gap-3">
-          <Link
-            href="/servicos"
-            className="inline-flex h-[52px] w-fit items-center justify-center self-center rounded-md border border-primary px-[22px] text-sm font-bold text-text transition hover:bg-primary/10"
-          >
-            Continuar como visitante
-          </Link>
-          <p className="text-center text-caption leading-[1.6] text-muted">
-            Você pode agendar sem conta e criar uma depois.
-          </p>
-        </div>
+        <Link
+          href="/servicos"
+          className="inline-flex items-center justify-center gap-1 text-body text-text-secondary transition-colors hover:text-text"
+        >
+          Continuar como visitante
+          <ChevronRight
+            aria-hidden
+            className="h-4 w-4"
+          />
+        </Link>
       </form>
     </div>
   )

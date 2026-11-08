@@ -3,6 +3,7 @@
 import { headers } from 'next/headers'
 import { after } from 'next/server'
 
+import { sendAccountActivation } from '@/lib/auth/service'
 import { getSessionUser } from '@/lib/auth/session'
 import { AppError } from '@/lib/http/errors'
 import { enforceRateLimit } from '@/lib/http/rate-limit'
@@ -50,11 +51,29 @@ export async function createOrderAction(input: unknown): Promise<CreateOrderActi
 
     const order = await createOrder(parsed.data, actor)
 
+    const queueActivation = () => {
+      if (actor || !order.customerId) return
+      const customerId = order.customerId
+      const { email, phone } = parsed.data.customer
+      after(() =>
+        sendAccountActivation(customerId, {
+          email: email || null,
+          phone: phone || null,
+        }).catch((error) => {
+          console.warn(
+            '[create-order] activation failed:',
+            error instanceof Error ? error.name : 'unknown',
+          )
+        }),
+      )
+    }
+
     if (parsed.data.paymentMode === 'ONLINE') {
       try {
         const detailed = await getOrderByCode(order.code)
         if (!detailed) throw new AppError(500, 'order_missing', 'Pedido não encontrado.')
         const preference = await createMercadoPagoPreference(detailed)
+        queueActivation()
         return { ok: true, code: order.code, initPoint: preference.initPoint }
       } catch (error) {
         await expirePendingOrder(order.code).catch(() => undefined)
@@ -63,6 +82,7 @@ export async function createOrderAction(input: unknown): Promise<CreateOrderActi
     }
 
     after(() => notifyOrderConfirmation(order.code))
+    queueActivation()
 
     return { ok: true, code: order.code }
   } catch (error) {

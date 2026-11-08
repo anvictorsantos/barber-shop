@@ -183,7 +183,7 @@ export function SlotPicker({
                     className={cn(
                       'mx-auto flex h-[42px] w-[42px] items-center justify-center rounded-full text-[13px] leading-4 transition',
                       selectedDay
-                        ? 'bg-primary font-bold text-white'
+                        ? 'bg-primary font-bold text-accent-ink'
                         : disabled
                           ? 'cursor-not-allowed text-muted opacity-30'
                           : 'cursor-pointer font-medium text-text hover:bg-white/5',

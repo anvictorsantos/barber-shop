@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { registerSchema, resetPasswordSchema, verifyPhoneSchema } from '@/lib/validation/auth'
+import {
+  activateAccountSchema,
+  phoneLoginSchema,
+  registerSchema,
+  resetPasswordSchema,
+  verifyPhoneSchema,
+} from '@/lib/validation/auth'
 
 describe('auth validation', () => {
   it('accepts a valid registration', () => {
@@ -41,5 +47,32 @@ describe('auth validation', () => {
         password: 'secret123',
       }).success,
     ).toBe(true)
+  })
+
+  it('accepts activation by token or by phone OTP', () => {
+    expect(
+      activateAccountSchema.safeParse({
+        token: 'a'.repeat(24),
+        password: 'secret123',
+      }).success,
+    ).toBe(true)
+    expect(
+      activateAccountSchema.safeParse({
+        phone: '+5531999999999',
+        code: '123456',
+        password: 'secret123',
+      }).success,
+    ).toBe(true)
+    expect(
+      activateAccountSchema.safeParse({
+        token: 'a'.repeat(24),
+        password: 'short',
+      }).success,
+    ).toBe(false)
+  })
+
+  it('validates the phone login request', () => {
+    expect(phoneLoginSchema.safeParse({ phone: '+5531999999999' }).success).toBe(true)
+    expect(phoneLoginSchema.safeParse({ phone: '123' }).success).toBe(false)
   })
 })

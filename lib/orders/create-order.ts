@@ -49,11 +49,20 @@ async function resolveCustomer(input: CreateOrderInput, actor: OrderActor | null
     throw new AppError(400, 'missing_contact', 'Informe e-mail ou WhatsApp.')
   }
 
-  const existing = await prisma.user.findFirst({
-    where: {
-      OR: [...(email ? [{ email }] : []), ...(phone ? [{ phone }] : [])],
-    },
-  })
+  const [emailUser, phoneUser] = await Promise.all([
+    email ? prisma.user.findUnique({ where: { email } }) : Promise.resolve(null),
+    phone ? prisma.user.findUnique({ where: { phone } }) : Promise.resolve(null),
+  ])
+
+  if (emailUser && phoneUser && emailUser.id !== phoneUser.id) {
+    throw new AppError(
+      409,
+      'contact_conflict',
+      'Não foi possível usar esses dados. Confira e tente novamente.',
+    )
+  }
+
+  const existing = emailUser ?? phoneUser
 
   if (existing?.bookingBlocked) {
     throw new AppError(

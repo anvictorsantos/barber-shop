@@ -292,3 +292,11 @@ export function renderVerificationEmail(name: string, email: string, url: string
 export function renderPasswordResetEmail(name: string, email: string, url: string): RenderedEmail {
   return renderAuthEmail('reset', name, email, url)
 }
+
+export function renderAccountActivationEmail(
+  name: string,
+  email: string,
+  url: string,
+): RenderedEmail {
+  return renderAuthEmail('activation', name, email, url)
+}

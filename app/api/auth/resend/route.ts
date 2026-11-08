@@ -11,9 +11,14 @@ export const runtime = 'nodejs'
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request)
-    enforceRateLimit(`resend:${clientIp(request)}`, 5, 10 * 60 * 1000)
 
     const input = await parseJson(request, resendSchema)
+    enforceRateLimit(
+      `resend:${clientIp(request)}:${input.identifier.toLowerCase()}`,
+      10,
+      10 * 60 * 1000,
+    )
+
     await resendVerification(input.identifier)
 
     return Response.json({ ok: true }, { status: 202 })

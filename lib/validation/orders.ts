@@ -24,11 +24,16 @@ const productLineSchema = z.object({
 
 export const createOrderSchema = z.object({
   paymentMode: z.enum(['ONLINE', 'ON_SITE']),
-  customer: z.object({
-    name: z.string().trim().min(2, 'Informe seu nome.').max(120),
-    email: optionalEmail,
-    phone: z.string().trim().max(30).optional().default(''),
-  }),
+  customer: z
+    .object({
+      name: z.string().trim().min(2, 'Informe seu nome.').max(120),
+      email: optionalEmail,
+      phone: z.string().trim().max(30).optional().default(''),
+    })
+    .refine((customer) => Boolean(customer.email.trim() || customer.phone.trim()), {
+      message: 'Informe e-mail ou WhatsApp.',
+      path: ['email'],
+    }),
   lines: z
     .array(z.discriminatedUnion('kind', [serviceLineSchema, productLineSchema]))
     .min(1, 'Adicione pelo menos um item.')

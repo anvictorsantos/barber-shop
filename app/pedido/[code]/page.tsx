@@ -157,7 +157,7 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
               <div className="flex flex-col gap-3">
                 <Link
                   href={user ? '/conta/agendamentos' : '/'}
-                  className="inline-flex h-[52px] w-fit items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
+                  className="inline-flex h-[52px] w-fit items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-accent-ink transition hover:bg-primary-hover"
                 >
                   {user ? 'Ver meus agendamentos' : 'Voltar ao início'}
                   <ChevronRight

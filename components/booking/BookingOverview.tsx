@@ -49,54 +49,50 @@ export function BookingOverview({
   return (
     <aside
       className={cn(
-        'flex flex-col gap-[22px] rounded-xl border border-white/10 bg-surface p-7',
+        'flex flex-col gap-5 rounded-lg border border-border bg-surface p-6',
         className,
       )}
     >
-      <h2 className={cn('text-[17px] font-bold leading-[21px] text-text', titleClassName)}>
-        {title}
-      </h2>
+      <h2 className={cn('text-lead font-medium text-text', titleClassName)}>{title}</h2>
 
       {children ?? (
         <>
           {service ? (
             <>
               <div className="flex items-center gap-3.5">
-                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-input">
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
                   {service.imageUrl ? (
                     <Image
                       src={service.imageUrl}
                       alt=""
                       fill
-                      sizes="64px"
+                      sizes="56px"
                       className="object-cover"
                     />
                   ) : (
                     <Scissors
                       aria-hidden
-                      className="h-6 w-6 text-muted"
+                      className="h-5 w-5 text-muted"
                     />
                   )}
                 </div>
-                <div className="flex min-w-0 flex-col gap-1.5">
-                  <span className="truncate text-base font-bold leading-[19px] text-text">
-                    {service.name}
-                  </span>
-                  <span className="text-label text-accent">{service.meta}</span>
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="truncate text-body font-medium text-text">{service.name}</span>
+                  <span className="text-caption text-muted">{service.meta}</span>
                 </div>
               </div>
 
-              <div className="h-px w-full bg-white/10" />
+              <div className="border-t border-border" />
 
               {barber ? (
                 <div className="flex items-center gap-3">
-                  <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-input">
+                  <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle">
                     {barber.avatarUrl ? (
                       <Image
                         src={barber.avatarUrl}
                         alt=""
                         fill
-                        sizes="40px"
+                        sizes="36px"
                         className="object-cover"
                       />
                     ) : (
@@ -106,11 +102,9 @@ export function BookingOverview({
                       />
                     )}
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-label text-muted">Profissional</span>
-                    <span className="text-sm font-semibold leading-[17px] text-text">
-                      {barber.displayName}
-                    </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-caption text-muted">Profissional</span>
+                    <span className="text-body font-medium text-text">{barber.displayName}</span>
                   </div>
                 </div>
               ) : null}
@@ -119,12 +113,10 @@ export function BookingOverview({
                 <div className="flex items-center gap-3">
                   <CalendarDays
                     aria-hidden
-                    className="h-5 w-5 shrink-0 text-accent"
+                    className="h-4 w-4 shrink-0 text-muted"
                   />
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm font-semibold leading-[17px] text-text">
-                      {dateLabel}
-                    </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-body font-medium text-text">{dateLabel}</span>
                     {timeLabel ? (
                       <span className="text-caption text-muted">{timeLabel}</span>
                     ) : null}
@@ -133,42 +125,40 @@ export function BookingOverview({
               ) : null}
 
               {total ? (
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-baseline justify-between gap-4 border-t border-border pt-4">
                   <span className="text-body text-muted">Total</span>
-                  <span className="text-[25px] font-bold leading-[30px] text-accent">{total}</span>
+                  <span className="text-title font-medium tabular-nums text-text">{total}</span>
                 </div>
               ) : null}
 
-              <p className="flex items-start gap-2.5 text-caption leading-[1.6] text-muted">
+              <p className="flex items-start gap-2 text-caption leading-relaxed text-muted">
                 <ShieldCheck
                   aria-hidden
-                  className="mt-0.5 h-[18px] w-[18px] shrink-0 text-success"
+                  className="mt-0.5 h-4 w-4 shrink-0"
                 />
                 Cancelamento gratuito com até 2h de antecedência.
               </p>
-
-              <div className="h-px w-full bg-white/10" />
             </>
           ) : (
-            <p className="text-caption leading-[1.6] text-muted">{emptyMessage}</p>
+            <p className="text-body leading-relaxed text-muted">{emptyMessage}</p>
           )}
 
           {address ? (
-            <p className="flex items-start gap-2.5 text-caption leading-[1.6] text-muted">
+            <p className="flex items-start gap-2 text-caption leading-relaxed text-muted">
               <MapPin
                 aria-hidden
-                className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary"
+                className="mt-0.5 h-4 w-4 shrink-0"
               />
               {address}
             </p>
           ) : null}
 
-          <p className="text-label leading-[1.5] text-muted">Não precisa de conta para agendar.</p>
+          <p className="text-caption text-subtle">Não precisa de conta para agendar.</p>
 
           {actionHref && actionLabel ? (
             <Link
               href={actionHref}
-              className="w-fit text-caption font-semibold text-primary underline underline-offset-2 transition hover:text-primary-hover"
+              className="w-fit text-caption font-medium text-accent transition-colors hover:text-accent-hover"
             >
               {actionLabel}
             </Link>

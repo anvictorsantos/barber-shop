@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  renderAccountActivationEmail,
   renderPasswordResetEmail,
   renderVerificationEmail,
 } from '@/lib/notifications/email/templates'
@@ -34,6 +35,19 @@ describe('email templates', () => {
     expect(rendered.html).toContain('https://example.com/redefinir?token=xyz')
     expect(rendered.html).toContain('joao@example.com')
     expect(rendered.text).toContain('expira em 30 minutos')
+  })
+
+  it('renders an account activation email', () => {
+    const rendered = renderAccountActivationEmail(
+      'Maria',
+      'maria@example.com',
+      'https://example.com/ativar-conta?token=abc',
+    )
+
+    expect(rendered.subject).toContain('Defina sua senha')
+    expect(rendered.html).toContain('https://example.com/ativar-conta?token=abc')
+    expect(rendered.html).toContain('maria@example.com')
+    expect(rendered.text).toContain('24 horas')
   })
 
   it('renders the appointment as a ticket and escapes the customer name', () => {
