@@ -4,7 +4,7 @@ import { getAvailability } from '@/lib/availability/queries'
 import { prisma } from '@/lib/db/prisma'
 import { AppError } from '@/lib/http/errors'
 import { recordCompletedVisit, releaseOrderCredit } from '@/lib/loyalty/service'
-import { uniqueOrderCode } from '@/lib/orders/code'
+import { createOrderPublicToken, uniqueOrderCode } from '@/lib/orders/code'
 import { isExclusionError } from '@/lib/orders/conflict'
 import type { ManualBookingInput } from '@/lib/validation/admin'
 
@@ -63,6 +63,7 @@ export async function createManualBooking(input: ManualBookingInput, scope: Admi
         const order = await tx.order.create({
           data: {
             code,
+            publicToken: createOrderPublicToken(),
             customerId: customer.id,
             customerName: input.customer.name,
             customerEmail: input.customer.email || null,
@@ -141,10 +142,14 @@ export async function markAppointmentNoShow(appointmentId: string, scope: AdminS
   }
 
   return prisma.$transaction(async (tx) => {
-    await tx.appointment.update({
-      where: { id: appointment.id },
+    const updated = await tx.appointment.updateMany({
+      where: { id: appointment.id, status: { in: ['PENDING', 'CONFIRMED'] } },
       data: { status: 'NO_SHOW', noShowAt: new Date() },
     })
+
+    if (updated.count === 0) {
+      throw new AppError(409, 'invalid_status', 'Este agendamento não pode ser marcado como falta.')
+    }
 
     if (!appointment.customerId) return { customerId: null, blocked: false }
 

@@ -39,7 +39,15 @@ export async function POST(request: Request) {
     return Response.json({ ignored: true })
   }
 
-  if (env.MERCADO_PAGO_WEBHOOK_SECRET) {
+  if (!env.MERCADO_PAGO_WEBHOOK_SECRET) {
+    if (env.NODE_ENV === 'production') {
+      console.error('[webhook:mercadopago] MERCADO_PAGO_WEBHOOK_SECRET is missing; rejecting.')
+      return Response.json(
+        { error: { code: 'webhook_unconfigured', message: 'Webhook indisponível.' } },
+        { status: 503 },
+      )
+    }
+  } else {
     const valid = verifyMercadoPagoSignature({
       xSignature: request.headers.get('x-signature'),
       xRequestId: request.headers.get('x-request-id'),

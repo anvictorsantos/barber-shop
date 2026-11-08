@@ -6,8 +6,8 @@ import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { prisma } from '@/lib/db/prisma'
 import { AppError } from '@/lib/http/errors'
 import { findAvailableCredit, releaseOrderCredit } from '@/lib/loyalty/service'
-import { uniqueOrderCode } from '@/lib/orders/code'
-import { isExclusionError } from '@/lib/orders/conflict'
+import { createOrderPublicToken, uniqueOrderCode } from '@/lib/orders/code'
+import { isExclusionError, isTransientTransactionError } from '@/lib/orders/conflict'
 import type { OrderActor } from '@/lib/orders/types'
 import type { CreateOrderInput } from '@/lib/validation/orders'
 
@@ -228,12 +228,13 @@ export async function createOrder(input: CreateOrderInput, actor: OrderActor | n
   const online = input.paymentMode === 'ONLINE'
   const now = new Date()
 
-  try {
-    return await prisma.$transaction(
+  const runTransaction = () =>
+    prisma.$transaction(
       async (tx) => {
         const order = await tx.order.create({
           data: {
             code,
+            publicToken: createOrderPublicToken(),
             customerId: customer.customerId,
             customerName: customer.customerName,
             customerPhone: customer.customerPhone,
@@ -326,12 +327,23 @@ export async function createOrder(input: CreateOrderInput, actor: OrderActor | n
       },
       { isolationLevel: 'Serializable' },
     )
-  } catch (error) {
-    if (error instanceof AppError) throw error
-    if (isExclusionError(error)) {
-      throw new AppError(409, 'slot_taken', 'Um dos horários acabou de ser reservado.')
+
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await runTransaction()
+    } catch (error) {
+      if (error instanceof AppError) throw error
+      if (isExclusionError(error)) {
+        throw new AppError(409, 'slot_taken', 'Um dos horários acabou de ser reservado.')
+      }
+      if (isTransientTransactionError(error)) {
+        if (attempt === 0) continue
+        throw preparedProducts.length > 0
+          ? new AppError(409, 'stock_unavailable', 'Estoque insuficiente para um dos produtos.')
+          : new AppError(409, 'slot_taken', 'Um dos horários acabou de ser reservado.')
+      }
+      throw error
     }
-    throw error
   }
 }
 

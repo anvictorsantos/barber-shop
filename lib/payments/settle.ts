@@ -45,6 +45,10 @@ export async function settleOrderPayment(input: SettlePaymentInput) {
         throw new AppError(409, 'order_not_payable', 'Pedido não está mais ativo.')
       }
 
+      if (input.amountCents < order.totalCents) {
+        throw new AppError(409, 'underpayment', 'Valor pago é menor que o total do pedido.')
+      }
+
       const paidAt = input.paidAt ?? new Date()
       const data = {
         orderId: order.id,
