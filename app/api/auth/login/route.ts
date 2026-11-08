@@ -1,3 +1,5 @@
+import { normalizeIdentifier } from '@/lib/auth/identity'
+import { resetRateLimit } from '@/lib/auth/rate-limit'
 import { loginUser } from '@/lib/auth/service'
 import { createSession } from '@/lib/auth/session'
 import { errorResponse } from '@/lib/http/errors'
@@ -14,13 +16,16 @@ export async function POST(request: Request) {
     assertSameOrigin(request)
 
     const input = await parseJson(request, loginSchema)
-    enforceRateLimit(
-      `login:${clientIp(request)}:${input.identifier.toLowerCase()}`,
-      10,
-      10 * 60 * 1000,
-    )
+    const identifier = normalizeIdentifier(input.identifier)
+    const accountKey = identifier
+      ? `${identifier.kind}:${identifier.value}`
+      : input.identifier.toLowerCase().trim()
+
+    await enforceRateLimit(`login:${clientIp(request)}:${accountKey}`, 10, 10 * 60 * 1000)
+    await enforceRateLimit(`login-fail:${accountKey}`, 5, 15 * 60 * 1000)
 
     const user = await loginUser(input.identifier, input.password)
+    await resetRateLimit(`login-fail:${accountKey}`)
     await createSession(user.id, requestMeta(request))
 
     return Response.json({ user })

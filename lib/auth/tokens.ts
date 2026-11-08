@@ -4,6 +4,10 @@ export const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000
 export const PASSWORD_RESET_TTL_MS = 30 * 60 * 1000
 export const OTP_TTL_MS = 10 * 60 * 1000
 export const OTP_MAX_ATTEMPTS = 5
+export const OTP_FAILURE_LIMIT = 5
+export const OTP_FAILURE_WINDOW_MS = 60 * 60 * 1000
+export const OTP_ISSUE_PER_HOUR = 3
+export const OTP_ISSUE_PER_DAY = 10
 
 export function createOpaqueToken(): string {
   return randomBytes(32).toString('base64url')

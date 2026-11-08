@@ -13,7 +13,7 @@ function sign(dataId: string, requestId: string, ts: string): string {
 
 describe('mercado pago webhook signature', () => {
   it('accepts a signature built from the notification manifest', () => {
-    const ts = '1704908010'
+    const ts = String(Math.floor(Date.now() / 1000))
     const signature = sign('ABC123', 'request-1', ts)
 
     expect(
@@ -24,6 +24,20 @@ describe('mercado pago webhook signature', () => {
         secret,
       }),
     ).toBe(true)
+  })
+
+  it('rejects a stale timestamp even with a valid signature', () => {
+    const ts = String(Math.floor(Date.now() / 1000) - 3600)
+    const signature = sign('ABC123', 'request-1', ts)
+
+    expect(
+      verifyMercadoPagoSignature({
+        xSignature: `ts=${ts},v1=${signature}`,
+        xRequestId: 'request-1',
+        dataId: 'abc123',
+        secret,
+      }),
+    ).toBe(false)
   })
 
   it('rejects tampered data', () => {

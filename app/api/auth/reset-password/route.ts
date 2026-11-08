@@ -11,7 +11,7 @@ export const runtime = 'nodejs'
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request)
-    enforceRateLimit(`reset-password:${clientIp(request)}`, 10, 10 * 60 * 1000)
+    await enforceRateLimit(`reset-password:${clientIp(request)}`, 10, 10 * 60 * 1000)
 
     const input = await parseJson(request, resetPasswordSchema)
 

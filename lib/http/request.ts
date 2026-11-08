@@ -1,6 +1,28 @@
-export function clientIp(request: Request): string {
+import { getServerEnv } from '@/lib/env'
+
+interface HeaderSource {
+  headers: { get(name: string): string | null }
+}
+
+function trustedClientIp(request: HeaderSource): string | null {
+  const secret = getServerEnv().ORIGIN_SHARED_SECRET
+  if (!secret) return null
+  if (request.headers.get('x-origin-secret') !== secret) return null
+  return request.headers.get('x-client-ip')?.trim() || null
+}
+
+export function clientIp(request: HeaderSource): string {
+  const trusted = trustedClientIp(request)
+  if (trusted) return trusted
+
   const forwarded = request.headers.get('x-forwarded-for')
-  return forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown'
+  const last = forwarded
+    ?.split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .at(-1)
+
+  return last || 'unknown'
 }
 
 export function requestMeta(request: Request): { ip: string | null; userAgent: string | null } {

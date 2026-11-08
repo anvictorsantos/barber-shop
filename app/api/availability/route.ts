@@ -16,7 +16,7 @@ const querySchema = z.object({
 
 export async function GET(request: Request) {
   try {
-    enforceRateLimit(`availability:${clientIp(request)}`, 120, 60 * 1000)
+    await enforceRateLimit(`availability:${clientIp(request)}`, 120, 60 * 1000)
 
     const url = new URL(request.url)
     const parsed = querySchema.safeParse(Object.fromEntries(url.searchParams))

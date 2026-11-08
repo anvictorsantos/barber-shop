@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     assertSameOrigin(request)
 
     const input = await parseJson(request, verifyPhoneSchema)
-    enforceRateLimit(`verify-phone:${clientIp(request)}:${input.phone}`, 10, 10 * 60 * 1000)
+    await enforceRateLimit(`verify-phone:${clientIp(request)}:${input.phone}`, 10, 10 * 60 * 1000)
 
     const user = await verifyPhoneSignup(input.phone, input.code)
     await createSession(user.id, requestMeta(request))

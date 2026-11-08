@@ -1,34 +1,53 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
 import { AuthField, AuthInput } from '@/components/auth/AuthField'
 import { AuthHeading } from '@/components/auth/AuthHeading'
-import { AuthRedirectOverlay } from '@/components/auth/AuthRedirectOverlay'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { PhoneVerification } from '@/components/auth/PhoneVerification'
 import { Button } from '@/components/ui/Button'
-import { postAuthPath } from '@/lib/auth/redirect'
 import { postJson } from '@/lib/http/client'
 
-type RoleName = 'CUSTOMER' | 'BARBER' | 'OWNER'
-
 interface RegisterResponse {
-  user: { id: string; name: string; role: RoleName }
   requiresPhoneVerification: boolean
   verificationEmailSent: boolean
 }
 
 export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin: () => void }) {
-  const router = useRouter()
   const [name, setName] = useState('')
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [phonePending, setPhonePending] = useState<string | null>(null)
-  const [redirecting, setRedirecting] = useState(false)
+  const [emailPending, setEmailPending] = useState(false)
+  const [emailFailed, setEmailFailed] = useState(false)
+
+  if (emailPending) {
+    return (
+      <div className="flex w-full flex-col gap-6">
+        <AuthHeading
+          title="Confira seu e-mail"
+          description="Enviamos um link para confirmar sua conta. Depois é só entrar."
+        />
+        {emailFailed ? (
+          <FormMessage>
+            A conta foi criada, mas o e-mail não saiu. Tente entrar em alguns instantes ou fale com
+            a barbearia.
+          </FormMessage>
+        ) : null}
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          onClick={onLogin}
+        >
+          Ir para entrar
+        </Button>
+      </div>
+    )
+  }
 
   if (phonePending) {
     return (
@@ -68,10 +87,8 @@ export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin:
       return
     }
 
-    setRedirecting(true)
-    await new Promise((resolve) => setTimeout(resolve, 450))
-    router.push(postAuthPath(result.data.user.role, next))
-    router.refresh()
+    setEmailFailed(!result.data.verificationEmailSent)
+    setEmailPending(true)
   }
 
   return (
@@ -158,8 +175,6 @@ export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin:
           </p>
         </div>
       </form>
-
-      {redirecting ? <AuthRedirectOverlay label="Criando sua conta…" /> : null}
     </div>
   )
 }

@@ -7,6 +7,7 @@ import {
   type NormalizedIdentifier,
 } from '@/lib/auth/identity'
 import { hashPassword, verifyPassword } from '@/lib/auth/password'
+import { takeRateLimit } from '@/lib/auth/rate-limit'
 import {
   consumeAccountActivation,
   consumeEmailVerification,
@@ -43,10 +44,12 @@ export interface AuthUser {
 }
 
 export interface RegisterResult {
-  user: AuthUser
   requiresPhoneVerification: boolean
   verificationEmailSent: boolean
 }
+
+const DUMMY_PASSWORD_HASH =
+  '$argon2id$v=19$m=19456,t=2,p=1$MBC46WBSi4UqEuDOygkCQg$UDTCt3lErgUj10Bm4qHNRB6iP6g8Nw76+rXXzKiGOCw'
 
 export interface AuthDelivery {
   sendPhoneOtp(phone: string, code: string): Promise<void>
@@ -113,6 +116,45 @@ function logDeliveryFailure(kind: string, error: unknown): void {
   console.warn(`[auth] ${kind} delivery failed:`, error instanceof Error ? error.name : 'unknown')
 }
 
+function genericRegisterResult(identifier: NormalizedIdentifier): RegisterResult {
+  return {
+    requiresPhoneVerification: identifier.kind === 'phone',
+    verificationEmailSent: identifier.kind === 'email',
+  }
+}
+
+async function notifyExistingContact(
+  user: User,
+  identifier: NormalizedIdentifier,
+  deps: AuthDeps,
+): Promise<void> {
+  try {
+    if (identifier.kind === 'email' && user.email) {
+      const allowed = await takeRateLimit(
+        `reset-request:email:${identifier.value}`,
+        3,
+        60 * 60 * 1000,
+      )
+      if (!allowed.allowed) return
+
+      const token = await issuePasswordResetEmail(user.id, user.email)
+      await deps.delivery.sendPasswordResetEmail(
+        user.email,
+        user.name,
+        emailUrl('/entrar?modo=recuperar', token),
+      )
+      return
+    }
+
+    if (identifier.kind === 'phone' && !user.passwordHash) {
+      const code = await issuePhoneOtp(user.id, identifier.value)
+      await deps.delivery.sendPhoneOtp(identifier.value, code)
+    }
+  } catch (error) {
+    logDeliveryFailure('existing account notice', error)
+  }
+}
+
 export async function registerUser(
   input: { name: string; identifier: string; password: string },
   deps: AuthDeps = defaultDeps,
@@ -124,7 +166,8 @@ export async function registerUser(
 
   const existing = await prisma.user.findFirst({ where: identifierWhere(identifier) })
   if (existing) {
-    throw new AppError(409, 'identifier_taken', 'Este contato já está cadastrado.')
+    await notifyExistingContact(existing, identifier, deps)
+    return genericRegisterResult(identifier)
   }
 
   if (identifier.kind === 'email') {
@@ -149,7 +192,7 @@ export async function registerUser(
     })
   } catch (error) {
     if (isUniqueConstraintError(error)) {
-      throw new AppError(409, 'identifier_taken', 'Este contato já está cadastrado.')
+      return genericRegisterResult(identifier)
     }
     throw error
   }
@@ -168,7 +211,6 @@ export async function registerUser(
     }
 
     return {
-      user: toAuthUser(user),
       requiresPhoneVerification: true,
       verificationEmailSent: false,
     }
@@ -186,7 +228,6 @@ export async function registerUser(
   }
 
   return {
-    user: toAuthUser(user),
     requiresPhoneVerification: false,
     verificationEmailSent,
   }
@@ -200,6 +241,7 @@ export async function loginUser(identifierInput: string, password: string): Prom
 
   const user = await prisma.user.findFirst({ where: identifierWhere(identifier) })
   if (!user?.passwordHash) {
+    await verifyPassword(DUMMY_PASSWORD_HASH, password)
     throw new AppError(401, 'invalid_credentials', 'Contato ou senha inválidos.')
   }
 
@@ -368,6 +410,13 @@ export async function requestPasswordReset(
 ): Promise<void> {
   const identifier = normalizeIdentifier(identifierInput)
   if (!identifier) return
+
+  const allowed = await takeRateLimit(
+    `reset-request:${identifier.kind}:${identifier.value}`,
+    3,
+    60 * 60 * 1000,
+  )
+  if (!allowed.allowed) return
 
   const user = await prisma.user.findFirst({ where: identifierWhere(identifier) })
   if (!user) return

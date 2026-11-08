@@ -11,7 +11,14 @@ import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
 
 const prisma = new PrismaClient()
 const TIMEZONE = 'America/Sao_Paulo'
-const DEMO_PASSWORD = 'demo1234'
+
+function requireDemoPassword(): string {
+  const value = process.env.SEED_DEMO_PASSWORD
+  if (!value) throw new Error('SEED_DEMO_PASSWORD is required to seed demo accounts.')
+  return value
+}
+
+const DEMO_PASSWORD = requireDemoPassword()
 
 type BookingSeed = {
   dayOffset: number
@@ -375,10 +382,8 @@ function nextCode(): string {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === 'production' && process.env.DEMO_MODE !== 'true') {
-    throw new Error(
-      'Refusing to seed demo data in production. Set DEMO_MODE=true on a demo environment.',
-    )
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Refusing to seed demo data in production.')
   }
 
   await prisma.$transaction([

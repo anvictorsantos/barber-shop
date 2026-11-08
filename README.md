@@ -36,7 +36,7 @@ npm run format:check
 npm run typecheck    # tsc --noEmit, strict
 npm test             # Vitest unit tests
 npm run test:integration
-npm run test:e2e     # Playwright; seeded specs need E2E_SEEDED=true after db:seed
+npm run test:e2e     # Playwright; seeded specs need E2E_SEEDED=true and E2E_PASSWORD after db:seed
                      # demo spec needs DEMO_MODE=true and E2E_DEMO=true
 npm run db:generate
 npm run db:migrate
@@ -57,8 +57,8 @@ npm run db:seed
 DEMO_MODE=true npm run dev
 ```
 
-Seeded credentials remain `demo1234` for manual login. Never enable demo mode on a production
-deployment.
+Seeded accounts use the password in `SEED_DEMO_PASSWORD`; the seed refuses to run without it and
+refuses to run in production. Never enable demo mode on a production deployment.
 
 ## Configuration
 

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     assertSameOrigin(request)
-    enforceRateLimit(`demo:${clientIp(request)}`, 20, 60 * 1000)
+    await enforceRateLimit(`demo:${clientIp(request)}`, 20, 60 * 1000)
 
     const input = await parseJson(request, demoSchema)
     const user = await prisma.user.findUnique({
