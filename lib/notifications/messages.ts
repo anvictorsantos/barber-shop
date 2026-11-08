@@ -1,8 +1,9 @@
+import { ptBR } from 'date-fns/locale'
 import { formatInTimeZone } from 'date-fns-tz'
 
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { renderEmailLayout } from '@/lib/notifications/email/templates'
-import type { RenderedEmail } from '@/lib/notifications/email/templates'
+import type { EmailDetail, EmailLink, RenderedEmail } from '@/lib/notifications/email/templates'
 
 import type { NotificationKind } from '@prisma/client'
 
@@ -19,52 +20,117 @@ export interface AppointmentMessageContext {
   calendarUrl?: string | null
 }
 
-function whenLabel(startAt: Date): string {
-  return formatInTimeZone(startAt, BUSINESS_TIMEZONE, "dd/MM/yyyy 'às' HH:mm")
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function whenLong(startAt: Date): string {
+  return capitalize(
+    formatInTimeZone(startAt, BUSINESS_TIMEZONE, "EEEE, d 'de' MMMM 'às' HH:mm", {
+      locale: ptBR,
+    }),
+  )
+}
+
+function whenShort(startAt: Date): string {
+  return formatInTimeZone(startAt, BUSINESS_TIMEZONE, "dd/MM 'às' HH:mm")
+}
+
+function withPeriod(value: string): string {
+  const trimmed = value.trim()
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
 }
 
 interface EventCopy {
   subject: string
   title: string
   intro: string
+  preheader: string
   footer: string
+  calendar: boolean
 }
 
 function eventCopy(kind: NotificationKind, context: AppointmentMessageContext): EventCopy | null {
-  const when = whenLabel(context.startAt)
+  const short = whenShort(context.startAt)
 
   switch (kind) {
     case 'BOOKING_CONFIRMATION':
       return {
+        subject: `Agendamento confirmado — ${short}`,
         title: 'Agendamento confirmado',
-        intro: `Olá, ${context.customerName}. Seu horário de ${context.serviceName} com ${context.barberName} está confirmado para ${when}.`,
+        intro: `Olá, ${context.customerName}. Seu horário está confirmado.`,
+        preheader: `${context.serviceName} com ${context.barberName} · ${short}`,
         footer: 'Chegue com 5 minutos de antecedência. Precisa remarcar? Fale com a barbearia.',
-        subject: `Agendamento confirmado — ${when}`,
+        calendar: true,
       }
     case 'REMINDER':
       return {
-        title: `Lembrete: ${when}`,
-        intro: `Oi, ${context.customerName}. Passando para lembrar do seu ${context.serviceName} com ${context.barberName} em ${when}.`,
+        subject: `Lembrete — ${short}`,
+        title: 'Lembrete do seu horário',
+        intro: `Olá, ${context.customerName}. Seu horário está chegando.`,
+        preheader: `${context.serviceName} com ${context.barberName} · ${short}`,
         footer: 'Se não puder comparecer, avise com antecedência.',
-        subject: `Lembrete do seu horário — ${when}`,
+        calendar: true,
       }
     case 'CANCELED':
       return {
+        subject: 'Agendamento cancelado',
         title: 'Agendamento cancelado',
-        intro: `Olá, ${context.customerName}. Seu ${context.serviceName} de ${when} foi cancelado.${context.reason ? ` Motivo: ${context.reason}.` : ''}`,
+        intro: `Olá, ${context.customerName}. Seu horário foi cancelado.${
+          context.reason ? ` Motivo: ${withPeriod(context.reason)}` : ''
+        }`,
+        preheader: `${context.serviceName} de ${short} foi cancelado.`,
         footer: 'Você pode agendar um novo horário quando quiser.',
-        subject: 'Seu agendamento foi cancelado',
+        calendar: false,
       }
     case 'RESCHEDULED':
       return {
-        title: 'Agendamento remarcado',
-        intro: `Olá, ${context.customerName}. Seu ${context.serviceName} com ${context.barberName} agora é em ${when}.`,
+        subject: `Novo horário — ${short}`,
+        title: 'Novo horário confirmado',
+        intro: `Olá, ${context.customerName}. Seu horário mudou. O novo horário está abaixo.`,
+        preheader: `Novo horário de ${context.serviceName} com ${context.barberName}.`,
         footer: 'Se o novo horário não servir, fale com a barbearia.',
-        subject: `Novo horário — ${when}`,
+        calendar: true,
       }
     default:
       return null
   }
+}
+
+function appointmentDetails(context: AppointmentMessageContext): EmailDetail[] {
+  return [
+    { label: 'Serviço', value: context.serviceName },
+    { label: 'Profissional', value: context.barberName },
+    { label: 'Data', value: whenLong(context.startAt) },
+    { label: 'Local', value: `${context.shopName} · ${context.shopAddress}` },
+    {
+      label: 'Pedido',
+      value: context.orderCode.startsWith('#') ? context.orderCode : `#${context.orderCode}`,
+    },
+  ]
+}
+
+function renderAppointmentEmailText(
+  context: AppointmentMessageContext,
+  copy: EventCopy,
+  details: EmailDetail[],
+  secondary: EmailLink | null,
+): string {
+  return [
+    context.shopName,
+    '',
+    copy.title,
+    '',
+    copy.intro,
+    '',
+    ...details.map((detail) => `${detail.label}: ${detail.value}`),
+    '',
+    'Ver detalhes',
+    context.orderUrl,
+    ...(secondary ? ['', `${secondary.label}: ${secondary.url}`] : []),
+    '',
+    copy.footer,
+  ].join('\n')
 }
 
 export function renderAppointmentEmail(
@@ -74,27 +140,28 @@ export function renderAppointmentEmail(
   const copy = eventCopy(kind, context)
   if (!copy) return null
 
-  const details = `${context.serviceName} com ${context.barberName} · ${whenLabel(context.startAt)}\n${context.shopName} — ${context.shopAddress}`
-  const footer = context.calendarUrl
-    ? `${copy.footer} Adicionar ao Google Agenda: ${context.calendarUrl}`
-    : copy.footer
+  const details = appointmentDetails(context)
+  const secondary =
+    copy.calendar && context.calendarUrl
+      ? { label: 'Adicionar ao Google Agenda', url: context.calendarUrl }
+      : null
 
   return {
-    subject: `${copy.subject} — ${context.shopName}`,
-    html: renderEmailLayout(copy.title, copy.intro, 'Ver detalhes', context.orderUrl, footer),
-    text: [
-      context.shopName,
-      '',
-      copy.title,
-      '',
-      copy.intro,
-      '',
-      details,
-      '',
+    subject: copy.subject,
+    html: renderEmailLayout(
+      {
+        preheader: copy.preheader,
+        kicker: 'Seu horário',
+        title: copy.title,
+        body: copy.intro,
+        details,
+        cta: 'Ver detalhes',
+        ...(secondary ? { secondary } : {}),
+        footer: copy.footer,
+      },
       context.orderUrl,
-      '',
-      footer,
-    ].join('\n'),
+    ),
+    text: renderAppointmentEmailText(context, copy, details, secondary),
   }
 }
 
@@ -108,6 +175,7 @@ export function renderAppointmentWhatsApp(
   return [
     `${copy.title} — ${context.shopName}`,
     copy.intro,
+    `${context.serviceName} com ${context.barberName} · ${whenShort(context.startAt)}`,
     `${context.shopName}, ${context.shopAddress}`,
     context.orderUrl,
   ].join('\n')
