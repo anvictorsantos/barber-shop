@@ -1,0 +1,119 @@
+{
+  "engagement": "Barbearia do Luiz — owner-requested web security assessment",
+  "authorization": {
+    "signed_by": "Antonio Pontes (repository owner, session instruction)",
+    "document": "In-session authorization 2026-11-08: 'do it using the users and credentials you have, locally and on https://barbeariadoluiz.com.br/'. Ownership corroborated by local repository, production deployment secrets present in .env, and render.yaml deployment config. Staging authorization added 2026-11-08: in-session 'Do it', interpreted as the staging run offered in the report; staging is an isolated local Postgres + app copy, production excluded.",
+    "date": "2026-11-08",
+    "bounty_policy": null
+  },
+  "window": {
+    "start": "2026-11-08T00:00:00Z",
+    "end": "2026-11-09T00:00:00Z"
+  },
+  "rate_limit_rps": 1,
+  "max_requests": 250,
+  "in_scope": [
+    {
+      "host": "barbeariadoluiz.com.br",
+      "schemes": ["https"],
+      "ports": [443],
+      "paths": ["/"]
+    },
+    {
+      "host": "www.barbeariadoluiz.com.br",
+      "schemes": ["https"],
+      "ports": [443],
+      "paths": ["/"]
+    },
+    {
+      "host": "localhost",
+      "schemes": ["http"],
+      "ports": [3000],
+      "paths": ["/"]
+    },
+    {
+      "host": "127.0.0.1",
+      "schemes": ["http"],
+      "ports": [3000],
+      "paths": ["/"]
+    },
+    {
+      "host": "localhost",
+      "schemes": ["http"],
+      "ports": [3001],
+      "paths": ["/"]
+    },
+    {
+      "host": "127.0.0.1",
+      "schemes": ["http"],
+      "ports": [3001],
+      "paths": ["/"]
+    }
+  ],
+  "out_of_scope": [
+    { "host": "*.mercadopago.com" },
+    { "host": "*.mercadopago.com.br" },
+    { "host": "*.mercadolivre.com" },
+    { "host": "*.resend.com" },
+    { "host": "*.whatsapp.com" },
+    { "host": "*.facebook.com" },
+    { "host": "*.neon.tech" },
+    { "host": "*.sentry.io" },
+    { "host": "*.google-analytics.com" },
+    { "host": "*.googletagmanager.com" },
+    { "host": "disify.com" }
+  ],
+  "staging": {
+    "host": "http://localhost:3001",
+    "database": "Docker postgres:16-alpine on localhost:5433; Compose projects barber-staging (logic tests) and barber-clone (production build, 5,022 synthetic orders); both destroyed after use",
+    "allowed_test_types": [
+      "bounded-brute-force",
+      "bounded-rate-limit-validation",
+      "light-load",
+      "production-build-load",
+      "mass-extraction-on-synthetic-data",
+      "destructive-state-change-on-synthetic-data",
+      "race-condition",
+      "token-reuse",
+      "workflow-skipping"
+    ],
+    "limits": "max 50 concurrent, max 3,000 requests per test, no external hosts",
+    "note": "These types remain forbidden on production. All clone and staging identities are synthetic (@example.test) and the data is disposable."
+  },
+  "excluded_test_types": [
+    "denial-of-service",
+    "load-testing",
+    "brute-force",
+    "credential-stuffing",
+    "password-spraying",
+    "mass-data-extraction",
+    "destructive-state-change",
+    "social-engineering",
+    "third-party-testing"
+  ],
+  "accounts": [
+    { "role": "anonymous" },
+    { "role": "customer", "note": "joao.silva@example.com (seed customer)" },
+    {
+      "role": "customer-b",
+      "note": "felipe.andrade@example.com (second seed customer for IDOR checks)"
+    },
+    { "role": "barber", "note": "hinner@barbeariadoluiz.com.br (seed barber)" },
+    { "role": "owner", "note": "luiz@barbeariadoluiz.com.br (seed owner)" },
+    {
+      "role": "test-only",
+      "note": "2026-11-08 created accounts are limited to localhost; production tests use existing seed accounts read-only"
+    }
+  ],
+  "data_handling": {
+    "evidence_dir": "./security/evidence",
+    "redact": ["tokens", "cookies", "password", "email", "phone", "address"],
+    "retention_days": 30,
+    "production_evidence": "status codes, headers, and redacted field names only"
+  },
+  "escalation": {
+    "name": "Antonio Pontes",
+    "contact": "session owner",
+    "critical_sla_minutes": 30
+  }
+}
