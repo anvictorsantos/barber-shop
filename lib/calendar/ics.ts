@@ -64,6 +64,21 @@ export function buildGoogleCalendarUrl(input: CalendarEventInput): string {
   return `https://calendar.google.com/calendar/render?${params.toString()}`
 }
 
+export function buildOutlookCalendarUrl(input: CalendarEventInput): string {
+  const params = new URLSearchParams({
+    path: '/calendar/action/compose',
+    rru: 'addevent',
+    subject: input.title,
+    startdt: input.startAt.toISOString(),
+    enddt: input.endAt.toISOString(),
+    location: input.location,
+    body: input.description,
+    allday: 'false',
+  })
+
+  return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`
+}
+
 export function appointmentTimesInShop(iso: string): string {
   return formatInTimeZone(new Date(iso), BUSINESS_TIMEZONE, "dd/MM/yyyy 'às' HH:mm")
 }

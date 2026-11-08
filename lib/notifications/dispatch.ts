@@ -1,11 +1,16 @@
 import { formatInTimeZone } from 'date-fns-tz'
 
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
-import { buildAppointmentIcs, buildGoogleCalendarUrl } from '@/lib/calendar/ics'
+import {
+  buildAppointmentIcs,
+  buildGoogleCalendarUrl,
+  buildOutlookCalendarUrl,
+} from '@/lib/calendar/ics'
 import { prisma } from '@/lib/db/prisma'
 import { getServerEnv } from '@/lib/env'
 import { emailSender } from '@/lib/notifications/email/factory'
 import type { EmailAttachment } from '@/lib/notifications/email/sender'
+import { renderEmailLayout } from '@/lib/notifications/email/templates'
 import { renderAppointmentEmail, renderAppointmentWhatsApp } from '@/lib/notifications/messages'
 import type { AppointmentMessageContext } from '@/lib/notifications/messages'
 import { whatsappSender } from '@/lib/notifications/whatsapp/factory'
@@ -36,7 +41,12 @@ const WHATSAPP_TEMPLATE_KEYS = {
   CANCELED: 'WHATSAPP_TEMPLATE_CANCELED',
   RESCHEDULED: 'WHATSAPP_TEMPLATE_RESCHEDULED',
 } as const
-const CALENDAR_KINDS = new Set<NotificationKind>(['BOOKING_CONFIRMATION', 'RESCHEDULED'])
+const CALENDAR_LINK_KINDS = new Set<NotificationKind>([
+  'BOOKING_CONFIRMATION',
+  'REMINDER',
+  'RESCHEDULED',
+])
+const CALENDAR_ATTACHMENT_KINDS = new Set<NotificationKind>(['BOOKING_CONFIRMATION', 'RESCHEDULED'])
 
 function errorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)
@@ -202,11 +212,16 @@ export async function notifyAppointment(
       shopAddress,
       orderCode: appointment.order.code,
       orderUrl,
-      calendarUrl: CALENDAR_KINDS.has(kind) ? buildGoogleCalendarUrl(calendarInput) : null,
+      calendarLinks: CALENDAR_LINK_KINDS.has(kind)
+        ? [
+            { label: 'Google Agenda', url: buildGoogleCalendarUrl(calendarInput) },
+            { label: 'Outlook', url: buildOutlookCalendarUrl(calendarInput) },
+          ]
+        : null,
     }
 
     const attachments: EmailAttachment[] =
-      CALENDAR_KINDS.has(kind) && email
+      CALENDAR_ATTACHMENT_KINDS.has(kind) && email
         ? [
             {
               filename: 'agendamento.ics',
@@ -254,10 +269,30 @@ export async function notifyNoShowBlock(userId: string): Promise<DispatchResult>
     })
     if (!user || (!user.email && !user.phone)) return result
 
-    const shop = await prisma.shop.findFirst({ select: { name: true } })
+    const shop = await prisma.shop.findFirst({
+      select: { name: true, whatsapp: true, phone: true },
+    })
     const shopName = shop?.name ?? 'Barbearia do Luiz'
+    const whatsapp = (shop?.whatsapp ?? shop?.phone ?? '').replace(/\D/g, '')
+    const contactUrl = whatsapp ? `https://wa.me/${whatsapp}` : null
     const text = `Olá, ${user.name}. Sua conta está bloqueada para novos agendamentos online por faltas sem aviso. Fale com a ${shopName} para regularizar.`
     const subject = `Agendamentos bloqueados — ${shopName}`
+    const footer = 'Se você acha que houve um engano, fale com a barbearia.'
+    const cta = contactUrl ? 'Falar com a barbearia' : null
+    const html = renderEmailLayout(
+      {
+        preheader: 'Sua conta está bloqueada para novos agendamentos online.',
+        kicker: 'Sua conta',
+        title: 'Agendamentos bloqueados',
+        body: text,
+        ...(cta ? { cta } : {}),
+        footer,
+      },
+      contactUrl,
+    )
+    const emailText = [text, ...(cta && contactUrl ? ['', cta, contactUrl] : []), '', footer].join(
+      '\n',
+    )
 
     result.skipped = false
 
@@ -276,7 +311,7 @@ export async function notifyNoShowBlock(userId: string): Promise<DispatchResult>
         result,
         send: async () => {
           if (channel === 'EMAIL') {
-            await emailSender().send({ to: contact, subject, text, html: `<p>${text}</p>` })
+            await emailSender().send({ to: contact, subject, text: emailText, html })
           } else {
             const templateName = getServerEnv().WHATSAPP_TEMPLATE_NO_SHOW_BLOCK
             if (templateName) {

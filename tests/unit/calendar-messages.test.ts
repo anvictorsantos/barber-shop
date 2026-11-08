@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildAppointmentIcs, buildGoogleCalendarUrl } from '@/lib/calendar/ics'
+import {
+  buildAppointmentIcs,
+  buildGoogleCalendarUrl,
+  buildOutlookCalendarUrl,
+} from '@/lib/calendar/ics'
 import { renderAppointmentEmail, renderAppointmentWhatsApp } from '@/lib/notifications/messages'
 
 const startAt = new Date('2026-11-05T15:00:00.000Z')
@@ -37,6 +41,18 @@ describe('calendar exports', () => {
     expect(params.get('action')).toBe('TEMPLATE')
     expect(params.get('dates')).toBe('20261105T150000Z/20261105T154000Z')
     expect(params.get('text')).toContain('Corte + Barba')
+    expect(params.get('location')).toBe(calendarInput.location)
+  })
+
+  it('builds an outlook deeplink with the event location', () => {
+    const url = buildOutlookCalendarUrl(calendarInput)
+    const params = new URL(url).searchParams
+
+    expect(url.startsWith('https://outlook.live.com/calendar/0/deeplink/compose?')).toBe(true)
+    expect(params.get('rru')).toBe('addevent')
+    expect(params.get('subject')).toContain('Corte + Barba')
+    expect(params.get('startdt')).toBe('2026-11-05T15:00:00.000Z')
+    expect(params.get('location')).toBe(calendarInput.location)
   })
 
   it('builds an ics event in utc', () => {
@@ -54,13 +70,24 @@ describe('appointment messages', () => {
   it('renders confirmation copy with local time and calendar link', () => {
     const email = renderAppointmentEmail('BOOKING_CONFIRMATION', {
       ...messageContext,
-      calendarUrl: 'https://calendar.google.com/calendar/render?action=TEMPLATE',
+      calendarLinks: [
+        {
+          label: 'Google Agenda',
+          url: 'https://calendar.google.com/calendar/render?action=TEMPLATE',
+        },
+        {
+          label: 'Outlook',
+          url: 'https://outlook.live.com/calendar/0/deeplink/compose?rru=addevent',
+        },
+      ],
     })
 
     expect(email).not.toBeNull()
     expect(email?.subject).toContain('Agendamento confirmado')
     expect(email?.text).toContain('Quinta-feira, 5 de novembro às 12:00')
-    expect(email?.text).toContain('Google Agenda')
+    expect(email?.text).toContain('Adicionar à sua agenda:')
+    expect(email?.text).toContain('Google Agenda:')
+    expect(email?.text).toContain('Outlook:')
     expect(email?.html).toContain('Agendamento confirmado')
   })
 

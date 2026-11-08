@@ -17,7 +17,7 @@ export interface AppointmentMessageContext {
   orderCode: string
   orderUrl: string
   reason?: string | null
-  calendarUrl?: string | null
+  calendarLinks?: EmailLink[] | null
 }
 
 function capitalize(value: string): string {
@@ -47,7 +47,6 @@ interface EventCopy {
   intro: string
   preheader: string
   footer: string
-  calendar: boolean
 }
 
 function eventCopy(kind: NotificationKind, context: AppointmentMessageContext): EventCopy | null {
@@ -61,7 +60,6 @@ function eventCopy(kind: NotificationKind, context: AppointmentMessageContext): 
         intro: `Olá, ${context.customerName}. Seu horário está confirmado.`,
         preheader: `${context.serviceName} com ${context.barberName} · ${short}`,
         footer: 'Chegue com 5 minutos de antecedência. Precisa remarcar? Fale com a barbearia.',
-        calendar: true,
       }
     case 'REMINDER':
       return {
@@ -70,7 +68,6 @@ function eventCopy(kind: NotificationKind, context: AppointmentMessageContext): 
         intro: `Olá, ${context.customerName}. Seu horário está chegando.`,
         preheader: `${context.serviceName} com ${context.barberName} · ${short}`,
         footer: 'Se não puder comparecer, avise com antecedência.',
-        calendar: true,
       }
     case 'CANCELED':
       return {
@@ -81,7 +78,6 @@ function eventCopy(kind: NotificationKind, context: AppointmentMessageContext): 
         }`,
         preheader: `${context.serviceName} de ${short} foi cancelado.`,
         footer: 'Você pode agendar um novo horário quando quiser.',
-        calendar: false,
       }
     case 'RESCHEDULED':
       return {
@@ -90,7 +86,6 @@ function eventCopy(kind: NotificationKind, context: AppointmentMessageContext): 
         intro: `Olá, ${context.customerName}. Seu horário mudou. O novo horário está abaixo.`,
         preheader: `Novo horário de ${context.serviceName} com ${context.barberName}.`,
         footer: 'Se o novo horário não servir, fale com a barbearia.',
-        calendar: true,
       }
     default:
       return null
@@ -114,7 +109,7 @@ function renderAppointmentEmailText(
   context: AppointmentMessageContext,
   copy: EventCopy,
   details: EmailDetail[],
-  secondary: EmailLink | null,
+  links: EmailLink[],
 ): string {
   return [
     context.shopName,
@@ -127,7 +122,9 @@ function renderAppointmentEmailText(
     '',
     'Ver detalhes',
     context.orderUrl,
-    ...(secondary ? ['', `${secondary.label}: ${secondary.url}`] : []),
+    ...(links.length
+      ? ['', 'Adicionar à sua agenda:', ...links.map((link) => `${link.label}: ${link.url}`)]
+      : []),
     '',
     copy.footer,
   ].join('\n')
@@ -141,10 +138,7 @@ export function renderAppointmentEmail(
   if (!copy) return null
 
   const details = appointmentDetails(context)
-  const secondary =
-    copy.calendar && context.calendarUrl
-      ? { label: 'Adicionar ao Google Agenda', url: context.calendarUrl }
-      : null
+  const links = context.calendarLinks ?? []
 
   return {
     subject: copy.subject,
@@ -156,12 +150,12 @@ export function renderAppointmentEmail(
         body: copy.intro,
         details,
         cta: 'Ver detalhes',
-        ...(secondary ? { secondary } : {}),
+        ...(links.length > 0 ? { links } : {}),
         footer: copy.footer,
       },
       context.orderUrl,
     ),
-    text: renderAppointmentEmailText(context, copy, details, secondary),
+    text: renderAppointmentEmailText(context, copy, details, links),
   }
 }
 
