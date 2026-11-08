@@ -5,9 +5,9 @@ import {
 } from '@/lib/notifications/email/templates'
 
 export async function sendVerificationEmail(to: string, name: string, url: string): Promise<void> {
-  await emailSender().send({ to, ...renderVerificationEmail(name, url) })
+  await emailSender().send({ to, ...renderVerificationEmail(name, to, url) })
 }
 
 export async function sendPasswordResetEmail(to: string, name: string, url: string): Promise<void> {
-  await emailSender().send({ to, ...renderPasswordResetEmail(name, url) })
+  await emailSender().send({ to, ...renderPasswordResetEmail(name, to, url) })
 }

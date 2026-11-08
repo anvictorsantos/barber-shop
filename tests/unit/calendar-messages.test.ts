@@ -59,7 +59,7 @@ describe('appointment messages', () => {
 
     expect(email).not.toBeNull()
     expect(email?.subject).toContain('Agendamento confirmado')
-    expect(email?.text).toContain('05/11/2026 às 12:00')
+    expect(email?.text).toContain('Quinta-feira, 5 de novembro às 12:00')
     expect(email?.text).toContain('Google Agenda')
     expect(email?.html).toContain('Agendamento confirmado')
   })
@@ -69,7 +69,7 @@ describe('appointment messages', () => {
 
     expect(text).toContain('Lembrete')
     expect(text).toContain('Corte + Barba')
-    expect(text).toContain('05/11/2026 às 12:00')
+    expect(text).toContain('05/11 às 12:00')
   })
 
   it('returns null for kinds that are not appointment messages', () => {
