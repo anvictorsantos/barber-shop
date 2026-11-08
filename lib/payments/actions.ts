@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 
+import { recordAudit } from '@/lib/audit/log'
 import { requireOwner, requireStaff } from '@/lib/auth/guards'
 import { getSessionUser } from '@/lib/auth/session'
 import { prisma } from '@/lib/db/prisma'
@@ -64,7 +65,7 @@ export async function recordPaymentAction(input: unknown): Promise<ActionResult>
 
 export async function refundPaymentAction(input: unknown): Promise<ActionResult> {
   try {
-    requireOwner(await getSessionUser())
+    const user = requireOwner(await getSessionUser())
     const parsed = refundPaymentSchema.safeParse(input)
     if (!parsed.success) {
       return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos.' }
@@ -76,6 +77,19 @@ export async function refundPaymentAction(input: unknown): Promise<ActionResult>
       reason: parsed.data.reason,
       appointmentId: parsed.data.appointmentId ?? null,
       orderProductId: parsed.data.orderProductId ?? null,
+    })
+
+    await recordAudit({
+      actorId: user.id,
+      action: 'refund',
+      entity: 'order',
+      entityId: parsed.data.orderCode,
+      detail: {
+        amountCents: parsed.data.amountCents,
+        reason: parsed.data.reason,
+        appointmentId: parsed.data.appointmentId ?? null,
+        orderProductId: parsed.data.orderProductId ?? null,
+      },
     })
 
     revalidatePath('/admin/agenda')

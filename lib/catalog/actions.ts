@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 
+import { recordAudit } from '@/lib/audit/log'
 import { requireOwner } from '@/lib/auth/guards'
 import { getSessionUser } from '@/lib/auth/session'
 import {
@@ -22,8 +23,9 @@ import {
   updateServiceSchema,
 } from '@/lib/validation/catalog'
 
-async function ownerGuard(): Promise<void> {
-  requireOwner(await getSessionUser())
+async function ownerGuard(): Promise<string> {
+  const user = requireOwner(await getSessionUser())
+  return user.id
 }
 
 function failure(error: unknown): ActionResult {
@@ -58,13 +60,20 @@ export async function createServiceAction(input: unknown): Promise<ActionResult>
 
 export async function updateServiceAction(input: unknown): Promise<ActionResult> {
   try {
-    await ownerGuard()
+    const actorId = await ownerGuard()
     const parsed = updateServiceSchema.safeParse(input)
     if (!parsed.success) {
       return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos.' }
     }
 
     await updateService(parsed.data)
+    await recordAudit({
+      actorId,
+      action: 'service_update',
+      entity: 'service',
+      entityId: parsed.data.id,
+      detail: parsed.data,
+    })
     revalidateCatalog()
     return { ok: true }
   } catch (error) {
@@ -106,13 +115,20 @@ export async function createProductAction(input: unknown): Promise<ActionResult>
 
 export async function updateProductAction(input: unknown): Promise<ActionResult> {
   try {
-    await ownerGuard()
+    const actorId = await ownerGuard()
     const parsed = updateProductSchema.safeParse(input)
     if (!parsed.success) {
       return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos.' }
     }
 
     await updateProduct(parsed.data)
+    await recordAudit({
+      actorId,
+      action: 'product_update',
+      entity: 'product',
+      entityId: parsed.data.id,
+      detail: parsed.data,
+    })
     revalidateCatalog()
     return { ok: true }
   } catch (error) {

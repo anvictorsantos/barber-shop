@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { e2ePassword } from './credentials'
+
 const seeded = process.env.E2E_SEEDED === 'true'
 
 test.describe('admin panel', () => {
@@ -9,7 +11,7 @@ test.describe('admin panel', () => {
 
   test('owner dashboard, finance, and clients render', async ({ page }) => {
     const login = await page.request.post('/api/auth/login', {
-      data: { identifier: 'luiz@barbeariadoluiz.com.br', password: 'demo1234' },
+      data: { identifier: 'luiz@barbeariadoluiz.com.br', password: e2ePassword() },
     })
     expect(login.ok()).toBeTruthy()
 

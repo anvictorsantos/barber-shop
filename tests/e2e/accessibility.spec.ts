@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { e2ePassword } from './credentials'
+
 import type { Page } from '@playwright/test'
 
 const seeded = process.env.E2E_SEEDED === 'true'
@@ -23,7 +25,7 @@ test.describe('accessibility and layout', () => {
 
   test('public and customer screens fit a phone and expose a skip link', async ({ page }) => {
     await page.request.post('/api/auth/login', {
-      data: { identifier: 'joao.silva@example.com', password: 'demo1234' },
+      data: { identifier: 'joao.silva@example.com', password: e2ePassword() },
     })
     await page.setViewportSize({ width: 390, height: 844 })
 
@@ -43,7 +45,7 @@ test.describe('accessibility and layout', () => {
 
   test('admin screens fit a desktop and expose a skip link', async ({ page }) => {
     await page.request.post('/api/auth/login', {
-      data: { identifier: 'luiz@barbeariadoluiz.com.br', password: 'demo1234' },
+      data: { identifier: 'luiz@barbeariadoluiz.com.br', password: e2ePassword() },
     })
     await page.setViewportSize({ width: 1440, height: 900 })
 
