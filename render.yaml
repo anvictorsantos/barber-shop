@@ -32,6 +32,8 @@ services:
         generateValue: true
       - key: CRON_SECRET
         generateValue: true
+      - key: ORIGIN_SHARED_SECRET
+        sync: false
       - key: DEMO_MODE
         value: 'false'
       - key: NEXT_PUBLIC_GTM_ID
