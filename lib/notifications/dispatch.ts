@@ -169,6 +169,7 @@ export async function notifyAppointment(
           select: {
             id: true,
             code: true,
+            publicToken: true,
             customerName: true,
             customerEmail: true,
             customerPhone: true,
@@ -189,7 +190,7 @@ export async function notifyAppointment(
     if (!shop) return { ...result, skipped: true }
 
     const baseUrl = getServerEnv().APP_URL.replace(/\/+$/, '')
-    const orderUrl = `${baseUrl}/pedido/${appointment.order.code}`
+    const orderUrl = `${baseUrl}/pedido/${appointment.order.code}?t=${encodeURIComponent(appointment.order.publicToken)}`
     const shopAddress = `${shop.addressLine}, ${shop.city}/${shop.state}`
 
     const calendarInput = {

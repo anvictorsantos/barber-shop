@@ -6,4 +6,4 @@ export interface OrderActor {
 }
 
 export type CreateOrderActionResult =
-  { ok: true; code: string; initPoint?: string } | { ok: false; error: string }
+  { ok: true; code: string; publicToken: string; initPoint?: string } | { ok: false; error: string }

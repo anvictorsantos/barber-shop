@@ -22,6 +22,7 @@ import { SkipLink } from '@/components/layout/SkipLink'
 import { getSessionUser } from '@/lib/auth/session'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { formatBRL } from '@/lib/format/money'
+import { canViewOrder } from '@/lib/orders/access'
 import { getOrderByCode } from '@/lib/orders/queries'
 import { orderStatusLabel, orderStatusTone } from '@/lib/orders/status'
 import { getShopSettings } from '@/lib/settings/queries'
@@ -47,12 +48,19 @@ function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-export default async function OrderPage({ params }: { params: Promise<{ code: string }> }) {
+export default async function OrderPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ code: string }>
+  searchParams: Promise<{ t?: string }>
+}) {
   const { code } = await params
-  const order = await getOrderByCode(code)
-  if (!order) notFound()
+  const { t } = await searchParams
+  const [order, user] = await Promise.all([getOrderByCode(code), getSessionUser()])
+  if (!order || !canViewOrder(order, user, t)) notFound()
 
-  const [user, shop] = await Promise.all([getSessionUser(), getShopSettings()])
+  const shop = await getShopSettings()
   const settled = order.payments.some((payment) => payment.paidAt !== null)
 
   const appointment = order.appointments[0] ?? null
