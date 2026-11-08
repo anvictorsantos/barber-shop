@@ -12,10 +12,12 @@ const tones: Record<StatusTone, string> = {
 
 export function StatusPill({
   tone = 'neutral',
+  pulse = false,
   children,
   className,
 }: {
   tone?: StatusTone
+  pulse?: boolean
   children: string
   className?: string
 }) {
@@ -29,8 +31,13 @@ export function StatusPill({
     >
       <span
         aria-hidden
-        className="h-1.5 w-1.5 rounded-full bg-current"
-      />
+        className="relative flex h-1.5 w-1.5"
+      >
+        {pulse ? (
+          <span className="absolute inset-0 animate-ping rounded-full bg-current opacity-60" />
+        ) : null}
+        <span className="relative h-1.5 w-1.5 rounded-full bg-current" />
+      </span>
       {children}
     </span>
   )

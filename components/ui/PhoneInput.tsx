@@ -3,6 +3,7 @@
 import { AsYouType, parsePhoneNumberFromString } from 'libphonenumber-js'
 import { useState } from 'react'
 
+import { Select } from '@/components/ui/Select'
 import { cn } from '@/lib/utils'
 
 const COUNTRIES = [
@@ -66,21 +67,17 @@ export function PhoneInput({
         className,
       )}
     >
-      <select
+      <Select
         aria-label="País do WhatsApp"
         value={country}
-        onChange={(event) => changeCountry(event.target.value as CountryCode)}
-        className="h-[38px] shrink-0 cursor-pointer rounded-sm border border-white/10 bg-surface-input px-2 text-caption text-text outline-none"
-      >
-        {COUNTRIES.map((item) => (
-          <option
-            key={item.code}
-            value={item.code}
-          >
-            {item.label} ({item.dial})
-          </option>
-        ))}
-      </select>
+        onValueChange={(value) => changeCountry(value as CountryCode)}
+        options={COUNTRIES.map((item) => ({
+          label: `${item.label} (${item.dial})`,
+          value: item.code,
+        }))}
+        className="shrink-0"
+        triggerClassName="h-[38px] w-auto rounded-sm px-2 text-caption"
+      />
 
       <input
         id={id}

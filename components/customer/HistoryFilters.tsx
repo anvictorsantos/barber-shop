@@ -1,11 +1,10 @@
 'use client'
 
-import { CalendarDays, ChevronDown, Search } from 'lucide-react'
+import { CalendarDays, Search } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
-const fieldClass =
-  'h-[31px] rounded-xs border border-white/[0.07] bg-background text-caption text-text outline-none transition focus:border-accent'
+import { Select } from '@/components/ui/Select'
 
 export function HistoryFilters({
   services,
@@ -75,55 +74,29 @@ export function HistoryFilters({
         </label>
       </div>
 
-      <div className="relative">
-        <select
-          name="service"
-          aria-label="Serviço"
-          defaultValue={searchParams.get('service') ?? ''}
-          onChange={(event) => update({ service: event.target.value })}
-          className={`${fieldClass} w-[150px] appearance-none pl-3 pr-7`}
-        >
-          <option value="">Todos os serviços</option>
-          {services.map((service) => (
-            <option
-              key={service.id}
-              value={service.id}
-            >
-              {service.name}
-            </option>
-          ))}
-        </select>
-        <ChevronDown
-          aria-hidden
-          strokeWidth={2}
-          className="pointer-events-none absolute right-3 top-1/2 h-2.5 w-2.5 -translate-y-1/2 text-muted"
-        />
-      </div>
+      <Select
+        aria-label="Serviço"
+        value={searchParams.get('service') ?? ''}
+        onValueChange={(value) => update({ service: value })}
+        className="w-[150px]"
+        triggerClassName="h-[31px] rounded-xs text-caption"
+        options={[
+          { label: 'Todos os serviços', value: '' },
+          ...services.map((service) => ({ label: service.name, value: service.id })),
+        ]}
+      />
 
-      <div className="relative">
-        <select
-          name="barber"
-          aria-label="Barbeiro"
-          defaultValue={searchParams.get('barber') ?? ''}
-          onChange={(event) => update({ barber: event.target.value })}
-          className={`${fieldClass} w-[155px] appearance-none pl-3 pr-7`}
-        >
-          <option value="">Todos os barbeiros</option>
-          {barbers.map((barber) => (
-            <option
-              key={barber.id}
-              value={barber.id}
-            >
-              {barber.name}
-            </option>
-          ))}
-        </select>
-        <ChevronDown
-          aria-hidden
-          strokeWidth={2}
-          className="pointer-events-none absolute right-3 top-1/2 h-2.5 w-2.5 -translate-y-1/2 text-muted"
-        />
-      </div>
+      <Select
+        aria-label="Barbeiro"
+        value={searchParams.get('barber') ?? ''}
+        onValueChange={(value) => update({ barber: value })}
+        className="w-[155px]"
+        triggerClassName="h-[31px] rounded-xs text-caption"
+        options={[
+          { label: 'Todos os barbeiros', value: '' },
+          ...barbers.map((barber) => ({ label: barber.name, value: barber.id })),
+        ]}
+      />
 
       <div className="flex h-[31px] min-w-0 flex-1 items-center gap-2 rounded-xs border border-white/[0.07] bg-background px-3">
         <Search

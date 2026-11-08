@@ -72,7 +72,7 @@ export default async function StorePage() {
               <EmptyState
                 icon={Package}
                 title="Nenhum produto disponível"
-                description="A barbearia ainda não cadastrou produtos ativos."
+                description="Ainda não há produtos por aqui. Volte em breve para conferir as novidades."
               />
             </Card>
           ) : (

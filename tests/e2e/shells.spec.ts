@@ -14,7 +14,7 @@ test.describe('account shells', () => {
     await page.getByRole('button', { name: 'Entrar' }).click()
 
     await expect(page).toHaveURL('/admin')
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible()
   })
 
   test('owner shell at 1440', async ({ page }) => {
@@ -25,7 +25,7 @@ test.describe('account shells', () => {
 
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/admin')
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Navegação administrativa' })).toBeVisible()
   })
 

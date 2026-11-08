@@ -1,7 +1,6 @@
 'use client'
 
-import { Home, Menu, X } from 'lucide-react'
-import Link from 'next/link'
+import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 
 import { LogoutButton } from '@/components/admin/LogoutButton'
@@ -56,16 +55,6 @@ export function AdminMobileMenu({ role }: { role: Role }) {
             <AdminNav role={role} />
 
             <div className="mt-auto flex flex-col gap-3 border-t border-white/10 pt-4">
-              <Link
-                href="/"
-                className="flex items-center gap-2 text-caption font-semibold text-muted transition hover:text-text"
-              >
-                <Home
-                  aria-hidden
-                  className="h-4 w-4"
-                />
-                Ver site
-              </Link>
               <LogoutButton />
             </div>
           </div>

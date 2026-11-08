@@ -20,6 +20,6 @@ test.describe('demo mode', () => {
 
     await page.getByRole('button', { name: 'Entrar como dono' }).click()
     await expect(page).toHaveURL('/admin')
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible()
   })
 })

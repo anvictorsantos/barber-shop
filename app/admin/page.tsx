@@ -27,7 +27,7 @@ import type { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Dashboard — Barbearia do Luiz',
+  title: 'Visão geral — Barbearia do Luiz',
   robots: { index: false, follow: false },
 }
 
@@ -69,7 +69,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Dashboard"
+        title="Visão geral"
         description={format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
         actions={
           <Link

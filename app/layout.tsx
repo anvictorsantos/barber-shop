@@ -3,7 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google'
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider'
 import { ConsentBanner } from '@/components/analytics/ConsentBanner'
 
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 
 import './globals.css'
@@ -23,9 +23,20 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: 'Barbearia do Luiz',
-  description: 'Corte, barba e resenha de alto padrão em Belo Horizonte.',
+  description:
+    'Corte bem-feito, atenção aos detalhes e atendimento que faz você se sentir em casa, em Belo Horizonte.',
   metadataBase: new URL(process.env.APP_URL || 'http://localhost:3000'),
   robots: { index: true, follow: true },
+  appleWebApp: {
+    capable: true,
+    title: 'Barbearia',
+    statusBarStyle: 'black-translucent',
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#121110',
+  colorScheme: 'dark',
 }
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

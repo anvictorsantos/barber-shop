@@ -225,7 +225,7 @@ export function SlotPicker({
               </div>
             ) : availableSlots.length === 0 ? (
               <p className="rounded-md border border-white/10 bg-background p-4 text-caption text-muted">
-                Nenhum horário para esta data. Escolha outro dia.
+                Não encontramos horários para esta data. Que tal tentar outro dia?
               </p>
             ) : (
               <div

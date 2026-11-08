@@ -16,7 +16,7 @@ test.describe('admin panel', () => {
     await page.setViewportSize({ width: 1440, height: 900 })
 
     await page.goto('/admin')
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible()
     await expect(page.getByText('Receita — 14 dias')).toBeVisible()
 
     await page.goto('/admin/financeiro')

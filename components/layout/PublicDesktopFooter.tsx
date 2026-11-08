@@ -51,7 +51,8 @@ export function PublicDesktopFooter({
         </nav>
 
         <p>
-          © {new Date().getFullYear()} {shopName} · Corte, barba e resenha em Belo Horizonte
+          © {new Date().getFullYear()} {shopName} · Corte bem-feito e atendimento de verdade em Belo
+          Horizonte
         </p>
       </div>
     </footer>

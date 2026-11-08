@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react'
 
 import { AuthField, AuthInput } from '@/components/auth/AuthField'
 import { AuthHeading } from '@/components/auth/AuthHeading'
+import { AuthRedirectOverlay } from '@/components/auth/AuthRedirectOverlay'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { PhoneVerification } from '@/components/auth/PhoneVerification'
 import { Button } from '@/components/ui/Button'
@@ -27,6 +28,7 @@ export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin:
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [phonePending, setPhonePending] = useState<string | null>(null)
+  const [redirecting, setRedirecting] = useState(false)
 
   if (phonePending) {
     return (
@@ -66,6 +68,8 @@ export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin:
       return
     }
 
+    setRedirecting(true)
+    await new Promise((resolve) => setTimeout(resolve, 450))
     router.push(postAuthPath(result.data.user.role, next))
     router.refresh()
   }
@@ -154,6 +158,8 @@ export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin:
           </p>
         </div>
       </form>
+
+      {redirecting ? <AuthRedirectOverlay label="Criando sua conta…" /> : null}
     </div>
   )
 }

@@ -27,7 +27,7 @@ export const customerNavItems: readonly NavItem[] = [
 ]
 
 const adminNavItems: readonly NavItem[] = [
-  { href: '/admin', label: 'Dashboard', icon: 'dashboard' },
+  { href: '/admin', label: 'Visão geral', icon: 'dashboard' },
   { href: '/admin/agenda', label: 'Agenda', icon: 'calendar' },
   { href: '/admin/clientes', label: 'Clientes', icon: 'users' },
   { href: '/admin/catalogo', label: 'Serviços', icon: 'scissors', ownerOnly: true },

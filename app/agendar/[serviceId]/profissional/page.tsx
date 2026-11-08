@@ -106,7 +106,7 @@ export default async function SelectBarberPage({
               <EmptyState
                 icon={Scissors}
                 title="Nenhum profissional disponível"
-                description="A barbearia ainda não cadastrou barbeiros ativos."
+                description="Ainda não há profissionais por aqui. Volte em breve ou fale com a gente."
               />
             </Card>
           ) : (

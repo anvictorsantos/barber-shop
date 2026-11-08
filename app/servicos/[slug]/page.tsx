@@ -22,7 +22,11 @@ import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
 
-const INCLUSIONS = ['Atendimento dedicado', 'Produtos premium', 'Finalização'] as const
+const INCLUSIONS = [
+  'Atendimento próximo',
+  'Produtos de qualidade',
+  'Acabamento caprichado',
+] as const
 
 export async function generateMetadata({
   params,

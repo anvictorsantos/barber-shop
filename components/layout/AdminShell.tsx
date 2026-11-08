@@ -1,4 +1,3 @@
-import { Home } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -53,17 +52,6 @@ export async function AdminShell({ children }: { children: ReactNode }) {
         <AdminNav role={user.role} />
 
         <div className="mt-auto flex flex-col gap-4">
-          <Link
-            href="/"
-            className="flex items-center gap-3 rounded-lg px-4 py-3 text-body font-semibold text-muted transition hover:bg-white/5 hover:text-text"
-          >
-            <Home
-              className="h-[18px] w-[18px]"
-              aria-hidden
-            />
-            Ver site
-          </Link>
-
           <div className="flex items-center gap-3 rounded-lg border border-border bg-surface p-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-full border border-accent bg-primary/10 text-caption font-bold text-accent">
               {initials(user.name)}
@@ -101,7 +89,12 @@ export async function AdminShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="hidden lg:block">
-            <StatusPill tone="success">BARBEARIA ABERTA</StatusPill>
+            <StatusPill
+              tone="success"
+              pulse
+            >
+              BARBEARIA ABERTA
+            </StatusPill>
           </div>
 
           <div className="flex items-center gap-3">
