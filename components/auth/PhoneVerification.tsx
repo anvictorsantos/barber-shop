@@ -62,14 +62,14 @@ export function PhoneVerification({
   }
 
   return (
-    <div className="flex w-full flex-col gap-7">
+    <div className="flex w-full flex-col gap-6">
       <AuthHeading
         title="Confirme seu WhatsApp"
         description={`Enviamos um código de 6 dígitos para ${phone}.`}
       />
 
       <form
-        className="flex flex-col gap-7"
+        className="flex flex-col gap-6"
         onSubmit={verify}
       >
         {notice ? <FormMessage tone="success">{notice}</FormMessage> : null}
@@ -93,11 +93,11 @@ export function PhoneVerification({
           />
         </AuthField>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <Button
             type="submit"
             size="lg"
-            className="h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm"
+            className="w-full"
             disabled={pending || code.length !== 6}
           >
             {pending ? 'Confirmando…' : 'Confirmar'}
@@ -116,18 +116,18 @@ export function PhoneVerification({
               <button
                 type="button"
                 onClick={onBack}
-                className="cursor-pointer text-caption font-semibold text-muted underline hover:text-text"
+                className="cursor-pointer text-caption text-muted transition-colors hover:text-text"
               >
                 Voltar
               </button>
             ) : null}
           </div>
 
-          <p className="text-center text-[13px] leading-4 text-muted">
+          <p className="text-center text-caption text-muted">
             Já confirmou?{' '}
             <Link
               href="/entrar"
-              className="font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
+              className="font-medium text-accent transition-colors hover:text-accent-hover"
             >
               Entrar
             </Link>

@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import { buttonClasses } from '@/components/ui/Button'
 import { readConsent, writeConsent } from '@/lib/analytics/consent'
 import { cn } from '@/lib/utils'
 
@@ -43,42 +44,46 @@ export function ConsentBanner() {
         role="region"
         aria-labelledby="consent-title"
         className={cn(
-          'fixed inset-x-0 z-50 border-t border-border bg-surface/95 px-4 py-4 backdrop-blur sm:px-6',
-          hasBottomNav ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))] lg:bottom-0' : 'bottom-0',
+          'fixed inset-x-0 z-50 border-t border-border bg-surface px-4 py-3 lg:bottom-6 lg:left-6 lg:right-auto lg:max-w-[420px] lg:rounded-lg lg:border lg:p-5 lg:shadow-card',
+          hasBottomNav ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))] lg:bottom-6' : 'bottom-0',
         )}
       >
-        <div className="mx-auto flex max-w-shell flex-col gap-3 md:flex-row md:items-center md:gap-5">
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex flex-col gap-3 lg:gap-4">
+          <div className="flex flex-col gap-1.5">
             <p
               id="consent-title"
-              className="text-label font-bold uppercase tracking-wide text-text"
+              className="text-body font-medium text-text"
             >
               Cookies e medição
             </p>
-            <p className="text-body leading-relaxed text-text-secondary">
+            <p className="text-caption leading-relaxed text-muted">
               Usamos cookies para medir o uso do site e melhorar a experiência. Você pode aceitar ou
-              recusar.
+              recusar.{' '}
+              <button
+                type="button"
+                onClick={() => setPrivacyOpen(true)}
+                className="cursor-pointer text-text-secondary underline underline-offset-2 transition-colors hover:text-text"
+              >
+                Privacidade
+              </button>
             </p>
-            <button
-              type="button"
-              onClick={() => setPrivacyOpen(true)}
-              className="cursor-pointer self-start text-label font-semibold text-muted underline transition hover:text-text"
-            >
-              Privacidade
-            </button>
           </div>
-          <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={() => decide('denied')}
-              className="min-h-touch cursor-pointer rounded-lg border border-border-strong bg-transparent px-5 font-bold text-body text-text-secondary transition hover:border-white/30 hover:text-text"
+              className={buttonClasses({
+                variant: 'ghost',
+                size: 'sm',
+                className: 'min-h-touch',
+              })}
             >
               Recusar
             </button>
             <button
               type="button"
               onClick={() => decide('granted')}
-              className="min-h-touch cursor-pointer rounded-lg border border-primary/60 bg-primary/20 px-5 font-bold text-body text-text transition hover:bg-primary/30"
+              className={buttonClasses({ size: 'sm', className: 'min-h-touch' })}
             >
               Aceitar
             </button>
@@ -97,7 +102,7 @@ export function ConsentBanner() {
           aria-label="Fechar privacidade"
           tabIndex={privacyOpen ? 0 : -1}
           onClick={() => setPrivacyOpen(false)}
-          className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-sm"
+          className="absolute inset-0 cursor-default bg-black/70"
         />
 
         <div
@@ -105,14 +110,14 @@ export function ConsentBanner() {
           aria-modal="true"
           aria-labelledby="privacy-title"
           className={cn(
-            'relative w-full max-w-lg rounded-xl border border-white/10 bg-surface p-6 transition duration-200',
-            privacyOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
+            'relative w-full max-w-lg rounded-xl border border-border bg-surface p-6 transition-opacity duration-200',
+            privacyOpen ? 'opacity-100' : 'opacity-0',
           )}
         >
           <div className="flex items-start justify-between gap-4">
             <h2
               id="privacy-title"
-              className="text-lg font-bold leading-[22px] text-text"
+              className="font-display text-title font-semibold text-text"
             >
               Privacidade
             </h2>
@@ -120,7 +125,7 @@ export function ConsentBanner() {
               type="button"
               onClick={() => setPrivacyOpen(false)}
               aria-label="Fechar"
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-muted transition hover:bg-white/5 hover:text-text"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-muted transition-colors hover:bg-white/5 hover:text-text"
             >
               <X
                 aria-hidden

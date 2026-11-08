@@ -11,7 +11,7 @@ export function Input({
     <input
       aria-invalid={invalid || undefined}
       className={cn(
-        'h-10 w-full rounded-sm border border-border-strong bg-surface-input px-3 text-body text-text placeholder:text-subtle transition focus:border-accent',
+        'h-10 w-full rounded-sm border border-border-strong bg-surface-input px-3 text-body text-text placeholder:text-subtle transition-colors focus:border-accent',
         invalid && 'border-danger',
         className,
       )}
@@ -34,10 +34,10 @@ export function Field({
   children: ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <label
         htmlFor={htmlFor}
-        className="text-caption font-semibold text-muted"
+        className="text-caption font-medium text-muted"
       >
         {label}
       </label>

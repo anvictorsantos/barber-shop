@@ -58,14 +58,13 @@ export function FavoriteButton({
         aria-label={saved ? `Remover ${label} dos favoritos` : `Salvar ${label} nos favoritos`}
         title={saved ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
         className={cn(
-          'flex cursor-pointer items-center justify-center transition',
-          variant === 'bare'
-            ? 'h-5 w-5 text-primary hover:text-primary-hover'
-            : 'h-9 w-9 rounded-full border',
+          'flex cursor-pointer items-center justify-center transition-colors',
+          variant === 'bare' ? 'h-5 w-5 hover:text-accent' : 'h-9 w-9 rounded-md border',
+          variant === 'bare' && (saved ? 'text-accent' : 'text-muted'),
           variant === 'badge' &&
             (saved
-              ? 'border-danger/50 bg-danger/10 text-danger'
-              : 'border-border bg-surface-input text-muted hover:border-accent hover:text-accent'),
+              ? 'border-accent/40 bg-accent/10 text-accent'
+              : 'border-border text-muted hover:border-border-strong hover:text-text'),
           pending && 'opacity-50',
         )}
       >

@@ -1,4 +1,4 @@
-import { MapPin, Package } from 'lucide-react'
+import { Package } from 'lucide-react'
 
 import { ProductCard } from '@/components/catalog/ProductCard'
 import { PublicDesktopFooter } from '@/components/layout/PublicDesktopFooter'
@@ -7,6 +7,7 @@ import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 import { getSessionUser } from '@/lib/auth/session'
 import { getActiveProducts } from '@/lib/catalog/queries'
 import { getFavoriteIds } from '@/lib/customer/queries'
@@ -55,26 +56,16 @@ export default async function StorePage() {
           />
         </div>
 
-        <section className="flex w-full flex-1 flex-col gap-8 px-5 pb-16 pt-6 lg:px-10 lg:pt-10 xl:px-20">
-          <div className="flex flex-col gap-2.5">
-            <span className="text-label font-bold uppercase tracking-[1.8px] text-accent">
-              Loja · Retirada na barbearia
-            </span>
-            <h1 className="font-display text-[32px] font-bold leading-[1.2] text-text lg:text-[38px]">
+        <section className="flex w-full flex-1 flex-col gap-10 px-6 pb-16 pt-8 lg:px-10 lg:pb-20 lg:pt-10 xl:px-10">
+          <div className="flex flex-col gap-4">
+            <SectionLabel>Retirada na barbearia</SectionLabel>
+            <h1 className="font-display text-[40px] font-semibold leading-[1.05] text-text lg:text-[48px]">
               Loja
             </h1>
-            <p className="text-[15px] leading-[1.5] text-muted">
-              Produtos selecionados para levar no mesmo dia. Retirada na barbearia.
+            <p className="max-w-[560px] text-lead leading-relaxed text-muted">
+              Pomadas, óleos e bebidas para levar no mesmo dia. Sem custo de entrega.
             </p>
           </div>
-
-          <p className="flex items-center gap-2 text-caption text-muted">
-            <MapPin
-              className="h-4 w-4 text-primary"
-              aria-hidden
-            />
-            Retirada na barbearia, sem custo de entrega.
-          </p>
 
           {products.length === 0 ? (
             <Card>
@@ -85,7 +76,7 @@ export default async function StorePage() {
               />
             </Card>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {products.map((product) => (
                 <ProductCard
                   key={product.id}

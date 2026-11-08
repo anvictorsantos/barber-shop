@@ -1,9 +1,9 @@
-import { ArrowRight, UserRound } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
 import { postAuthPath } from '@/lib/auth/redirect'
 import type { SessionUser } from '@/lib/auth/session'
+import { cn } from '@/lib/utils'
 
 type ActivePage = 'home' | 'services' | 'booking'
 
@@ -33,11 +33,11 @@ export function PublicDesktopHeader({
   const accountHref = user ? postAuthPath(user.role) : '/entrar'
 
   return (
-    <header className={overlay ? 'absolute inset-x-0 top-0 z-40' : 'border-b border-white/10'}>
-      <div className="flex h-[88px] items-center justify-between gap-8 px-10 xl:px-20">
+    <header className={overlay ? 'absolute inset-x-0 top-0 z-40' : 'border-b border-border'}>
+      <div className="mx-auto grid h-20 max-w-shell grid-cols-[1fr_auto_1fr] items-center gap-8 px-6 lg:px-10">
         <Link
           href="/"
-          className="flex items-center"
+          className="flex items-center justify-self-start"
         >
           <Image
             src="/brand/logo.png"
@@ -45,52 +45,52 @@ export function PublicDesktopHeader({
             width={774}
             height={880}
             priority
-            className="h-[60px] w-auto"
+            className="h-12 w-auto"
           />
         </Link>
 
         <nav className="flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              aria-current={link.page === active ? 'page' : undefined}
-              className={
-                link.page === active
-                  ? 'text-sm font-bold text-accent'
-                  : 'text-sm font-medium text-muted transition hover:text-text'
-              }
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const isActive = link.page === active
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                aria-current={isActive ? 'page' : undefined}
+                className={cn(
+                  'relative text-body transition-colors',
+                  isActive ? 'text-text' : 'text-muted hover:text-text',
+                )}
+              >
+                {link.label}
+                {isActive ? (
+                  <span
+                    aria-hidden
+                    className="absolute -bottom-2 left-1/2 h-[3px] w-[3px] -translate-x-1/2 rotate-45 bg-accent"
+                  />
+                ) : null}
+              </Link>
+            )
+          })}
         </nav>
 
         {hideAccount ? (
-          <div className="w-[1px]" />
+          <div className="justify-self-end" />
         ) : (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-self-end gap-6">
             <Link
               href={accountHref}
-              className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-white/10 px-[22px] text-sm font-bold text-text transition hover:bg-white/15"
+              className="text-body text-muted transition-colors hover:text-text"
             >
               {user ? 'Minha conta' : 'Entrar'}
-              <UserRound
-                aria-hidden
-                className="h-[18px] w-[18px]"
-              />
             </Link>
 
             {user ? null : (
               <Link
                 href="/entrar?modo=criar"
-                className="inline-flex h-[52px] items-center justify-center gap-2.5 rounded-md bg-primary px-[22px] text-sm font-bold text-white transition hover:bg-primary-hover"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-border-strong px-4 text-body font-medium text-text transition-colors hover:border-accent/60"
               >
                 Criar conta
-                <ArrowRight
-                  aria-hidden
-                  className="h-[18px] w-[18px]"
-                />
               </Link>
             )}
           </div>

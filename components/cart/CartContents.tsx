@@ -66,7 +66,7 @@ export function CartContents({
           action={
             <Link
               href="/servicos"
-              className="inline-flex min-h-touch items-center rounded-lg bg-primary px-5 py-2.5 text-body font-bold text-white hover:bg-primary-hover"
+              className="inline-flex min-h-touch items-center rounded-lg bg-primary px-5 py-2.5 text-body font-bold text-accent-ink hover:bg-primary-hover"
             >
               Ver serviços
             </Link>

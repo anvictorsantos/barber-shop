@@ -1,4 +1,4 @@
-import { CalendarDays, Check, History } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
 import { AuthPanel, type AuthMode } from '@/components/auth/AuthPanel'
@@ -7,6 +7,7 @@ import { PublicDesktopFooter } from '@/components/layout/PublicDesktopFooter'
 import { PublicDesktopHeader } from '@/components/layout/PublicDesktopHeader'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SkipLink } from '@/components/layout/SkipLink'
+import { SectionLabel } from '@/components/ui/SectionLabel'
 import { postAuthPath } from '@/lib/auth/redirect'
 import { getSessionUser } from '@/lib/auth/session'
 import { getServerEnv } from '@/lib/env'
@@ -23,12 +24,10 @@ export const metadata: Metadata = {
 
 const BENEFITS = [
   {
-    icon: CalendarDays,
     title: 'Agendamento em segundos',
     description: 'Seus dados ficam salvos para o próximo horário.',
   },
   {
-    icon: History,
     title: 'Seu histórico na mão',
     description: 'Atendimentos anteriores, avaliações e créditos de fidelidade.',
   },
@@ -77,42 +76,32 @@ export default async function LoginPage({
           />
         </div>
 
-        <section className="flex w-full flex-1 px-5 py-10 lg:px-10 lg:py-12 xl:px-[120px] xl:py-16">
-          <div className="mx-auto grid w-full max-w-[1200px] items-center gap-10 lg:grid-cols-[minmax(0,1fr)_520px] xl:gap-[104px]">
+        <section className="flex w-full flex-1 px-6 py-12 lg:px-10 lg:py-16 xl:px-[120px]">
+          <div className="mx-auto grid w-full max-w-[1160px] items-center gap-12 lg:grid-cols-[minmax(0,1fr)_480px] xl:gap-20">
             <div className="flex flex-col gap-8">
               <div className="flex flex-col gap-5">
-                <span className="text-label font-bold uppercase tracking-[1.8px] text-accent">
-                  Bem-vindo de volta
-                </span>
-                <h1 className="font-display text-[34px] font-bold leading-[1.15] text-text lg:text-[40px] xl:text-[48px]">
-                  Entre e acompanhe seus horários.
+                <SectionLabel>Sua conta</SectionLabel>
+                <h1 className="font-display text-[38px] font-semibold leading-[1.08] text-text lg:text-[44px] xl:text-[50px]">
+                  Seus horários, em um só lugar.
                 </h1>
-                <p className="text-base leading-[1.65] text-muted">
-                  Salve seus profissionais favoritos e veja todo o histórico de atendimentos em um
-                  só lugar.
+                <p className="max-w-[440px] text-lead leading-relaxed text-muted">
+                  Salve seus profissionais favoritos e veja todo o histórico de atendimentos sem
+                  procurar em outro lugar.
                 </p>
               </div>
 
-              <span className="h-0.5 w-12 bg-primary" />
-
-              <div className="flex flex-col gap-6">
-                {BENEFITS.map((benefit) => (
+              <div className="flex flex-col divide-y divide-border border-y border-border">
+                {BENEFITS.map((benefit, index) => (
                   <div
                     key={benefit.title}
-                    className="flex items-center gap-4"
+                    className="flex gap-5 py-4"
                   >
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[#302119]">
-                      <benefit.icon
-                        aria-hidden
-                        strokeWidth={1.8}
-                        className="h-5 w-5 text-primary"
-                      />
+                    <span className="pt-0.5 text-caption tabular-nums text-subtle">
+                      {String(index + 1).padStart(2, '0')}
                     </span>
-                    <div className="flex min-w-0 flex-col gap-1.5">
-                      <span className="text-[15px] font-semibold leading-[18px] text-text">
-                        {benefit.title}
-                      </span>
-                      <span className="text-[13px] leading-[1.5] text-muted">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <span className="text-body font-medium text-text">{benefit.title}</span>
+                      <span className="text-caption leading-relaxed text-muted">
                         {benefit.description}
                       </span>
                     </div>
@@ -120,10 +109,9 @@ export default async function LoginPage({
                 ))}
               </div>
 
-              <p className="flex items-center gap-2.5 pt-2 text-[13px] leading-[1.5] text-muted">
+              <p className="flex items-center gap-2 text-caption text-muted">
                 <Check
                   aria-hidden
-                  strokeWidth={1.8}
                   className="h-4 w-4 shrink-0 text-accent"
                 />
                 Agendar sem conta também funciona — você pode entrar depois.

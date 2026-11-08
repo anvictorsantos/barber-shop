@@ -1,6 +1,5 @@
 'use client'
 
-import { ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
@@ -72,19 +71,19 @@ export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin:
   }
 
   return (
-    <div className="flex w-full flex-col gap-7">
+    <div className="flex w-full flex-col gap-6">
       <AuthHeading
         title="Criar conta"
         description="Informe seu nome, telefone ou e-mail e uma senha."
       />
 
       <form
-        className="flex flex-col gap-7"
+        className="flex flex-col gap-6"
         onSubmit={submit}
       >
         {error ? <FormMessage>{error}</FormMessage> : null}
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <AuthField
             label="Nome"
             htmlFor="register-name"
@@ -133,26 +132,22 @@ export function RegisterForm({ next, onLogin }: { next?: string | null; onLogin:
           </AuthField>
         </div>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <Button
             type="submit"
             size="lg"
-            className="h-[52px] w-full gap-2.5 rounded-md px-[22px] text-sm"
+            className="w-full"
             disabled={pending}
           >
             {pending ? 'Criando conta…' : 'Criar conta'}
-            <ChevronRight
-              aria-hidden
-              className="h-[18px] w-[18px]"
-            />
           </Button>
 
-          <p className="text-center text-[13px] leading-4 text-muted">
+          <p className="text-center text-caption text-muted">
             Já tem conta?{' '}
             <button
               type="button"
               onClick={onLogin}
-              className="cursor-pointer font-semibold text-accent underline underline-offset-2 transition hover:text-accent-hover"
+              className="cursor-pointer font-medium text-accent transition-colors hover:text-accent-hover"
             >
               Entrar
             </button>
