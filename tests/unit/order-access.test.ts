@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { canViewOrder } from '@/lib/orders/access'
-
 import type { SessionUser } from '@/lib/auth/session'
+import { canViewOrder } from '@/lib/orders/access'
 
 const order = {
   publicToken: 'secret-token',
