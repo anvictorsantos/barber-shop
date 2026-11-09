@@ -1,4 +1,5 @@
 import { hash } from '@node-rs/argon2'
+import { PrismaPg } from '@prisma/adapter-pg'
 import {
   PrismaClient,
   type AppointmentSource,
@@ -9,7 +10,9 @@ import {
 import { addDays, format, getDay, parseISO } from 'date-fns'
 import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+})
 const TIMEZONE = 'America/Sao_Paulo'
 
 function requireDemoPassword(): string {

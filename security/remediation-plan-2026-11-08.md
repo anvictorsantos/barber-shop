@@ -58,7 +58,7 @@ Until step 4 passes, F-01 is open and the production OWNER account has a public 
 | F-11 CSP `unsafe-inline` | Low | Per-request nonce + `strict-dynamic` in `proxy.ts` | 10 | done |
 | F-12 open image proxy | Low | Exact host allowlist | 8 | open |
 | F-13 webhook assumptions | Low | Fail closed, `ts` freshness, amount assert | 8 | open |
-| F-14 dependencies | Low | Update + CI audit gate | 8 | open |
+| F-14 dependencies | Low | Prisma 7 + pg adapter; CI audit gate | 8/11 | done |
 | F-15 hardening bundle | Low | `.env` 600, headers (adds COOP/CORP), security.txt, password policy, audit log | 1/8/9 | done |
 | F-16 refund race | High | Atomic claim + compensating failure path | 5 | open |
 | F-17 no-show race | Medium | Conditional transition inside the transaction | 5 | open |
@@ -205,8 +205,8 @@ reject `ts` older than 5 min; assert provider amount `>= order.totalCents`.
 when the role changes. Step 9 adds the list/revoke UI.
 
 **D — Ops hygiene:** image `remotePatterns` → `images.unsplash.com` only; dependency updates and a
-CI gate at `--audit-level=critical` (`npm audit --omit=dev` still reports the Prisma 7 / deepmerge-ts
-high advisory); `/.well-known/security.txt`; `Cross-Origin-Opener-Policy` and
+CI gate at `--audit-level=critical` (the Prisma 7 / deepmerge-ts high advisory was cleared in step
+11); `/.well-known/security.txt`; `Cross-Origin-Opener-Policy` and
 `Cross-Origin-Resource-Policy` set to `same-origin`; truncate the Mercado Pago error body; password
 denylist at registration.
 
@@ -256,13 +256,28 @@ scripts without a nonce, and a headless Chromium run of `/`, `/servicos`, `/entr
 
 ---
 
+## Step 11 — Prisma 7 (F-14)
+
+`prisma` and `@prisma/client` move to 7.10.1 and connect through `@prisma/adapter-pg`. The schema
+`datasource` keeps only `provider`; `prisma.config.ts` supplies `DIRECT_URL` for migrations and the
+adapter takes `DATABASE_URL` at runtime. Prisma 7 no longer loads `.env`, so
+`vitest.integration.config.ts` loads it explicitly. See ADR 0012.
+
+**Acceptance:** `npm audit --omit=dev` shows no high or critical advisory; generate, migrate deploy,
+build, unit and integration tests all pass; the app renders DB-backed pages against a real database.
+
+**Observed 2026-11-09:** `npm audit --omit=dev` reports 5 moderate (no high/critical), 101 unit and
+62 integration tests pass, `prisma migrate status` is clean, and `/` plus `/servicos` render 200 from
+a local `next start`.
+
+---
+
 ## Accepted risks
 
 | Risk | Why accepted | Revisit |
 | --- | --- | --- |
 | No MFA on OWNER/BARBER (F-07) | Needs recovery-code UX and schema; lockout closes the practical brute-force path | Dedicated project after P1/P2 |
 | Order token links are bearer links | Anyone with the WhatsApp/email link can open the order; that is the delivery channel | Redeem-once is not compatible with re-opening |
-| Prisma 7 / deepmerge-ts high advisory | Fix requires a Prisma major upgrade; no runtime request path uses it | Upgrade project after this branch |
 | Email registration no longer logs in immediately | Enumeration fix requires a uniform response; verification-first is the secure flow | Revisit onboarding copy after launch |
 
 ---

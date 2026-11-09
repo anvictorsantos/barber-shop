@@ -1,9 +1,11 @@
+import { existsSync } from 'node:fs'
 import { loadEnvFile } from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { defineConfig } from 'vitest/config'
 
-if (!process.env.DATABASE_URL) loadEnvFile('.env')
+// Prisma 7 no longer auto-loads .env, and loadEnvFile never overrides real env vars.
+if (existsSync('.env')) loadEnvFile('.env')
 
 const databaseUrl = process.env.DATABASE_URL
 if (!databaseUrl) throw new Error('DATABASE_URL is required for integration tests.')
