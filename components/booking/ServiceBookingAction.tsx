@@ -52,7 +52,7 @@ export function ServiceBookingAction({
         Agendar este serviço
         <ChevronRight
           aria-hidden
-          className="h-4 w-4"
+          className="w-4 h-4"
         />
       </Link>
     )
@@ -116,7 +116,7 @@ export function ServiceBookingAction({
         {pending ? 'Verificando…' : 'Adicionar ao agendamento'}
         <ChevronRight
           aria-hidden
-          className="h-4 w-4"
+          className="w-4 h-4"
         />
       </button>
       <span className="text-caption text-muted">
