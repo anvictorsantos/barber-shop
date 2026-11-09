@@ -46,23 +46,23 @@ Until step 4 passes, F-01 is open and the production OWNER account has a public 
 | Finding | Severity | Decision | Step | Status |
 | --- | --- | --- | --- | --- |
 | F-01 seeded password | Critical | Rotation + seed/README/E2E guard | 0/1 | open |
-| F-02 XFF bypass | High | Trusted client IP + shared limiter + per-account counters | 3 | open |
-| F-03 OTP brute force | High | Issuance caps + failure counter that survives reissue | 4 | open |
-| F-04 open redirect | Medium | Strict same-origin path parsing | 2 | open |
-| F-05 order enumeration | Medium | `publicToken` on anonymous access | 6 | open |
-| F-06 enumeration oracles | Medium | Generic register, dummy hash, always-202 reset | 7 | open |
+| F-02 XFF bypass | High | Trusted client IP + shared limiter + per-account counters | 3 | done |
+| F-03 OTP brute force | High | Issuance caps + failure counter that survives reissue | 4 | done |
+| F-04 open redirect | Medium | Strict same-origin path parsing | 2 | done |
+| F-05 order enumeration | Medium | `publicToken` on anonymous access | 6 | done |
+| F-06 enumeration oracles | Medium | Generic register, dummy hash, always-202 reset | 7 | done |
 | F-07 no MFA | Medium | Deferred; lockout shipped | — | accepted risk |
-| F-08 in-memory limiter | Low | Postgres store | 1 | open |
+| F-08 in-memory limiter | Low | Postgres store | 1 | done |
 | F-09 session lifetime | Low | Absolute cap + session list/revoke UI | 8/9 | done |
-| F-10 missing Origin | Low | Require `Origin` or same-origin `Referer` on cookie-authenticated writes | 8 | open |
+| F-10 missing Origin | Low | Require `Origin` or same-origin `Referer` on cookie-authenticated writes | 8 | done |
 | F-11 CSP `unsafe-inline` | Low | Per-request nonce + `strict-dynamic` in `proxy.ts` | 10 | done |
-| F-12 open image proxy | Low | Exact host allowlist | 8 | open |
-| F-13 webhook assumptions | Low | Fail closed, `ts` freshness, amount assert | 8 | open |
+| F-12 open image proxy | Low | Exact host allowlist | 8 | done |
+| F-13 webhook assumptions | Low | Fail closed, `ts` freshness, amount assert | 8 | done |
 | F-14 dependencies | Low | Prisma 7 + pg adapter; CI audit gate | 8/11 | done |
 | F-15 hardening bundle | Low | `.env` 600, headers (adds COOP/CORP), security.txt, password policy, audit log | 1/8/9 | done |
-| F-16 refund race | High | Atomic claim + compensating failure path | 5 | open |
-| F-17 no-show race | Medium | Conditional transition inside the transaction | 5 | open |
-| F-18 unmapped race errors | Low | Retry once, map `P2034`/`P2002` | 5 | open |
+| F-16 refund race | High | Atomic claim + compensating failure path | 5 | done |
+| F-17 no-show race | Medium | Conditional transition inside the transaction | 5 | done |
+| F-18 unmapped race errors | Low | Retry once, map `P2034`/`P2002` | 5 | done |
 
 ---
 
