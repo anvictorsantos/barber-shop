@@ -12,7 +12,7 @@ export function ConsentBanner() {
   const [decided, setDecided] = useState(true)
   const [privacyOpen, setPrivacyOpen] = useState(false)
   const pathname = usePathname()
-  const hasBottomNav = pathname.startsWith('/conta')
+  const hasBottomNav = pathname.startsWith('/conta') || pathname.startsWith('/servicos/')
 
   useEffect(() => {
     setDecided(readConsent() !== null)
