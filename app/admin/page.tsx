@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
+import { ActiveSessions } from '@/components/auth/ActiveSessions'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -184,6 +185,8 @@ export default async function AdminDashboardPage() {
           />
         </Link>
       ) : null}
+
+      <ActiveSessions />
     </div>
   )
 }

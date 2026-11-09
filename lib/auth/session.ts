@@ -128,3 +128,23 @@ export async function destroySession(): Promise<void> {
 export async function revokeAllSessions(userId: string): Promise<void> {
   await prisma.session.deleteMany({ where: { userId } })
 }
+
+export async function getCurrentSessionId(): Promise<string | null> {
+  const store = await cookies()
+  const token = store.get(SESSION_COOKIE)?.value
+  if (!token) return null
+
+  const session = await prisma.session.findUnique({
+    where: { tokenHash: hashSessionToken(token) },
+    select: { id: true },
+  })
+  return session?.id ?? null
+}
+
+export async function revokeSession(userId: string, sessionId: string): Promise<void> {
+  await prisma.session.deleteMany({ where: { id: sessionId, userId } })
+}
+
+export async function revokeOtherSessions(userId: string, currentSessionId: string): Promise<void> {
+  await prisma.session.deleteMany({ where: { userId, id: { not: currentSessionId } } })
+}

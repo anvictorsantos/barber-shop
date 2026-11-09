@@ -53,13 +53,13 @@ Until step 4 passes, F-01 is open and the production OWNER account has a public 
 | F-06 enumeration oracles | Medium | Generic register, dummy hash, always-202 reset | 7 | open |
 | F-07 no MFA | Medium | Deferred; lockout shipped | — | accepted risk |
 | F-08 in-memory limiter | Low | Postgres store | 1 | open |
-| F-09 session lifetime | Low | Absolute cap; no list/revoke UI yet | 8 | open |
+| F-09 session lifetime | Low | Absolute cap + session list/revoke UI | 8/9 | done |
 | F-10 missing Origin | Low | Require `Origin` or same-origin `Referer` on cookie-authenticated writes | 8 | open |
 | F-11 CSP `unsafe-inline` | Low | Deferred, retest later | — | accepted risk |
 | F-12 open image proxy | Low | Exact host allowlist | 8 | open |
 | F-13 webhook assumptions | Low | Fail closed, `ts` freshness, amount assert | 8 | open |
 | F-14 dependencies | Low | Update + CI audit gate | 8 | open |
-| F-15 hardening bundle | Low | `.env` 600, headers, security.txt, password policy, audit log | 1/8 | open |
+| F-15 hardening bundle | Low | `.env` 600, headers (adds COOP/CORP), security.txt, password policy, audit log | 1/8/9 | done |
 | F-16 refund race | High | Atomic claim + compensating failure path | 5 | open |
 | F-17 no-show race | Medium | Conditional transition inside the transaction | 5 | open |
 | F-18 unmapped race errors | Low | Retry once, map `P2034`/`P2002` | 5 | open |
@@ -202,12 +202,13 @@ responses are byte-identical for new and existing contacts.
 reject `ts` older than 5 min; assert provider amount `>= order.totalCents`.
 
 **B — Sessions (F-09):** absolute `expiresAt` cap (7 days staff, 30 days customer); rotate the token
-when the role changes. No list/revoke UI in this pass.
+when the role changes. Step 9 adds the list/revoke UI.
 
 **D — Ops hygiene:** image `remotePatterns` → `images.unsplash.com` only; dependency updates and a
 CI gate at `--audit-level=critical` (`npm audit --omit=dev` still reports the Prisma 7 / deepmerge-ts
-high advisory); `/.well-known/security.txt`; truncate the Mercado Pago error body; password denylist
-at registration.
+high advisory); `/.well-known/security.txt`; `Cross-Origin-Opener-Policy` and
+`Cross-Origin-Resource-Policy` set to `same-origin`; truncate the Mercado Pago error body; password
+denylist at registration.
 
 **F-10:** `assertSameOrigin` rejects a foreign `Origin` and now also a foreign `Referer`; requests
 with neither header still pass because cron, webhook, and non-browser clients authenticate
@@ -223,13 +224,25 @@ written by refunds, customer blocks, price changes, and role changes. No UI yet.
 
 ---
 
+## Step 9 — Session UI and response headers
+
+1. `GET /api/sessions` lists the caller's unexpired sessions, marking the current one.
+2. `DELETE /api/sessions?id=` revokes one own session (and clears the cookie when it is the current
+   one); `DELETE /api/sessions` revokes every other session.
+3. `ActiveSessions` card on `/conta/perfil` and the admin dashboard.
+4. `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin`.
+
+**Acceptance:** a user cannot revoke another user's session; "encerrar outras sessões" leaves the
+current one alive; both headers are present on every response.
+
+---
+
 ## Accepted risks
 
 | Risk | Why accepted | Revisit |
 | --- | --- | --- |
 | No MFA on OWNER/BARBER (F-07) | Needs recovery-code UX and schema; lockout closes the practical brute-force path | Dedicated project after P1/P2 |
 | CSP still allows `unsafe-inline` (F-11) | GTM injects inline scripts; a broken CSP silently kills analytics and checkout | Separate task with Playwright verification |
-| No session list/revoke UI (F-09) | Low value at this shop size | Optional |
 | Order token links are bearer links | Anyone with the WhatsApp/email link can open the order; that is the delivery channel | Redeem-once is not compatible with re-opening |
 | Prisma 7 / deepmerge-ts high advisory | Fix requires a Prisma major upgrade; no runtime request path uses it | Upgrade project after this branch |
 | Email registration no longer logs in immediately | Enumeration fix requires a uniform response; verification-first is the secure flow | Revisit onboarding copy after launch |
