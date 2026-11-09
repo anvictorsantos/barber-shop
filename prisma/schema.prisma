@@ -3,9 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 enum Role {
@@ -355,7 +353,7 @@ model Appointment {
 model Order {
   id            String           @id @default(cuid())
   code          String           @unique
-  publicToken   String           @unique @map("public_token") @default(dbgenerated("(replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', ''))"))
+  publicToken   String           @unique @default(dbgenerated("(replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', ''))")) @map("public_token")
   customerId    String?          @map("customer_id")
   customerName  String           @map("customer_name")
   customerPhone String?          @map("customer_phone")
@@ -423,10 +421,10 @@ model Payment {
 }
 
 model Refund {
-  id               String   @id @default(cuid())
-  paymentId        String   @map("payment_id")
-  appointmentId    String?  @map("appointment_id")
-  orderProductId   String?  @map("order_product_id")
+  id               String       @id @default(cuid())
+  paymentId        String       @map("payment_id")
+  appointmentId    String?      @map("appointment_id")
+  orderProductId   String?      @map("order_product_id")
   amountCents      Int          @map("amount_cents")
   reason           String
   status           RefundStatus @default(PENDING)
