@@ -203,22 +203,23 @@ export default async function ServiceDetailPage({
             </div>
 
             <div className="flex flex-col gap-3 lg:hidden">
-              <div className="flex items-center gap-4">
-                <ServiceBookingAction
-                  service={{
-                    id: service.id,
-                    name: service.name,
-                    durationMin: service.durationMin,
-                    priceCents: service.priceCents,
-                  }}
-                  continuar={continuar}
-                  size="lg"
-                />
+              <ServiceBookingAction
+                service={{
+                  id: service.id,
+                  name: service.name,
+                  durationMin: service.durationMin,
+                  priceCents: service.priceCents,
+                }}
+                continuar={continuar}
+                size="lg"
+                className="w-full"
+              />
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-caption leading-relaxed text-subtle">
+                  Sem conta para agendar · Cancelamento gratuito com até 2h de antecedência
+                </p>
                 {favorite}
               </div>
-              <p className="text-caption leading-relaxed text-subtle">
-                Sem conta para agendar · Cancelamento gratuito com até 2h de antecedência
-              </p>
             </div>
 
             {inclusions.length > 0 ? (
