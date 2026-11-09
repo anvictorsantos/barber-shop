@@ -284,15 +284,16 @@ export function CartContents({
 
             <button
               type="button"
+              disabled
               onClick={() => {
                 setUseCredit(false)
                 setPaymentMode('ONLINE')
               }}
               className={cn(
-                'flex min-h-[92px] cursor-pointer items-center gap-4 rounded-md border p-5 text-left transition',
+                'flex min-h-[92px] cursor-not-allowed items-center gap-4 rounded-md border p-5 text-left opacity-40 transition',
                 paymentMode === 'ONLINE'
                   ? 'border-primary bg-primary'
-                  : 'border-white/10 bg-background hover:border-accent/50',
+                  : 'border-white/10 bg-background',
               )}
             >
               <span
