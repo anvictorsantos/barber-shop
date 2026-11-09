@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { buttonClasses } from '@/components/ui/Button'
+import type { ButtonSize } from '@/components/ui/Button'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { addCartItem } from '@/lib/cart/store'
 import { useCart } from '@/lib/cart/useCart'
@@ -21,9 +22,13 @@ interface ActionService {
 export function ServiceBookingAction({
   service,
   continuar,
+  size = 'lg',
+  className = 'w-fit',
 }: {
   service: ActionService
   continuar: boolean
+  size?: ButtonSize
+  className?: string
 }) {
   const router = useRouter()
   const items = useCart()
@@ -40,8 +45,8 @@ export function ServiceBookingAction({
       <Link
         href={`/agendar/${service.id}/profissional`}
         className={buttonClasses({
-          size: 'lg',
-          className: 'w-fit',
+          size,
+          className,
         })}
       >
         Agendar este serviço
@@ -104,8 +109,8 @@ export function ServiceBookingAction({
         onClick={addToBooking}
         disabled={pending}
         className={buttonClasses({
-          size: 'lg',
-          className: 'w-fit',
+          size,
+          className,
         })}
       >
         {pending ? 'Verificando…' : 'Adicionar ao agendamento'}

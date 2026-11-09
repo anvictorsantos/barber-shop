@@ -277,6 +277,7 @@ export default async function ServiceDetailPage({
                   priceCents: service.priceCents,
                 }}
                 continuar={continuar}
+                className="w-full"
               />
 
               <p className="text-center text-caption text-subtle">
