@@ -1,4 +1,5 @@
 import { Inter, Playfair_Display } from 'next/font/google'
+import { headers } from 'next/headers'
 
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider'
 import { ConsentBanner } from '@/components/analytics/ConsentBanner'
@@ -39,8 +40,9 @@ export const viewport: Viewport = {
   colorScheme: 'dark',
 }
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim() || null
+  const nonce = (await headers()).get('x-nonce') ?? undefined
 
   return (
     <html
@@ -50,7 +52,10 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <body
         className={`${inter.variable} ${playfair.variable} bg-background text-text antialiased`}
       >
-        <AnalyticsProvider gtmId={gtmId} />
+        <AnalyticsProvider
+          gtmId={gtmId}
+          nonce={nonce}
+        />
         {children}
         <ConsentBanner />
       </body>
