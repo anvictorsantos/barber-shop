@@ -6,6 +6,7 @@ import { ClientsSearch } from '@/components/admin/clients/ClientsSearch'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { Pagination } from '@/components/ui/Pagination'
 import { StatusPill } from '@/components/ui/StatusPill'
 import { getClients } from '@/lib/admin/clients'
 import { resolveAdminScope } from '@/lib/admin/context'
@@ -129,38 +130,12 @@ export default async function AdminClientsPage({
             </table>
           </Card>
 
-          <nav
-            aria-label="Paginação de clientes"
-            className="flex items-center justify-between gap-3"
-          >
-            <Link
-              href={pageHref(currentPage - 1)}
-              aria-disabled={currentPage === 1}
-              className={
-                currentPage === 1
-                  ? 'pointer-events-none rounded-md border border-border px-4 py-2 text-caption font-bold text-muted opacity-40'
-                  : 'rounded-md border border-border px-4 py-2 text-caption font-bold text-text hover:border-accent'
-              }
-            >
-              Anterior
-            </Link>
-
-            <span className="text-caption text-muted">
-              Página {currentPage} de {totalPages}
-            </span>
-
-            <Link
-              href={pageHref(currentPage + 1)}
-              aria-disabled={currentPage === totalPages}
-              className={
-                currentPage === totalPages
-                  ? 'pointer-events-none rounded-md border border-border px-4 py-2 text-caption font-bold text-muted opacity-40'
-                  : 'rounded-md border border-border px-4 py-2 text-caption font-bold text-text hover:border-accent'
-              }
-            >
-              Próxima
-            </Link>
-          </nav>
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            hrefFor={pageHref}
+            label="Paginação de clientes"
+          />
         </>
       )}
     </div>

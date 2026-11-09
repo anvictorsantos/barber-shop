@@ -26,6 +26,7 @@ export function HeroBookingCard({ booking }: { booking: HomeHeroBooking }) {
           alt="Barbearia do Luiz"
           width={774}
           height={880}
+          sizes="56px"
           className="h-14 w-auto"
         />
         <span className="text-caption text-muted">Agendar</span>

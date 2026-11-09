@@ -14,6 +14,7 @@ export function AuthRedirectOverlay({ label }: { label: string }) {
         alt=""
         width={774}
         height={880}
+        sizes="80px"
         priority
         className="h-20 w-auto animate-pulse"
       />

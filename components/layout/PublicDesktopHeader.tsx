@@ -44,6 +44,7 @@ export function PublicDesktopHeader({
             alt={`${shopName} — ${city}, ${state}`}
             width={774}
             height={880}
+            sizes="48px"
             priority
             className="h-12 w-auto"
           />

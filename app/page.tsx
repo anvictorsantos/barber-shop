@@ -15,7 +15,7 @@ import { getSessionUser } from '@/lib/auth/session'
 import { BUSINESS_TIMEZONE, getNextOpening, isShopOpen } from '@/lib/availability/slots'
 import { HERO_IMAGE } from '@/lib/catalog/images'
 import { getActiveBarbers, getActiveServices } from '@/lib/catalog/queries'
-import { getHomeHeroBooking, getHomeReviews, getHomeStats } from '@/lib/home/queries'
+import { getHomeReviews, getHomeStats } from '@/lib/home/queries'
 import { getShopHours, getShopSettings } from '@/lib/settings/queries'
 import { formatHourLabel, minutesToTime } from '@/lib/time/schedule'
 import type { ShopHoursRow } from '@/lib/time/schedule'
@@ -110,9 +110,9 @@ export default async function HomePage() {
     services[0] ??
     null
   const featuredBarber = barbers[0] ?? null
-  const heroBooking =
+  const featured =
     featuredService && featuredBarber
-      ? await getHomeHeroBooking({ service: featuredService, barber: featuredBarber, now })
+      ? { service: featuredService, barber: featuredBarber, now }
       : null
 
   const jsonLd = {
@@ -166,7 +166,7 @@ export default async function HomePage() {
           open={open}
           statusDetail={statusDetail}
           address={addressLine}
-          booking={heroBooking}
+          featured={featured}
         />
 
         <AboutSection />

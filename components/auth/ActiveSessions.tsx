@@ -4,6 +4,10 @@ import { Monitor, Smartphone } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
+import { paginationLinkClass } from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 5
+
 interface SessionItem {
   id: string
   ip: string | null
@@ -52,6 +56,7 @@ export function ActiveSessions() {
   const [sessions, setSessions] = useState<SessionItem[] | null>(null)
   const [pending, setPending] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     const response = await fetch('/api/sessions')
@@ -84,6 +89,9 @@ export function ActiveSessions() {
   }
 
   const others = sessions?.filter((session) => !session.current) ?? []
+  const totalPages = Math.max(1, Math.ceil((sessions?.length ?? 0) / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const visible = sessions?.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE) ?? []
 
   return (
     <section className="flex flex-col gap-4 rounded-[20px] border border-white/[0.07] bg-surface p-6">
@@ -102,7 +110,7 @@ export function ActiveSessions() {
         </p>
       ) : (
         <ul className="flex flex-col">
-          {sessions.map((session) => (
+          {visible.map((session) => (
             <li
               key={session.id}
               className="flex items-center gap-3 border-b border-white/[0.07] py-3 last:border-0"
@@ -146,6 +154,35 @@ export function ActiveSessions() {
           ))}
         </ul>
       )}
+
+      {totalPages > 1 ? (
+        <nav
+          aria-label="Paginação de sessões"
+          className="flex items-center justify-between gap-3"
+        >
+          <button
+            type="button"
+            onClick={() => setPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={paginationLinkClass(currentPage === 1)}
+          >
+            Anterior
+          </button>
+
+          <span className="text-caption text-muted">
+            Página {currentPage} de {totalPages}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={paginationLinkClass(currentPage === totalPages)}
+          >
+            Próxima
+          </button>
+        </nav>
+      ) : null}
 
       {others.length > 0 ? (
         <button

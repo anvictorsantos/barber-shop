@@ -20,6 +20,7 @@ export function HistoryFilters({
 
   function update(patch: Record<string, string>) {
     const params = new URLSearchParams(searchParams.toString())
+    params.delete('page')
     for (const [key, value] of Object.entries(patch)) {
       if (value) params.set(key, value)
       else params.delete(key)

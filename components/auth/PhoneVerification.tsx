@@ -139,7 +139,7 @@ export function PhoneVerification({
         </div>
       </form>
 
-      {redirecting ? <AuthRedirectOverlay label="Confirmando…" /> : null}
+      {pending || redirecting ? <AuthRedirectOverlay label="Confirmando…" /> : null}
     </div>
   )
 }

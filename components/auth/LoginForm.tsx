@@ -240,7 +240,7 @@ export function LoginForm({
         </Link>
       </form>
 
-      {redirecting ? <AuthRedirectOverlay label="Entrando…" /> : null}
+      {pending || redirecting ? <AuthRedirectOverlay label="Entrando…" /> : null}
     </div>
   )
 }
