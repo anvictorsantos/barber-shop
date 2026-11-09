@@ -1,4 +1,4 @@
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import { headers } from 'next/headers'
 
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider'
@@ -12,13 +12,6 @@ import './globals.css'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-  display: 'swap',
-})
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-playfair',
   display: 'swap',
 })
 
@@ -49,9 +42,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       lang="pt-BR"
       suppressHydrationWarning
     >
-      <body
-        className={`${inter.variable} ${playfair.variable} bg-background text-text antialiased`}
-      >
+      <body className={`${inter.variable} bg-background text-text antialiased`}>
         <AnalyticsProvider
           gtmId={gtmId}
           nonce={nonce}

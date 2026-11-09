@@ -27,7 +27,7 @@ export default {
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-playfair)', 'Georgia', 'serif'],
+        display: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         xs: 'var(--radius-xs)',
