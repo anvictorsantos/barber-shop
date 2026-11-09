@@ -42,9 +42,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       lang="pt-BR"
       suppressHydrationWarning
     >
-      <body
-        className={`${inter.variable} bg-background text-text antialiased`}
-      >
+      <body className={`${inter.variable} bg-background text-text antialiased`}>
         <AnalyticsProvider
           gtmId={gtmId}
           nonce={nonce}
