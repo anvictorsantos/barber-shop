@@ -16,7 +16,7 @@ const variants: Record<ButtonVariant, string> = {
 const sizes: Record<ButtonSize, string> = {
   sm: 'h-9 px-3 text-caption',
   md: 'h-10 px-4 text-body',
-  lg: 'h-11 px-5 text-body',
+  lg: 'h-12 px-5 text-body',
 }
 
 export function buttonClasses({
