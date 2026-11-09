@@ -21,6 +21,7 @@ export const serviceInputSchema = z.object({
   promoLabel: z.string().trim().max(20, 'Texto promocional muito longo.').optional().default(''),
   imageUrl,
   active: z.boolean().default(true),
+  featured: z.boolean().default(false),
   sortOrder: z.coerce.number().int().min(0).max(999).default(0),
 })
 
@@ -44,6 +45,11 @@ export const updateProductSchema = productInputSchema.extend({
 export const toggleSchema = z.object({
   id: z.string().min(1),
   active: z.boolean(),
+})
+
+export const featureSchema = z.object({
+  id: z.string().min(1),
+  featured: z.boolean(),
 })
 
 export type ServiceInput = z.infer<typeof serviceInputSchema>

@@ -5,7 +5,7 @@ import type { Service } from '@prisma/client'
 export async function getActiveServices(): Promise<Service[]> {
   return prisma.service.findMany({
     where: { active: true },
-    orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    orderBy: [{ featured: 'desc' }, { sortOrder: 'asc' }, { name: 'asc' }],
   })
 }
 

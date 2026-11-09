@@ -12,6 +12,7 @@ export interface AdminService {
   promoLabel: string | null
   imageUrl: string | null
   active: boolean
+  featured: boolean
   sortOrder: number
 }
 

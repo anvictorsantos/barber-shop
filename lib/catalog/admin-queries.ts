@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db/prisma'
 
 export async function getAdminServices(): Promise<AdminService[]> {
   return prisma.service.findMany({
-    orderBy: [{ active: 'desc' }, { sortOrder: 'asc' }, { name: 'asc' }],
+    orderBy: [{ active: 'desc' }, { featured: 'desc' }, { sortOrder: 'asc' }, { name: 'asc' }],
     select: {
       id: true,
       slug: true,
@@ -16,6 +16,7 @@ export async function getAdminServices(): Promise<AdminService[]> {
       promoLabel: true,
       imageUrl: true,
       active: true,
+      featured: true,
       sortOrder: true,
     },
   })

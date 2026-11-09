@@ -36,6 +36,7 @@ export function ServiceEditor({
   const [imageUrl, setImageUrl] = useState(service?.imageUrl ?? '')
   const [sortOrder, setSortOrder] = useState(service?.sortOrder ?? 0)
   const [active, setActive] = useState(service?.active ?? true)
+  const [featured, setFeatured] = useState(service?.featured ?? false)
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
 
@@ -54,6 +55,7 @@ export function ServiceEditor({
       promoLabel,
       imageUrl,
       active,
+      featured,
       sortOrder,
     }
 
@@ -216,15 +218,27 @@ export function ServiceEditor({
           />
         </Field>
 
-        <label className="flex items-center gap-2 text-caption font-semibold text-muted">
-          <input
-            type="checkbox"
-            className="h-4 w-4 accent-[var(--primary)]"
-            checked={active}
-            onChange={(event) => setActive(event.target.checked)}
-          />
-          Ativo no catálogo
-        </label>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <label className="flex items-center gap-2 text-caption font-semibold text-muted">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-[var(--primary)]"
+              checked={active}
+              onChange={(event) => setActive(event.target.checked)}
+            />
+            Ativo no catálogo
+          </label>
+
+          <label className="flex items-center gap-2 text-caption font-semibold text-muted">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-[var(--primary)]"
+              checked={featured}
+              onChange={(event) => setFeatured(event.target.checked)}
+            />
+            Destaque no topo
+          </label>
+        </div>
 
         <div className="flex flex-wrap gap-3">
           <Button

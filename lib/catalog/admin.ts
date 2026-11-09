@@ -62,6 +62,7 @@ export async function createService(input: ServiceInput) {
       promoLabel: input.promoLabel || null,
       imageUrl: input.imageUrl || null,
       active: input.active,
+      featured: input.featured,
       sortOrder: input.sortOrder,
     },
   })
@@ -83,6 +84,7 @@ export async function updateService(input: UpdateServiceInput) {
       promoLabel: input.promoLabel || null,
       imageUrl: input.imageUrl || null,
       active: input.active,
+      featured: input.featured,
       sortOrder: input.sortOrder,
     },
   })
@@ -169,6 +171,16 @@ export async function updateProduct(input: UpdateProductInput) {
     }
 
     return product
+  })
+}
+
+export async function setServiceFeatured(input: { id: string; featured: boolean }) {
+  const existing = await prisma.service.findUnique({ where: { id: input.id } })
+  if (!existing) throw new AppError(404, 'not_found', 'Serviço não encontrado.')
+
+  return prisma.service.update({
+    where: { id: input.id },
+    data: { featured: input.featured },
   })
 }
 

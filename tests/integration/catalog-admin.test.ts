@@ -38,11 +38,13 @@ describe('catalog admin operations', () => {
       promoLabel: '',
       imageUrl: '',
       active: true,
+      featured: false,
       sortOrder: 99,
     })
     serviceIds.push(created.id)
 
     expect(created.priceCents).toBe(5000)
+    expect(created.featured).toBe(false)
     expect(created.slug).toContain('servico-e2e')
 
     const updated = await updateService({
@@ -56,12 +58,14 @@ describe('catalog admin operations', () => {
       promoLabel: 'TESTE',
       imageUrl: '',
       active: true,
+      featured: true,
       sortOrder: 99,
     })
 
     expect(updated.priceCents).toBe(5550)
     expect(updated.originalPriceCents).toBe(6000)
     expect(updated.durationMin).toBe(40)
+    expect(updated.featured).toBe(true)
 
     const toggled = await toggleService({ id: created.id, active: false })
     expect(toggled.active).toBe(false)
