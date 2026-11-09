@@ -1,4 +1,3 @@
-import { Check, ChevronLeft, Clock, ShieldCheck } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -9,9 +8,9 @@ import { PublicDesktopFooter } from '@/components/layout/PublicDesktopFooter'
 import { PublicDesktopHeader } from '@/components/layout/PublicDesktopHeader'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SkipLink } from '@/components/layout/SkipLink'
-import { SectionLabel } from '@/components/ui/SectionLabel'
 import { getSessionUser } from '@/lib/auth/session'
 import { serviceImage } from '@/lib/catalog/images'
+import { serviceInclusions } from '@/lib/catalog/inclusions'
 import { serviceCategoryLabels } from '@/lib/catalog/labels'
 import { getServiceBySlug } from '@/lib/catalog/queries'
 import { getFavoriteIds } from '@/lib/customer/queries'
@@ -21,12 +20,6 @@ import { getShopSettings } from '@/lib/settings/queries'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
-
-const INCLUSIONS = [
-  'Atendimento próximo',
-  'Produtos de qualidade',
-  'Acabamento caprichado',
-] as const
 
 export async function generateMetadata({
   params,
@@ -65,13 +58,25 @@ export default async function ServiceDetailPage({
   const city = shop?.city ?? 'Belo Horizonte'
   const state = shop?.state ?? 'MG'
   const whatsapp = (shop?.whatsapp ?? '+5531988815243').replace(/\D/g, '')
+  const promoLabel = service.promoLabel ? sentenceCase(service.promoLabel) : null
+  const inclusions = serviceInclusions(service.slug)
+  const isCustomer = user?.role === 'CUSTOMER'
+  const favorite = isCustomer ? (
+    <FavoriteButton
+      kind="service"
+      id={service.id}
+      initial={favoriteIds.services.has(service.id)}
+      label={service.name}
+      variant="bare"
+    />
+  ) : null
 
   return (
     <>
       <SkipLink />
       <main
         id="main-content"
-        className="flex min-h-dvh flex-col bg-background"
+        className="flex min-h-dvh flex-col bg-background pb-20 lg:pb-0"
       >
         <div className="lg:hidden">
           <SiteHeader />
@@ -86,120 +91,128 @@ export default async function ServiceDetailPage({
           />
         </div>
 
-        <section className="flex w-full flex-1 flex-col gap-8 px-6 py-8 lg:px-10 lg:pb-16 lg:pt-10 xl:px-10">
-          <Link
-            href="/servicos"
-            className="inline-flex w-fit items-center gap-1.5 text-caption text-muted transition-colors hover:text-text"
-          >
-            <ChevronLeft
-              aria-hidden
-              className="h-3.5 w-3.5"
+        <div className="mx-auto grid w-full max-w-shell flex-1 lg:grid-cols-[57%_43%]">
+          <div className="relative aspect-[4/5] w-full overflow-hidden bg-surface-subtle lg:aspect-auto lg:min-h-[640px]">
+            <Image
+              src={serviceImage(service)}
+              alt={service.name}
+              fill
+              priority
+              sizes="(max-width: 1023px) 100vw, 57vw"
+              className="object-cover"
             />
-            Voltar para serviços
-          </Link>
+            <p className="absolute inset-x-4 bottom-4 text-caption text-[#f2ece1]/85 lg:inset-x-8 lg:bottom-7">
+              {shopName} · {city}, {state}
+            </p>
+          </div>
 
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-14">
-            <div className="flex flex-col gap-8">
-              <div className="flex flex-col gap-4">
-                <SectionLabel>{serviceCategoryLabels[service.category]}</SectionLabel>
-                <div className="flex items-start justify-between gap-4">
-                  <h1 className="font-display text-[40px] font-semibold leading-[1.05] text-text lg:text-[52px]">
-                    {service.name}
-                  </h1>
-                  {user?.role === 'CUSTOMER' ? (
-                    <FavoriteButton
-                      kind="service"
-                      id={service.id}
-                      initial={favoriteIds.services.has(service.id)}
-                      label={service.name}
-                    />
-                  ) : null}
-                </div>
-              </div>
+          <div className="flex flex-col gap-6 px-6 py-8 lg:justify-center lg:gap-7 lg:px-14 lg:py-16">
+            <nav
+              aria-label="Trilha"
+              className="text-caption text-muted"
+            >
+              <Link
+                href={`/servicos${continuar ? '?continuar=1' : ''}`}
+                className="transition-colors hover:text-text"
+              >
+                Serviços
+              </Link>
+              <span className="mx-2 text-subtle">/</span>
+              <span className="text-text-secondary">{serviceCategoryLabels[service.category]}</span>
+            </nav>
 
-              <div className="relative aspect-[5/4] w-full overflow-hidden rounded-lg border border-border bg-surface-subtle">
-                <Image
-                  src={serviceImage(service)}
-                  alt={service.name}
-                  fill
-                  priority
-                  sizes="(max-width: 1023px) 100vw, 620px"
-                  className="object-cover"
-                />
-              </div>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-[40px] font-medium leading-[1.03] tracking-[-0.025em] text-text lg:text-[56px]">
+                {service.name}
+              </h1>
+              {favorite ? <div className="lg:hidden">{favorite}</div> : null}
             </div>
 
-            <div className="flex flex-col gap-7 lg:pt-2">
-              {service.promoLabel ? (
-                <span className="text-caption font-medium text-accent">{service.promoLabel}</span>
-              ) : null}
-
-              <div className="flex flex-wrap items-baseline gap-3">
-                <span className="text-[32px] font-medium leading-none tabular-nums text-text">
-                  {formatBRL(service.priceCents)}
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-[32px] font-medium leading-none tabular-nums text-text lg:text-[34px]">
+                {formatBRL(service.priceCents)}
+              </span>
+              {service.originalPriceCents ? (
+                <span className="text-caption tabular-nums text-subtle line-through">
+                  {formatBRL(service.originalPriceCents)}
                 </span>
-                {service.originalPriceCents ? (
-                  <span className="text-body tabular-nums text-muted line-through">
-                    {formatBRL(service.originalPriceCents)}
-                  </span>
-                ) : null}
-              </div>
+              ) : null}
+              <span className="text-body text-muted">· {service.durationMin} min</span>
+              {promoLabel ? (
+                <span className="text-caption font-medium text-accent">{promoLabel}</span>
+              ) : null}
+            </div>
 
-              <p className="text-lead leading-relaxed text-text-secondary">{service.description}</p>
+            <p className="max-w-[430px] text-lead leading-relaxed text-text-secondary">
+              {service.description}
+            </p>
 
-              <p className="flex items-center gap-2 text-body text-muted">
-                <Clock
-                  aria-hidden
-                  className="h-4 w-4 shrink-0"
-                />
-                {service.durationMin} min · duração estimada
-              </p>
-
-              <ul className="divide-y divide-border border-y border-border">
-                {INCLUSIONS.map((inclusion) => (
+            {inclusions.length > 0 ? (
+              <ul className="max-w-[430px] border-y border-border">
+                {inclusions.map((inclusion, index) => (
                   <li
                     key={inclusion}
-                    className="flex items-center gap-3 py-3 text-body text-text-secondary"
+                    className="flex items-center justify-between gap-4 py-3 text-body text-text-secondary"
                   >
-                    <Check
-                      aria-hidden
-                      className="h-4 w-4 shrink-0 text-accent"
-                    />
-                    {inclusion}
+                    <span>{inclusion}</span>
+                    <span className="text-caption tabular-nums text-subtle">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
                   </li>
                 ))}
               </ul>
+            ) : null}
 
-              <div className="flex flex-col gap-4 border-t border-border pt-7">
-                <ServiceBookingAction
-                  service={{
-                    id: service.id,
-                    name: service.name,
-                    durationMin: service.durationMin,
-                    priceCents: service.priceCents,
-                  }}
-                  continuar={continuar}
-                />
-
-                <p className="text-caption text-subtle">Não precisa de conta para agendar.</p>
-
-                <p className="flex items-start gap-2 text-caption leading-relaxed text-muted">
-                  <ShieldCheck
-                    aria-hidden
-                    className="mt-0.5 h-4 w-4 shrink-0"
-                  />
-                  Cancelamento gratuito com até 2h de antecedência.
-                </p>
-              </div>
+            <div className="hidden items-center gap-4 lg:flex">
+              <ServiceBookingAction
+                service={{
+                  id: service.id,
+                  name: service.name,
+                  durationMin: service.durationMin,
+                  priceCents: service.priceCents,
+                }}
+                continuar={continuar}
+              />
+              {favorite}
             </div>
+
+            <p className="text-caption leading-relaxed text-subtle">
+              Sem conta para agendar · Cancelamento gratuito com até 2h de antecedência
+            </p>
           </div>
-        </section>
+        </div>
 
         <PublicDesktopFooter
           shopName={shopName}
           whatsapp={whatsapp}
         />
       </main>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border-strong bg-surface/95 px-4 pt-2.5 pb-[max(10px,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-shell items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-body font-medium tabular-nums text-text">
+              {formatBRL(service.priceCents)}
+            </p>
+            <p className="truncate text-micro text-muted">
+              {service.durationMin} min{promoLabel ? ` · ${promoLabel}` : ''}
+            </p>
+          </div>
+          <ServiceBookingAction
+            service={{
+              id: service.id,
+              name: service.name,
+              durationMin: service.durationMin,
+              priceCents: service.priceCents,
+            }}
+            continuar={continuar}
+          />
+        </div>
+      </div>
     </>
   )
+}
+
+function sentenceCase(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
 }
