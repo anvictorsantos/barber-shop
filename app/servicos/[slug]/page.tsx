@@ -212,6 +212,7 @@ export default async function ServiceDetailPage({
                     priceCents: service.priceCents,
                   }}
                   continuar={continuar}
+                  size="lg"
                 />
                 {favorite}
               </div>
