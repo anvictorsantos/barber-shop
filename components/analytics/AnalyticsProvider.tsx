@@ -7,7 +7,13 @@ import { GoogleTagManager } from '@/components/analytics/GoogleTagManager'
 import { readConsent, subscribeConsent, type Consent } from '@/lib/analytics/consent'
 import { trackPageView } from '@/lib/analytics/gtm'
 
-export function AnalyticsProvider({ gtmId }: { gtmId: string | null }) {
+export function AnalyticsProvider({
+  gtmId,
+  nonce,
+}: {
+  gtmId: string | null
+  nonce?: string | undefined
+}) {
   const [consent, setConsent] = useState<Consent | null>(null)
   const pathname = usePathname()
 
@@ -22,5 +28,10 @@ export function AnalyticsProvider({ gtmId }: { gtmId: string | null }) {
 
   if (consent !== 'granted' || !gtmId) return null
 
-  return <GoogleTagManager id={gtmId} />
+  return (
+    <GoogleTagManager
+      id={gtmId}
+      nonce={nonce}
+    />
+  )
 }

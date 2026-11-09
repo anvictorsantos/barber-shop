@@ -35,7 +35,7 @@ Until step 4 passes, F-01 is open and the production OWNER account has a public 
 | Login lockout | 5 failures / 15 min → 15 min lock, per account |
 | Sessions | Absolute 7 days staff / 30 days customer; idle refresh unchanged |
 | MFA | Deferred to a dedicated project (accepted risk) |
-| CSP nonce | Deferred (accepted risk) |
+| CSP nonce | Per-request nonce + `strict-dynamic`, generated in `proxy.ts` (production only) |
 | Tests | Unit for pure logic, integration (local DB) for races and tokens, no new E2E |
 | ADRs | 0009 client IP, 0010 rate-limit store, 0011 order access token |
 
@@ -55,7 +55,7 @@ Until step 4 passes, F-01 is open and the production OWNER account has a public 
 | F-08 in-memory limiter | Low | Postgres store | 1 | open |
 | F-09 session lifetime | Low | Absolute cap + session list/revoke UI | 8/9 | done |
 | F-10 missing Origin | Low | Require `Origin` or same-origin `Referer` on cookie-authenticated writes | 8 | open |
-| F-11 CSP `unsafe-inline` | Low | Deferred, retest later | — | accepted risk |
+| F-11 CSP `unsafe-inline` | Low | Per-request nonce + `strict-dynamic` in `proxy.ts` | 10 | done |
 | F-12 open image proxy | Low | Exact host allowlist | 8 | open |
 | F-13 webhook assumptions | Low | Fail closed, `ts` freshness, amount assert | 8 | open |
 | F-14 dependencies | Low | Update + CI audit gate | 8 | open |
@@ -237,12 +237,30 @@ current one alive; both headers are present on every response.
 
 ---
 
+## Step 10 — CSP nonce (F-11)
+
+`proxy.ts` builds the policy per request with a fresh nonce and `'strict-dynamic'`, exposing the
+nonce to server components through the `x-nonce` request header. The static CSP in
+`next.config.ts` was removed so only one policy is sent. `AnalyticsProvider` and the home page's
+JSON-LD script forward the nonce to their inline scripts; GTM's injected `gtm.js` is trusted through
+the nonce'd loader.
+
+The policy stays production-only: the dev server needs `eval` and websockets.
+
+**Acceptance:** every inline script carries the same per-response nonce; with consent granted, GTM
+loads without a CSP violation.
+
+**Observed 2026-11-09** (local `next start`): one nonce per response, 15 nonced scripts, zero inline
+scripts without a nonce, and a headless Chromium run of `/`, `/servicos`, `/entrar` and
+`/conta/perfil` reported no CSP violations and loaded `gtm.js`.
+
+---
+
 ## Accepted risks
 
 | Risk | Why accepted | Revisit |
 | --- | --- | --- |
 | No MFA on OWNER/BARBER (F-07) | Needs recovery-code UX and schema; lockout closes the practical brute-force path | Dedicated project after P1/P2 |
-| CSP still allows `unsafe-inline` (F-11) | GTM injects inline scripts; a broken CSP silently kills analytics and checkout | Separate task with Playwright verification |
 | Order token links are bearer links | Anyone with the WhatsApp/email link can open the order; that is the delivery channel | Redeem-once is not compatible with re-opening |
 | Prisma 7 / deepmerge-ts high advisory | Fix requires a Prisma major upgrade; no runtime request path uses it | Upgrade project after this branch |
 | Email registration no longer logs in immediately | Enumeration fix requires a uniform response; verification-first is the secure flow | Revisit onboarding copy after launch |

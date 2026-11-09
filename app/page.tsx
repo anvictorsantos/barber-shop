@@ -1,4 +1,5 @@
 import { formatInTimeZone } from 'date-fns-tz'
+import { headers } from 'next/headers'
 
 import { AboutSection } from '@/components/home/AboutSection'
 import { GallerySection } from '@/components/home/GallerySection'
@@ -193,6 +194,7 @@ export default async function HomePage() {
 
       <script
         type="application/ld+json"
+        nonce={(await headers()).get('x-nonce') ?? undefined}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
     </>
