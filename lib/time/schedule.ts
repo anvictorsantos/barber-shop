@@ -40,11 +40,10 @@ export function formatHourLabel(minutes: number): string {
   return mins === 0 ? `${hours}h` : `${hours}h${String(mins).padStart(2, '0')}`
 }
 
-export function describeHoursGroup(
+export function hoursRangeFor(
   hours: readonly ShopHoursRow[],
   weekdays: readonly number[],
-  label: string,
-): string | null {
+): { openMinute: number; closeMinute: number } | null {
   const rows = weekdays.map((weekday) => hours.find((hour) => hour.weekday === weekday))
   const first = rows[0]
   if (!first || first.closed) return null
@@ -60,7 +59,18 @@ export function describeHoursGroup(
     }
   }
 
-  return `${label}: ${formatHourLabel(first.openMinute)} às ${formatHourLabel(first.closeMinute)}`
+  return { openMinute: first.openMinute, closeMinute: first.closeMinute }
+}
+
+export function describeHoursGroup(
+  hours: readonly ShopHoursRow[],
+  weekdays: readonly number[],
+  label: string,
+): string | null {
+  const range = hoursRangeFor(hours, weekdays)
+  if (!range) return null
+
+  return `${label}: ${formatHourLabel(range.openMinute)} às ${formatHourLabel(range.closeMinute)}`
 }
 
 export function shopHoursLines(hours: readonly ShopHoursRow[]): string[] {
