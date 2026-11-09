@@ -117,6 +117,12 @@ valid `/conta/agendamentos?x=1`.
 **Acceptance:** rotating XFF hits `429` at the same threshold as a fixed XFF; the debug endpoint is
 gone; production header chain matches the documented assumption.
 
+**Observed 2026-11-09:** `X-Client-IP` was present with a matching origin secret, and the trusted IP
+equalled `cf-connecting-ip`. Raw chain:
+`95.95.6.142, 95.95.6.142, 162.158.110.58, 10.30.24.100`. The rightmost value is a Render-internal
+address, confirming the old fallback would have collapsed buckets. The debug endpoint was removed
+after this reading.
+
 ---
 
 ## Step 4 — OTP issuance and failure caps (F-03)
@@ -238,8 +244,8 @@ written by refunds, customer blocks, price changes, and role changes. No UI yet.
    without the rule the fallback still uses rightmost XFF.
 4. Set `SEED_DEMO_PASSWORD` in local `.env` and CI; never in production.
 5. Re-run the assessment retest list (F-01–F-06, F-16–F-18).
-6. Call `GET /api/debug/request-headers` with the cron bearer from production, record the observed
-   chain, then delete `app/api/debug/request-headers/` and redeploy. It must not stay in the tree.
+6. ~~Call `GET /api/debug/request-headers` with the cron bearer from production, record the observed
+   chain, then delete the route.~~ Done 2026-11-09; see step 3.
 
 ## Retest checklist
 
