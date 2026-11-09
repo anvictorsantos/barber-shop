@@ -25,6 +25,7 @@ export function SiteHeader() {
             alt="Barbearia do Luiz"
             width={774}
             height={880}
+            sizes="40px"
             className="h-10 w-auto"
           />
         </Link>

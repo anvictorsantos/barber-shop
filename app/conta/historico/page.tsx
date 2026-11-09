@@ -6,12 +6,15 @@ import { redirect } from 'next/navigation'
 
 import { HistoryFilters } from '@/components/customer/HistoryFilters'
 import { ReviewForm } from '@/components/customer/ReviewForm'
+import { Pagination } from '@/components/ui/Pagination'
 import { getSessionUser } from '@/lib/auth/session'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { getAppointmentHistory, type AppointmentCard } from '@/lib/customer/queries'
 import { formatBRL } from '@/lib/format/money'
 
 import type { Metadata } from 'next'
+
+const PAGE_SIZE = 10
 
 export const dynamic = 'force-dynamic'
 
@@ -85,6 +88,26 @@ export default async function CustomerHistoryPage({
     }
     return true
   })
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const requestedPage = Number(firstParam(params.page))
+  const currentPage = Math.min(
+    Math.max(1, Number.isFinite(requestedPage) ? requestedPage : 1),
+    totalPages,
+  )
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
+  const pageHref = (page: number) => {
+    const next = new URLSearchParams()
+    for (const [key, value] of Object.entries(params)) {
+      const item = firstParam(value)
+      if (item) next.set(key, item)
+    }
+    if (page > 1) next.set('page', String(page))
+    else next.delete('page')
+    const qs = next.toString()
+    return qs ? `/conta/historico?${qs}` : '/conta/historico'
+  }
 
   const completed = filtered.filter((item) => item.status === 'COMPLETED')
   const totalSpent = completed.reduce((sum, item) => sum + item.priceCents, 0)
@@ -177,7 +200,7 @@ export default async function CustomerHistoryPage({
             </span>
           </div>
 
-          {filtered.map((item) => (
+          {paginated.map((item) => (
             <div
               key={item.id}
               className="flex items-center gap-0 border-b border-white/[0.07] px-2 py-3.5 last:border-b-0"
@@ -220,6 +243,13 @@ export default async function CustomerHistoryPage({
             </p>
           ) : null}
         </section>
+
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          hrefFor={pageHref}
+          label="Paginação do histórico"
+        />
 
         {pendingReview ? (
           <section className="flex flex-col gap-3 rounded-xl border border-white/[0.07] bg-surface p-5">

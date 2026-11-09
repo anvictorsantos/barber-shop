@@ -1,6 +1,7 @@
 import { addDays, format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { formatInTimeZone } from 'date-fns-tz'
+import { unstable_cache } from 'next/cache'
 
 import { getAvailability } from '@/lib/availability/queries'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
@@ -81,42 +82,50 @@ export interface HomeReview {
   customerName: string
 }
 
-export async function getHomeReviews(take = 3): Promise<HomeReview[]> {
-  const reviews = await prisma.review.findMany({
-    where: { comment: { not: null } },
-    orderBy: { createdAt: 'desc' },
-    take,
-    select: {
-      id: true,
-      comment: true,
-      rating: true,
-      customer: { select: { name: true } },
-    },
-  })
+export const getHomeReviews = unstable_cache(
+  async (take = 3): Promise<HomeReview[]> => {
+    const reviews = await prisma.review.findMany({
+      where: { comment: { not: null } },
+      orderBy: { createdAt: 'desc' },
+      take,
+      select: {
+        id: true,
+        comment: true,
+        rating: true,
+        customer: { select: { name: true } },
+      },
+    })
 
-  return reviews.map((review) => ({
-    id: review.id,
-    comment: review.comment ?? '',
-    rating: review.rating,
-    customerName: review.customer.name,
-  }))
-}
+    return reviews.map((review) => ({
+      id: review.id,
+      comment: review.comment ?? '',
+      rating: review.rating,
+      customerName: review.customer.name,
+    }))
+  },
+  ['home-reviews'],
+  { revalidate: 300 },
+)
 
-export async function getHomeStats() {
-  const [beards, cuts, clients] = await Promise.all([
-    prisma.appointment.count({
-      where: { status: 'COMPLETED', service: { category: 'BARBA' } },
-    }),
-    prisma.appointment.count({
-      where: { status: 'COMPLETED', service: { category: { in: ['CORTE', 'COMBO'] } } },
-    }),
-    prisma.appointment
-      .groupBy({
-        by: ['customerId'],
-        where: { status: 'COMPLETED', customerId: { not: null } },
-      })
-      .then((rows) => rows.length),
-  ])
+export const getHomeStats = unstable_cache(
+  async () => {
+    const [beards, cuts, clients] = await Promise.all([
+      prisma.appointment.count({
+        where: { status: 'COMPLETED', service: { category: 'BARBA' } },
+      }),
+      prisma.appointment.count({
+        where: { status: 'COMPLETED', service: { category: { in: ['CORTE', 'COMBO'] } } },
+      }),
+      prisma.appointment
+        .groupBy({
+          by: ['customerId'],
+          where: { status: 'COMPLETED', customerId: { not: null } },
+        })
+        .then((rows) => rows.length),
+    ])
 
-  return { beards, cuts, clients }
-}
+    return { beards, cuts, clients }
+  },
+  ['home-stats'],
+  { revalidate: 3600 },
+)

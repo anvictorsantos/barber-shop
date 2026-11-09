@@ -1,22 +1,34 @@
 import { ChevronRight, MapPin } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Suspense } from 'react'
 
 import { HeroBookingCard } from '@/components/home/HeroBookingCard'
 import { HERO_IMAGE } from '@/lib/catalog/images'
-import type { HomeHeroBooking } from '@/lib/home/queries'
+import { getHomeHeroBooking } from '@/lib/home/queries'
 import { cn } from '@/lib/utils'
+
+type HeroFeatured = {
+  service: { id: string; name: string; durationMin: number; priceCents: number }
+  barber: { id: string; displayName: string; title: string }
+  now: Date
+}
+
+async function HeroBooking({ service, barber, now }: HeroFeatured) {
+  const booking = await getHomeHeroBooking({ service, barber, now })
+  return <HeroBookingCard booking={booking} />
+}
 
 export function HomeHero({
   open,
   statusDetail,
   address,
-  booking,
+  featured,
 }: {
   open: boolean
   statusDetail: string
   address: string
-  booking: HomeHeroBooking | null
+  featured: HeroFeatured | null
 }) {
   return (
     <section className="relative isolate flex min-h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-shell lg:min-h-dvh">
@@ -25,6 +37,7 @@ export function HomeHero({
         alt="Barbeiro finalizando um corte na Barbearia do Luiz"
         fill
         priority
+        fetchPriority="high"
         sizes="100vw"
         className="object-cover object-[62%_42%]"
       />
@@ -82,9 +95,11 @@ export function HomeHero({
           </p>
         </div>
 
-        {booking ? (
+        {featured ? (
           <div className="mt-8 w-full max-w-[420px] lg:absolute lg:bottom-10 lg:right-10 lg:mt-0 lg:w-[380px] lg:max-w-none">
-            <HeroBookingCard booking={booking} />
+            <Suspense fallback={null}>
+              <HeroBooking {...featured} />
+            </Suspense>
           </div>
         ) : null}
       </div>
