@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { ActiveSessions } from '@/components/auth/ActiveSessions'
 import { AddressForm } from '@/components/customer/AddressForm'
 import { NotificationPreferencesForm } from '@/components/customer/NotificationPreferencesForm'
 import { ProfileForm } from '@/components/customer/ProfileForm'
@@ -329,6 +330,8 @@ export default async function CustomerProfilePage() {
             hasWhatsapp={Boolean(profile.phone)}
           />
         </section>
+
+        <ActiveSessions />
       </div>
     </div>
   )
