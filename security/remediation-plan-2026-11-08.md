@@ -295,12 +295,25 @@ a local `next start`.
 
 ## Retest checklist
 
-- [ ] F-01 old password `401` for every seeded account
-- [ ] F-02 rotating XFF still hits `429`; per-account lockout at 5
-- [ ] F-03 4th OTP issuance sends nothing; 5 failures block 1 h
-- [ ] F-04 `?next=%2F%5Cevil.com` stays on site
-- [ ] F-05 anonymous order page `404`, token link `200`
-- [ ] F-06 timing medians converge; register responses identical
-- [ ] F-16 five refunds → ≤3 succeed, totals match
-- [ ] F-17 double no-show → one increment
-- [ ] F-18 races return clean `409`s
+Production run 2026-11-09 against `d9d5368` (read-only probes only).
+
+- [ ] F-01 old password `401` for every seeded account — **failed**: the documented seeded password
+      still logs in as the OWNER (HTTP `200`); the session was revoked immediately. Still the
+      owner's action to rotate.
+- [x] F-02 rotating XFF still hits `429`; per-account lockout at 5 — 6th attempt returned `429`
+      with a different `X-Forwarded-For` on every request.
+- [ ] F-03 4th OTP issuance sends nothing; 5 failures block 1 h — not run in production (sends real
+      messages); covered by `tests/integration/auth-verification.test.ts`.
+- [ ] F-04 `?next=%2F%5Cevil.com` stays on site — unit coverage only; not exercised live.
+- [x] F-05 anonymous order page `404`, token link `200` — five random codes all `404`; the token
+      link was verified locally.
+- [x] F-06 timing medians converge; register responses identical — identical `401` body; 1124 ms
+      known vs 1001 ms unknown (median of three).
+- [ ] F-16 five refunds → ≤3 succeed, totals match — not run in production (destructive); covered by
+      `tests/integration/security-remediation.test.ts`.
+- [ ] F-17 double no-show → one increment — same.
+- [ ] F-18 races return clean `409`s — same.
+
+Also checked live: CSP carries a per-response nonce with no `script-src 'unsafe-inline'`, COOP and
+CORP are `same-origin`, the Prisma 7 build generated the client and applied migrations cleanly, and
+no error-level logs appeared after the deploy.
