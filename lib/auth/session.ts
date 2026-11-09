@@ -145,9 +145,6 @@ export async function revokeSession(userId: string, sessionId: string): Promise<
   await prisma.session.deleteMany({ where: { id: sessionId, userId } })
 }
 
-export async function revokeOtherSessions(
-  userId: string,
-  currentSessionId: string,
-): Promise<void> {
+export async function revokeOtherSessions(userId: string, currentSessionId: string): Promise<void> {
   await prisma.session.deleteMany({ where: { userId, id: { not: currentSessionId } } })
 }

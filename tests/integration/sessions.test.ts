@@ -1,9 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import {
-  revokeOtherSessions,
-  revokeSession,
-} from '@/lib/auth/session'
+import { revokeOtherSessions, revokeSession } from '@/lib/auth/session'
 import { prisma } from '@/lib/db/prisma'
 
 const suffix = `${Date.now()}${Math.floor(Math.random() * 1000)}`
