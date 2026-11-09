@@ -11,7 +11,7 @@ export const runtime = 'nodejs'
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request)
-    enforceRateLimit(`verify-email:${clientIp(request)}`, 10, 10 * 60 * 1000)
+    await enforceRateLimit(`verify-email:${clientIp(request)}`, 10, 10 * 60 * 1000)
 
     const input = await parseJson(request, verifyEmailSchema)
     const user = await verifyEmailToken(input.token)

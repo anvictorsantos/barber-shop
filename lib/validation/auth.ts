@@ -6,10 +6,31 @@ const identifier = z
   .min(3, 'Informe um telefone ou e-mail válido.')
   .max(254, 'Contato muito longo.')
 
+const COMMON_PASSWORDS = new Set([
+  '12345678',
+  '123456789',
+  '1234567890',
+  'abc12345',
+  'admin123',
+  'barbearia',
+  'brasil123',
+  'demo1234',
+  'iloveyou',
+  'letmein',
+  'mudar123',
+  'password',
+  'password1',
+  'password123',
+  'qwerty123',
+  'senha123',
+  'welcome1',
+])
+
 const password = z
   .string()
   .min(8, 'A senha precisa ter pelo menos 8 caracteres.')
   .max(128, 'A senha é muito longa.')
+  .refine((value) => !COMMON_PASSWORDS.has(value.toLowerCase()), 'Escolha uma senha mais forte.')
 
 const code = z.string().regex(/^\d{6}$/, 'Código inválido.')
 

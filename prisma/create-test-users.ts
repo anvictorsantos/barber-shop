@@ -2,9 +2,20 @@ import { hash } from '@node-rs/argon2'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-const PASSWORD = 'demo1234'
+
+function requireDemoPassword(): string {
+  const value = process.env.SEED_DEMO_PASSWORD
+  if (!value) throw new Error('SEED_DEMO_PASSWORD is required to create test users.')
+  return value
+}
+
+const PASSWORD = requireDemoPassword()
 
 async function main() {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Refusing to create demo users in production.')
+  }
+
   const passwordHash = await hash(PASSWORD)
   const verifiedAt = new Date()
 

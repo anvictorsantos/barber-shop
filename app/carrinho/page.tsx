@@ -16,7 +16,7 @@ import type { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Checkout — Barbearia do Luiz',
+  title: 'Confirmar agendamento — Barbearia do Luiz',
   robots: { index: false, follow: false },
 }
 
@@ -70,10 +70,10 @@ export default async function CartPage() {
 
           <div className="flex flex-col gap-2.5">
             <span className="text-label font-bold uppercase tracking-[1.8px] text-accent">
-              Agendamento · Checkout
+              Agendamento · Confirmação
             </span>
             <h1 className="font-display text-[32px] font-bold leading-[1.2] text-text lg:text-[38px]">
-              Checkout
+              Confirmar agendamento
             </h1>
             <p className="text-[15px] leading-[1.5] text-muted">
               Confirme seus dados e forma de pagamento.

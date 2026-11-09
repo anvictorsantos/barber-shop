@@ -2,12 +2,16 @@
 
 import { Bell } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 import type { AdminNotification } from '@/lib/admin/notifications'
+import { postJson } from '@/lib/http/client'
 
 export function NotificationsBell({ count, items }: { count: number; items: AdminNotification[] }) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [marking, setMarking] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -18,6 +22,14 @@ export function NotificationsBell({ count, items }: { count: number; items: Admi
     document.addEventListener('mousedown', onPointerDown)
     return () => document.removeEventListener('mousedown', onPointerDown)
   }, [open])
+
+  async function markAsRead() {
+    if (marking) return
+    setMarking(true)
+    const result = await postJson<{ ok: boolean }>('/api/admin/notifications/read', {})
+    setMarking(false)
+    if (result.ok) router.refresh()
+  }
 
   return (
     <div
@@ -44,9 +56,21 @@ export function NotificationsBell({ count, items }: { count: number; items: Admi
 
       {open ? (
         <div className="absolute right-0 top-12 z-50 w-[320px] max-w-[90vw] rounded-xl border border-white/10 bg-surface p-3 shadow-card">
-          <p className="px-2 pb-2 text-micro font-bold uppercase tracking-wider text-muted">
-            Novos agendamentos
-          </p>
+          <div className="flex items-center justify-between gap-2 px-2 pb-2">
+            <p className="text-micro font-bold uppercase tracking-wider text-muted">
+              Novos agendamentos
+            </p>
+            {count > 0 ? (
+              <button
+                type="button"
+                onClick={markAsRead}
+                disabled={marking}
+                className="cursor-pointer text-micro font-semibold text-accent transition hover:text-accent-hover disabled:opacity-50"
+              >
+                {marking ? 'Marcando…' : 'Marcar como lido'}
+              </button>
+            ) : null}
+          </div>
 
           {items.length === 0 ? (
             <p className="px-2 py-4 text-caption text-muted">Nada novo por aqui.</p>

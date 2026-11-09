@@ -10,6 +10,7 @@ export const serverEnvSchema = z.object({
   SHOP_TIMEZONE: z.string().min(1).default('America/Sao_Paulo'),
   SESSION_SECRET: z.string().min(32),
   CRON_SECRET: z.string().min(16),
+  ORIGIN_SHARED_SECRET: z.string().default(''),
   DEMO_MODE: booleanString.default(false),
 
   EMAIL_ENABLED: booleanString.default(true),

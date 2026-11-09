@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { e2ePassword } from './credentials'
+
 import type { Page } from '@playwright/test'
 
 const seeded = process.env.E2E_SEEDED === 'true'
@@ -13,7 +15,7 @@ test.describe('customer account', () => {
   test.beforeEach(async ({ page }) => {
     test.skip(!seeded, 'Requires a seeded database. Set E2E_SEEDED=true after db:seed.')
     const login = await page.request.post('/api/auth/login', {
-      data: { identifier: 'joao.silva@example.com', password: 'demo1234' },
+      data: { identifier: 'joao.silva@example.com', password: e2ePassword() },
     })
     expect(login.ok()).toBeTruthy()
   })

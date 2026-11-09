@@ -12,6 +12,7 @@ import {
   unblockCustomer,
 } from '@/lib/admin/appointments'
 import { resolveAdminScope } from '@/lib/admin/context'
+import { recordAudit } from '@/lib/audit/log'
 import { requireOwner, requireStaff } from '@/lib/auth/guards'
 import { getSessionUser } from '@/lib/auth/session'
 import type { ActionResult } from '@/lib/http/action-result'
@@ -125,6 +126,12 @@ export async function blockCustomerAction(input: unknown): Promise<ActionResult>
     }
 
     await blockCustomer(parsed.data.userId, scope)
+    await recordAudit({
+      actorId: user.id,
+      action: 'customer_block',
+      entity: 'user',
+      entityId: parsed.data.userId,
+    })
     after(() => notifyNoShowBlock(parsed.data.userId))
     revalidatePath('/admin/clientes')
     revalidatePath(`/admin/clientes/${parsed.data.userId}`)
@@ -144,6 +151,12 @@ export async function unblockCustomerAction(input: unknown): Promise<ActionResul
     }
 
     await unblockCustomer(parsed.data.userId, scope)
+    await recordAudit({
+      actorId: user.id,
+      action: 'customer_unblock',
+      entity: 'user',
+      entityId: parsed.data.userId,
+    })
     revalidatePath('/admin/clientes')
     revalidatePath(`/admin/clientes/${parsed.data.userId}`)
     return { ok: true }

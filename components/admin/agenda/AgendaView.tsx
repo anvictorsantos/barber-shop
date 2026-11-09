@@ -192,19 +192,16 @@ export function AgendaView({
             <Select
               aria-label="Filtrar por profissional"
               value={selectedBarberId ?? ''}
-              onChange={(event) => navigate(day.date, event.target.value || null)}
+              onValueChange={(value) => navigate(day.date, value || null)}
               className="w-full sm:w-48"
-            >
-              <option value="">Todos os profissionais</option>
-              {barbers.map((barber) => (
-                <option
-                  key={barber.id}
-                  value={barber.id}
-                >
-                  {barber.displayName}
-                </option>
-              ))}
-            </Select>
+              options={[
+                { label: 'Todos os profissionais', value: '' },
+                ...barbers.map((barber) => ({
+                  label: barber.displayName,
+                  value: barber.id,
+                })),
+              ]}
+            />
           ) : null}
           <Button
             variant="gold"
@@ -543,17 +540,12 @@ function ManualBookingForm({
           <Select
             id="booking-service"
             value={serviceId}
-            onChange={(event) => setServiceId(event.target.value)}
-          >
-            {services.map((service) => (
-              <option
-                key={service.id}
-                value={service.id}
-              >
-                {service.name} · {service.durationMin} min
-              </option>
-            ))}
-          </Select>
+            onValueChange={setServiceId}
+            options={services.map((service) => ({
+              label: `${service.name} · ${service.durationMin} min`,
+              value: service.id,
+            }))}
+          />
         </Field>
 
         <Field
@@ -564,19 +556,14 @@ function ManualBookingForm({
             id="booking-barber"
             value={barberId}
             disabled={scopeBarberId !== null}
-            onChange={(event) => setBarberId(event.target.value)}
-          >
-            {barbers
+            onValueChange={setBarberId}
+            options={barbers
               .filter((barber) => !scopeBarberId || barber.id === scopeBarberId)
-              .map((barber) => (
-                <option
-                  key={barber.id}
-                  value={barber.id}
-                >
-                  {barber.displayName}
-                </option>
-              ))}
-          </Select>
+              .map((barber) => ({
+                label: barber.displayName,
+                value: barber.id,
+              }))}
+          />
         </Field>
 
         <Field
@@ -598,11 +585,12 @@ function ManualBookingForm({
           <Select
             id="booking-source"
             value={source}
-            onChange={(event) => setSource(event.target.value as 'MANUAL' | 'WALK_IN')}
-          >
-            <option value="MANUAL">Manual</option>
-            <option value="WALK_IN">Encaixe</option>
-          </Select>
+            onValueChange={(value) => setSource(value as 'MANUAL' | 'WALK_IN')}
+            options={[
+              { label: 'Manual', value: 'MANUAL' },
+              { label: 'Encaixe', value: 'WALK_IN' },
+            ]}
+          />
         </Field>
       </div>
 

@@ -222,7 +222,7 @@ export default async function CustomerFavoritesPage() {
               Produtos Favoritos
             </h2>
             <p className="text-[13px] leading-4 text-muted">
-              Cosméticos premium adquiridos na barbearia para o seu dia a dia
+              Produtos que você usa no dia a dia, disponíveis na barbearia
             </p>
           </div>
 

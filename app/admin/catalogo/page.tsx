@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Serviços e Produtos — Barbearia do Luiz',
+  title: 'Serviços e produtos — Barbearia do Luiz',
   robots: { index: false, follow: false },
 }
 
@@ -24,7 +24,7 @@ export default async function AdminCatalogPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Serviços e Produtos"
+        title="Serviços e produtos"
         description="Catálogo, preços, duração e estoque."
       />
       <CatalogManager

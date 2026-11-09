@@ -4,6 +4,7 @@ import type { FavoriteKind } from '@/lib/customer/favorites'
 import { prisma } from '@/lib/db/prisma'
 import { AppError } from '@/lib/http/errors'
 import { releaseOrderCredit } from '@/lib/loyalty/service'
+import { isUniqueConstraintError } from '@/lib/orders/conflict'
 import { refundOrderPayment } from '@/lib/payments/refund'
 import type { CustomerProfileInput, ReviewInput } from '@/lib/validation/customer'
 
@@ -108,33 +109,40 @@ export async function submitAppointmentReview(input: ReviewInput, userId: string
     throw new AppError(409, 'already_reviewed', 'Esta visita já foi avaliada.')
   }
 
-  return prisma.$transaction(async (tx) => {
-    const review = await tx.review.create({
-      data: {
-        appointmentId: appointment.id,
-        customerId: userId,
-        barberId: appointment.barberId,
-        rating: input.rating,
-        comment: input.comment || null,
-      },
-    })
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const review = await tx.review.create({
+        data: {
+          appointmentId: appointment.id,
+          customerId: userId,
+          barberId: appointment.barberId,
+          rating: input.rating,
+          comment: input.comment || null,
+        },
+      })
 
-    const aggregate = await tx.review.aggregate({
-      where: { barberId: appointment.barberId },
-      _avg: { rating: true },
-      _count: { _all: true },
-    })
+      const aggregate = await tx.review.aggregate({
+        where: { barberId: appointment.barberId },
+        _avg: { rating: true },
+        _count: { _all: true },
+      })
 
-    await tx.barberProfile.update({
-      where: { id: appointment.barberId },
-      data: {
-        ratingAvg: aggregate._avg.rating ?? 0,
-        ratingCount: aggregate._count._all,
-      },
-    })
+      await tx.barberProfile.update({
+        where: { id: appointment.barberId },
+        data: {
+          ratingAvg: aggregate._avg.rating ?? 0,
+          ratingCount: aggregate._count._all,
+        },
+      })
 
-    return review
-  })
+      return review
+    })
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      throw new AppError(409, 'already_reviewed', 'Esta visita já foi avaliada.')
+    }
+    throw error
+  }
 }
 
 export async function updateCustomerProfile(userId: string, input: CustomerProfileInput) {

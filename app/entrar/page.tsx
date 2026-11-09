@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 const BENEFITS = [
   {
-    title: 'Agendamento em segundos',
+    title: 'Agendamento sem complicação',
     description: 'Seus dados ficam salvos para o próximo horário.',
   },
   {

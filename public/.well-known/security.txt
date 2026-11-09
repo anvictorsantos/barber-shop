@@ -1,0 +1,4 @@
+Contact: mailto:luiz@barbeariadoluiz.com.br
+Expires: 2027-11-08T00:00:00.000Z
+Canonical: https://barbeariadoluiz.com.br/.well-known/security.txt
+Preferred-Languages: pt-BR, en

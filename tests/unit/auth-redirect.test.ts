@@ -9,6 +9,14 @@ describe('auth redirects', () => {
     expect(safeNextPath('/admin')).toBe('/admin')
   })
 
+  it('rejects backslash and control-character tricks', () => {
+    expect(safeNextPath('/\\evil.example')).toBeNull()
+    expect(safeNextPath('/%5Cevil.example')).toBeNull()
+    expect(safeNextPath('/%5cevil.example')).toBeNull()
+    expect(safeNextPath('/\u0000admin')).toBeNull()
+    expect(safeNextPath('/conta?next=//evil.example')).toBe('/conta?next=//evil.example')
+  })
+
   it('sends each role to its home', () => {
     expect(postAuthPath('CUSTOMER')).toBe('/conta/agendamentos')
     expect(postAuthPath('OWNER')).toBe('/admin')

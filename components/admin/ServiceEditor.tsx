@@ -112,17 +112,12 @@ export function ServiceEditor({
             <Select
               id="service-category"
               value={category}
-              onChange={(event) => setCategory(event.target.value as ServiceCategory)}
-            >
-              {serviceCategoryOrder.map((item) => (
-                <option
-                  key={item}
-                  value={item}
-                >
-                  {serviceCategoryLabels[item]}
-                </option>
-              ))}
-            </Select>
+              onValueChange={(value) => setCategory(value as ServiceCategory)}
+              options={serviceCategoryOrder.map((item) => ({
+                label: serviceCategoryLabels[item],
+                value: item,
+              }))}
+            />
           </Field>
 
           <Field

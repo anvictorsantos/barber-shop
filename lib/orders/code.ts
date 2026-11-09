@@ -1,7 +1,11 @@
-import { randomInt } from 'node:crypto'
+import { randomBytes, randomInt } from 'node:crypto'
 
 import { prisma } from '@/lib/db/prisma'
 import { AppError } from '@/lib/http/errors'
+
+export function createOrderPublicToken(): string {
+  return randomBytes(32).toString('base64url')
+}
 
 export async function uniqueOrderCode(): Promise<string> {
   for (let attempt = 0; attempt < 5; attempt += 1) {

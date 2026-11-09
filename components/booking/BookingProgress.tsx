@@ -24,7 +24,9 @@ export function BookingProgress({ current }: { current: BookingStep }) {
           </span>
           <span className="text-caption font-bold text-white">{STEPS[currentIndex]?.label}</span>
         </div>
-        <span className="text-caption text-muted">Passo {currentIndex} de 4</span>
+        <span className="text-caption text-muted">
+          Passo {currentIndex + 1} de {STEPS.length}
+        </span>
       </div>
 
       <div className="hidden overflow-x-auto lg:block">

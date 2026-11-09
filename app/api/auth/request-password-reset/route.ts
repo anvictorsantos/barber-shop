@@ -1,3 +1,5 @@
+import { after } from 'next/server'
+
 import { requestPasswordReset } from '@/lib/auth/service'
 import { errorResponse } from '@/lib/http/errors'
 import { assertSameOrigin } from '@/lib/http/origin'
@@ -11,10 +13,11 @@ export const runtime = 'nodejs'
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request)
-    enforceRateLimit(`request-reset:${clientIp(request)}`, 5, 10 * 60 * 1000)
+    await enforceRateLimit(`request-reset:${clientIp(request)}`, 5, 10 * 60 * 1000)
 
     const input = await parseJson(request, requestResetSchema)
-    await requestPasswordReset(input.identifier)
+
+    after(() => requestPasswordReset(input.identifier).catch(() => undefined))
 
     return Response.json({ ok: true }, { status: 202 })
   } catch (error) {

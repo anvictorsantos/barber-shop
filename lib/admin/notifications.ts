@@ -1,4 +1,5 @@
 import { formatInTimeZone } from 'date-fns-tz'
+import { cookies } from 'next/headers'
 
 import { resolveAdminScope } from '@/lib/admin/context'
 import type { SessionUser } from '@/lib/auth/session'
@@ -6,6 +7,8 @@ import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { prisma } from '@/lib/db/prisma'
 
 import type { Prisma } from '@prisma/client'
+
+export const ADMIN_NOTIFICATIONS_READ_COOKIE = 'admin_notifications_read_at'
 
 export interface AdminNotification {
   id: string
@@ -21,10 +24,13 @@ export async function getAdminNotifications(user: SessionUser): Promise<{
 }> {
   const scope = await resolveAdminScope(user)
   const since = new Date(Date.now() - 48 * 60 * 60 * 1000)
+  const readCookie = (await cookies()).get(ADMIN_NOTIFICATIONS_READ_COOKIE)?.value
+  const readAt = readCookie ? new Date(readCookie) : null
+  const unreadSince = readAt && !Number.isNaN(readAt.getTime()) ? readAt : null
 
   const where: Prisma.AppointmentWhereInput = {
     status: { in: ['PENDING', 'CONFIRMED'] },
-    createdAt: { gte: since },
+    createdAt: unreadSince ? { gt: unreadSince } : { gte: since },
     ...(scope.barberId ? { barberId: scope.barberId } : {}),
   }
 

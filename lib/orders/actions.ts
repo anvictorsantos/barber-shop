@@ -7,6 +7,7 @@ import { sendAccountActivation } from '@/lib/auth/service'
 import { getSessionUser } from '@/lib/auth/session'
 import { AppError } from '@/lib/http/errors'
 import { enforceRateLimit } from '@/lib/http/rate-limit'
+import { clientIp } from '@/lib/http/request'
 import { notifyOrderConfirmation } from '@/lib/notifications/orders'
 import { createOrder, expirePendingOrder } from '@/lib/orders/create-order'
 import { getOrderByCode } from '@/lib/orders/queries'
@@ -23,9 +24,7 @@ function failure(error: unknown): CreateOrderActionResult {
 export async function createOrderAction(input: unknown): Promise<CreateOrderActionResult> {
   try {
     const headerList = await headers()
-    const forwarded = headerList.get('x-forwarded-for')
-    const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
-    enforceRateLimit(`checkout:${ip}`, 10, 10 * 60 * 1000)
+    await enforceRateLimit(`checkout:${clientIp({ headers: headerList })}`, 10, 10 * 60 * 1000)
 
     const parsed = createOrderSchema.safeParse(input)
     if (!parsed.success) {
@@ -74,7 +73,12 @@ export async function createOrderAction(input: unknown): Promise<CreateOrderActi
         if (!detailed) throw new AppError(500, 'order_missing', 'Pedido não encontrado.')
         const preference = await createMercadoPagoPreference(detailed)
         queueActivation()
-        return { ok: true, code: order.code, initPoint: preference.initPoint }
+        return {
+          ok: true,
+          code: order.code,
+          publicToken: order.publicToken,
+          initPoint: preference.initPoint,
+        }
       } catch (error) {
         await expirePendingOrder(order.code).catch(() => undefined)
         return failure(error)
@@ -84,7 +88,7 @@ export async function createOrderAction(input: unknown): Promise<CreateOrderActi
     after(() => notifyOrderConfirmation(order.code))
     queueActivation()
 
-    return { ok: true, code: order.code }
+    return { ok: true, code: order.code, publicToken: order.publicToken }
   } catch (error) {
     return failure(error)
   }

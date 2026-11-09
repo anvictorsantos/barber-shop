@@ -108,17 +108,12 @@ export function TimeBlockManager({
               <Select
                 id="block-barber"
                 value={barberId}
-                onChange={(event) => setBarberId(event.target.value)}
-              >
-                {barbers.map((barber) => (
-                  <option
-                    key={barber.id}
-                    value={barber.id}
-                  >
-                    {barber.displayName}
-                  </option>
-                ))}
-              </Select>
+                onValueChange={setBarberId}
+                options={barbers.map((barber) => ({
+                  label: barber.displayName,
+                  value: barber.id,
+                }))}
+              />
             </Field>
 
             <Field
@@ -140,11 +135,12 @@ export function TimeBlockManager({
               <Select
                 id="block-recurring"
                 value={recurring}
-                onChange={(event) => setRecurring(event.target.value as 'weekly' | 'once')}
-              >
-                <option value="weekly">Toda semana</option>
-                <option value="once">Data única</option>
-              </Select>
+                onValueChange={(value) => setRecurring(value as 'weekly' | 'once')}
+                options={[
+                  { label: 'Toda semana', value: 'weekly' },
+                  { label: 'Data única', value: 'once' },
+                ]}
+              />
             </Field>
 
             {recurring === 'weekly' ? (
@@ -155,17 +151,12 @@ export function TimeBlockManager({
                 <Select
                   id="block-weekday"
                   value={weekday}
-                  onChange={(event) => setWeekday(event.target.value)}
-                >
-                  {WEEKDAY_LABELS.map((labelText, index) => (
-                    <option
-                      key={labelText}
-                      value={String(index)}
-                    >
-                      {labelText}
-                    </option>
-                  ))}
-                </Select>
+                  onValueChange={setWeekday}
+                  options={WEEKDAY_LABELS.map((labelText, index) => ({
+                    label: labelText,
+                    value: String(index),
+                  }))}
+                />
               </Field>
             ) : (
               <Field

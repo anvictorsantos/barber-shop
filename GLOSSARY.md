@@ -80,4 +80,9 @@ One context: a single neighborhood barbershop. These terms are the canonical lan
 - **Demo mode** — A non-production mode with seeded data and one-click logins for owner, barber, and customer.
 - **Disposable email** — A temporary mailbox domain rejected at registration. Checked by domain only.
 - **Notification** — A transactional message sent by WhatsApp or email. Kinds: confirmation, reminder, cancellation, reschedule, receipt, verification, reset, no-show block.
+- **Rate limit** — A cap on how many requests or messages one key (an IP address or an account) may make in a window.
+- **Account lockout** — A temporary refusal of sign-in for one account after repeated wrong passwords, independent of the IP address used.
+- **OTP block** — A temporary refusal of password reset by phone after repeated wrong codes, not cleared by requesting a new code.
+- **Order access link** — The confirmation link that proves its holder may view an order. Anonymous access requires it; the short code alone is not enough.
+- **Audit log** — A durable record of sensitive staff actions: refunds, customer blocks, price changes, and role changes.
 - **Add to calendar** — An ICS download and a Google Calendar link in the confirmation email and page. Not a two-way calendar sync.

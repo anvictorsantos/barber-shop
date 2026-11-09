@@ -23,7 +23,8 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Serviços — Barbearia do Luiz',
-  description: 'Corte, barba e tratamentos. Escolha o serviço e agende seu horário.',
+  description:
+    'Do corte ao acabamento, cada serviço é feito com atenção para você sair satisfeito.',
 }
 
 export default async function ServicesPage({
@@ -93,10 +94,10 @@ export default async function ServicesPage({
             <div className="flex flex-col gap-4">
               <SectionLabel>Catálogo</SectionLabel>
               <h1 className="font-display text-[40px] font-semibold leading-[1.05] text-text lg:text-[48px]">
-                Serviços
+                O cuidado que seu visual merece.
               </h1>
               <p className="max-w-[560px] text-lead leading-relaxed text-muted">
-                Escolha o serviço, o profissional e o horário. Confirmação em poucos minutos.
+                Do corte ao acabamento, cada serviço é feito com atenção para você sair satisfeito.
               </p>
             </div>
           </div>
@@ -142,7 +143,7 @@ export default async function ServicesPage({
                   <EmptyState
                     icon={Scissors}
                     title="Nenhum serviço disponível"
-                    description="A barbearia ainda não cadastrou serviços ativos."
+                    description="Ainda não há serviços por aqui. Volte em breve para conferir."
                   />
                 </Card>
               ) : (

@@ -74,27 +74,32 @@ export function AuthPanel({
         </div>
       )}
 
-      {mode === 'login' ? (
-        <LoginForm
-          next={next ?? null}
-          onCreateAccount={() => switchMode('register')}
-          onForgotPassword={() => switchMode('reset')}
-        />
-      ) : null}
+      <div
+        key={mode}
+        className="animate-auth-panel"
+      >
+        {mode === 'login' ? (
+          <LoginForm
+            next={next ?? null}
+            onCreateAccount={() => switchMode('register')}
+            onForgotPassword={() => switchMode('reset')}
+          />
+        ) : null}
 
-      {mode === 'register' ? (
-        <RegisterForm
-          next={next ?? null}
-          onLogin={() => switchMode('login')}
-        />
-      ) : null}
+        {mode === 'register' ? (
+          <RegisterForm
+            next={next ?? null}
+            onLogin={() => switchMode('login')}
+          />
+        ) : null}
 
-      {mode === 'reset' ? (
-        <PasswordResetForm
-          token={resetToken}
-          onLogin={() => switchMode('login')}
-        />
-      ) : null}
+        {mode === 'reset' ? (
+          <PasswordResetForm
+            token={resetToken}
+            onLogin={() => switchMode('login')}
+          />
+        ) : null}
+      </div>
     </div>
   )
 }

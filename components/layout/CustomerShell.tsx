@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { LogoutButton } from '@/components/admin/LogoutButton'
 import { CustomerNav } from '@/components/layout/CustomerNav'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { getSessionUser } from '@/lib/auth/session'
@@ -54,20 +55,24 @@ export async function CustomerShell({ children }: { children: ReactNode }) {
 
           <CustomerNav variant="horizontal" />
 
-          <Link
-            href="/conta/perfil"
-            className="flex items-center gap-3"
-          >
-            <span className="hidden flex-col items-end gap-0.5 sm:flex">
-              <span className="text-sm font-bold leading-[17px] text-text">{user.name}</span>
-              <span className="text-caption font-semibold leading-[15px] text-accent">
-                Cliente {TIER_LABEL[loyalty.tier]}
+          <div className="flex items-center gap-4">
+            <Link
+              href="/conta/perfil"
+              className="flex items-center gap-3"
+            >
+              <span className="hidden flex-col items-end gap-0.5 sm:flex">
+                <span className="text-sm font-bold leading-[17px] text-text">{user.name}</span>
+                <span className="text-caption font-semibold leading-[15px] text-accent">
+                  Cliente {TIER_LABEL[loyalty.tier]}
+                </span>
               </span>
-            </span>
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-primary bg-primary/15 text-caption font-bold text-accent">
-              {initials(user.name)}
-            </span>
-          </Link>
+              <span className="flex h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-primary bg-primary/15 text-caption font-bold text-accent">
+                {initials(user.name)}
+              </span>
+            </Link>
+
+            <LogoutButton />
+          </div>
         </div>
       </header>
 

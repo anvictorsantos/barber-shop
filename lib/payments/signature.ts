@@ -22,11 +22,20 @@ function parseSignatureHeader(header: string): { ts: string; v1: string } | null
   return { ts, v1 }
 }
 
+const MAX_SIGNATURE_AGE_SECONDS = 5 * 60
+
+function isFreshTimestamp(ts: string): boolean {
+  const seconds = Number(ts)
+  if (!Number.isFinite(seconds)) return false
+  return Math.abs(Date.now() / 1000 - seconds) <= MAX_SIGNATURE_AGE_SECONDS
+}
+
 export function verifyMercadoPagoSignature(input: SignatureInput): boolean {
   if (!input.xSignature || !input.dataId || !input.secret) return false
 
   const parsed = parseSignatureHeader(input.xSignature)
   if (!parsed) return false
+  if (!isFreshTimestamp(parsed.ts)) return false
 
   const manifest = `id:${input.dataId.toLowerCase()};request-id:${input.xRequestId ?? ''};ts:${parsed.ts};`
   const expected = createHmac('sha256', input.secret).update(manifest).digest('hex')

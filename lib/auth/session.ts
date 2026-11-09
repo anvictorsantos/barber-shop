@@ -6,11 +6,17 @@ import { createOpaqueToken } from '@/lib/auth/tokens'
 import { prisma } from '@/lib/db/prisma'
 import { getServerEnv } from '@/lib/env'
 
-import type { Prisma } from '@prisma/client'
+import type { Prisma, Role } from '@prisma/client'
 
 export const SESSION_COOKIE = 'bl_session'
-export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000
+const STAFF_SESSION_TTL_MS = 7 * DAY_MS
+const CUSTOMER_SESSION_TTL_MS = 30 * DAY_MS
 const SESSION_REFRESH_AFTER_MS = 24 * 60 * 60 * 1000
+
+function sessionTtlMs(role: Role): number {
+  return role === 'CUSTOMER' ? CUSTOMER_SESSION_TTL_MS : STAFF_SESSION_TTL_MS
+}
 
 const sessionUserSelect = {
   id: true,
@@ -46,7 +52,12 @@ export async function createSession(
 ): Promise<string> {
   const token = createOpaqueToken()
   const tokenHash = hashSessionToken(token)
-  const expiresAt = new Date(Date.now() + SESSION_TTL_MS)
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: { role: true },
+  })
+  const ttlMs = sessionTtlMs(user.role)
+  const expiresAt = new Date(Date.now() + ttlMs)
 
   await prisma.session.create({
     data: {
@@ -74,6 +85,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     select: {
       id: true,
       expiresAt: true,
+      createdAt: true,
       lastUsedAt: true,
       user: { select: sessionUserSelect },
     },
@@ -82,14 +94,16 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!session) return null
 
   const now = Date.now()
-  if (session.expiresAt.getTime() <= now) {
+  const cap = session.createdAt.getTime() + sessionTtlMs(session.user.role)
+  if (session.expiresAt.getTime() <= now || cap <= now) {
     await prisma.session.delete({ where: { id: session.id } })
     store.delete(SESSION_COOKIE)
     return null
   }
 
   if (now - session.lastUsedAt.getTime() > SESSION_REFRESH_AFTER_MS) {
-    const expiresAt = new Date(now + SESSION_TTL_MS)
+    const ttlMs = sessionTtlMs(session.user.role)
+    const expiresAt = new Date(Math.min(now + ttlMs, cap))
     await prisma.session.update({
       where: { id: session.id },
       data: { lastUsedAt: new Date(now), expiresAt },

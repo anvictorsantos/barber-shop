@@ -38,7 +38,7 @@ export async function createMercadoPagoPreference(order: OrderWithLines): Promis
   }
 
   const appUrl = env.APP_URL.replace(/\/+$/, '')
-  const callback = `${appUrl}/pedido/${order.code}`
+  const callback = `${appUrl}/pedido/${order.code}?t=${encodeURIComponent(order.publicToken)}`
 
   const response = await fetch(MP_ENDPOINT, {
     method: 'POST',
@@ -60,11 +60,8 @@ export async function createMercadoPagoPreference(order: OrderWithLines): Promis
 
   if (!response.ok) {
     const detail = (await response.text()).slice(0, 200)
-    throw new AppError(
-      502,
-      'payment_error',
-      `Mercado Pago recusou o pedido (${response.status}): ${detail}`,
-    )
+    console.warn('[mercadopago] preference rejected:', response.status, detail)
+    throw new AppError(502, 'payment_error', 'Não foi possível iniciar o pagamento.')
   }
 
   const body = (await response.json()) as { init_point?: unknown }

@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     assertSameOrigin(request)
     const input = await parseJson(request, activateAccountSchema)
     const identifier = 'token' in input ? input.token : input.phone
-    enforceRateLimit(`activate:${clientIp(request)}:${identifier}`, 10, 10 * 60 * 1000)
+    await enforceRateLimit(`activate:${clientIp(request)}:${identifier}`, 10, 10 * 60 * 1000)
 
     const user =
       'token' in input

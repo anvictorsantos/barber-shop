@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { e2ePassword } from './credentials'
+
 const seeded = process.env.E2E_SEEDED === 'true'
 
 test.describe('account shells', () => {
@@ -10,28 +12,28 @@ test.describe('account shells', () => {
   test('login form reaches admin', async ({ page }) => {
     await page.goto('/entrar')
     await page.getByLabel('Telefone ou e-mail').fill('luiz@barbeariadoluiz.com.br')
-    await page.getByLabel('Senha').fill('demo1234')
+    await page.getByLabel('Senha').fill(e2ePassword())
     await page.getByRole('button', { name: 'Entrar' }).click()
 
     await expect(page).toHaveURL('/admin')
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible()
   })
 
   test('owner shell at 1440', async ({ page }) => {
     const login = await page.request.post('/api/auth/login', {
-      data: { identifier: 'luiz@barbeariadoluiz.com.br', password: 'demo1234' },
+      data: { identifier: 'luiz@barbeariadoluiz.com.br', password: e2ePassword() },
     })
     expect(login.ok()).toBeTruthy()
 
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/admin')
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Navegação administrativa' })).toBeVisible()
   })
 
   test('customer shell at 390', async ({ page }) => {
     const login = await page.request.post('/api/auth/login', {
-      data: { identifier: 'joao.silva@example.com', password: 'demo1234' },
+      data: { identifier: 'joao.silva@example.com', password: e2ePassword() },
     })
     expect(login.ok()).toBeTruthy()
 

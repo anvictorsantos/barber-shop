@@ -59,10 +59,11 @@ describe('auth service', () => {
       { name: 'Telefone Teste', identifier: phone, password: 'secret123' },
       deps,
     )
-    createdIds.push(registered.user.id)
+    const user = await prisma.user.findFirstOrThrow({ where: { phone } })
+    createdIds.push(user.id)
 
     expect(registered.requiresPhoneVerification).toBe(true)
-    expect(registered.user.phoneVerifiedAt).toBeNull()
+    expect(user.phoneVerifiedAt).toBeNull()
     expect(otpCode).toMatch(/^\d{6}$/)
 
     await expect(loginUser(phone, 'secret123')).rejects.toThrow('Confirme seu WhatsApp')
@@ -70,7 +71,7 @@ describe('auth service', () => {
     const verified = await verifyPhoneSignup(phone, otpCode)
     expect(verified.phoneVerifiedAt).not.toBeNull()
     await expect(loginUser(phone, 'secret123')).resolves.toMatchObject({
-      id: registered.user.id,
+      id: user.id,
     })
   })
 
@@ -79,7 +80,8 @@ describe('auth service', () => {
       { name: 'Email Teste', identifier: email, password: 'secret123' },
       deps,
     )
-    createdIds.push(registered.user.id)
+    const user = await prisma.user.findFirstOrThrow({ where: { email } })
+    createdIds.push(user.id)
 
     expect(registered.requiresPhoneVerification).toBe(false)
     expect(registered.verificationEmailSent).toBe(true)
@@ -91,7 +93,19 @@ describe('auth service', () => {
     const verified = await verifyEmailToken(token ?? '')
     expect(verified.emailVerifiedAt).not.toBeNull()
     await expect(loginUser(email, 'secret123')).resolves.toMatchObject({
-      id: registered.user.id,
+      id: user.id,
+    })
+  })
+
+  it('does not reveal an existing contact at registration', async () => {
+    const repeated = await registerUser(
+      { name: 'Email Teste', identifier: email, password: 'secret123' },
+      deps,
+    )
+
+    expect(repeated).toEqual({
+      requiresPhoneVerification: false,
+      verificationEmailSent: true,
     })
   })
 

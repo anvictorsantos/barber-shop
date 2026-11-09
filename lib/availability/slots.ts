@@ -73,6 +73,36 @@ export function isShopOpen({
   return currentMinute >= shopHours.openMinute && currentMinute < shopHours.closeMinute
 }
 
+export interface NextOpening {
+  dayOffset: number
+  weekday: number
+  openMinute: number
+}
+
+export function getNextOpening({
+  shopHours,
+  now = new Date(),
+  timezone = BUSINESS_TIMEZONE,
+}: {
+  shopHours: readonly SlotShopHours[]
+  now?: Date
+  timezone?: string
+}): NextOpening | null {
+  const weekday = Number(formatInTimeZone(now, timezone, 'i')) % 7
+  const [hour = '0', minute = '0'] = formatInTimeZone(now, timezone, 'H:m').split(':')
+  const currentMinute = Number(hour) * 60 + Number(minute)
+
+  for (let dayOffset = 0; dayOffset < 7; dayOffset += 1) {
+    const day = (weekday + dayOffset) % 7
+    const row = shopHours.find((item) => item.weekday === day)
+    if (!row || row.closed) continue
+    if (dayOffset === 0 && currentMinute >= row.openMinute) continue
+    return { dayOffset, weekday: day, openMinute: row.openMinute }
+  }
+
+  return null
+}
+
 function overlaps(start: Date, end: Date, otherStart: Date, otherEnd: Date): boolean {
   return start.getTime() < otherEnd.getTime() && end.getTime() > otherStart.getTime()
 }

@@ -115,7 +115,7 @@ export function CartContents({
       return
     }
 
-    router.push(`/pedido/${result.code}`)
+    router.push(`/pedido/${result.code}?t=${encodeURIComponent(result.publicToken)}`)
   }
 
   return (

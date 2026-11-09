@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     assertSameOrigin(request)
 
     const input = await parseJson(request, phoneLoginSchema)
-    enforceRateLimit(`phone-login:${clientIp(request)}:${input.phone}`, 10, 10 * 60 * 1000)
+    await enforceRateLimit(`phone-login:${clientIp(request)}:${input.phone}`, 10, 10 * 60 * 1000)
 
     await requestPhoneLogin(input.phone)
 

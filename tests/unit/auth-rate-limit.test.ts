@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { resetRateLimits, takeRateLimit } from '@/lib/auth/rate-limit'
+import { resetRateLimits, takeRateLimitInMemory as takeRateLimit } from '@/lib/auth/rate-limit'
 
 describe('rate limit', () => {
   beforeEach(() => {

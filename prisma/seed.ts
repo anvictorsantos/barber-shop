@@ -11,12 +11,19 @@ import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
 
 const prisma = new PrismaClient()
 const TIMEZONE = 'America/Sao_Paulo'
-const DEMO_PASSWORD = 'demo1234'
+
+function requireDemoPassword(): string {
+  const value = process.env.SEED_DEMO_PASSWORD
+  if (!value) throw new Error('SEED_DEMO_PASSWORD is required to seed demo accounts.')
+  return value
+}
+
+const DEMO_PASSWORD = requireDemoPassword()
 
 type BookingSeed = {
   dayOffset: number
   time: string
-  barber: 'luiz' | 'hinner' | 'carlos'
+  barber: 'luiz' | 'hinner' | 'manoel'
   service: string
   customer: string | null
   customerName?: string
@@ -54,7 +61,7 @@ const serviceSeeds = [
     slug: 'corte-barba',
     name: 'Corte + Barba',
     description:
-      'O combo clássico para o homem moderno. Inclui corte de cabelo personalizado e design completo da barba com navalha, toalha quente e óleos essenciais.',
+      'Corte pensado para o seu estilo e barba alinhada com navalha, toalha quente e óleos essenciais.',
     category: 'COMBO',
     durationMin: 40,
     priceCents: 6000,
@@ -66,7 +73,7 @@ const serviceSeeds = [
     slug: 'corte-tesoura-maquina',
     name: 'Corte Tesoura + Máquina',
     description:
-      'Corte de cabelo personalizado combinando técnicas clássicas de tesoura e máquina.',
+      'Corte combinando tesoura e máquina, com acabamento bem-feito do jeito que você gosta.',
     category: 'CORTE',
     durationMin: 30,
     priceCents: 4500,
@@ -75,7 +82,7 @@ const serviceSeeds = [
   {
     slug: 'corte-kids',
     name: 'Corte Kids',
-    description: 'Corte infantil cuidadoso e divertido para deixar os pequenos no estilo.',
+    description: 'Corte infantil com paciência e capricho para deixar os pequenos à vontade.',
     category: 'CORTE',
     durationMin: 25,
     priceCents: 4500,
@@ -84,7 +91,7 @@ const serviceSeeds = [
   {
     slug: 'barba-terapia',
     name: 'Barba Terapia',
-    description: 'Tratamento facial completo com toalhas quentes, óleos essenciais e massagem.',
+    description: 'Barba com toalha quente, óleos e massagem para relaxar e sair bem alinhado.',
     category: 'BARBA',
     durationMin: 35,
     priceCents: 4500,
@@ -93,7 +100,7 @@ const serviceSeeds = [
   {
     slug: 'barba',
     name: 'Barba',
-    description: 'Alinhamento clássico de barba, navalha e finalização com balm premium.',
+    description: 'Barba alinhada com navalha e finalização caprichada.',
     category: 'BARBA',
     durationMin: 20,
     priceCents: 3500,
@@ -102,7 +109,7 @@ const serviceSeeds = [
   {
     slug: 'pezinho',
     name: 'Pezinho',
-    description: 'Limpeza de contorno do cabelo para manter o corte em dia.',
+    description: 'Contorno do cabelo em dia para manter o corte bonito por mais tempo.',
     category: 'PEZINHO',
     durationMin: 10,
     priceCents: 1000,
@@ -120,7 +127,7 @@ const serviceSeeds = [
   {
     slug: 'botox-capilar',
     name: 'Botox Capilar',
-    description: 'Tratamento profundo de reconstrução dos fios capilares.',
+    description: 'Tratamento de reconstrução para devolver força e vida ao cabelo.',
     category: 'QUIMICA',
     durationMin: 60,
     priceCents: 7000,
@@ -193,7 +200,7 @@ const bookingSeeds: BookingSeed[] = [
   {
     dayOffset: -2,
     time: '14:00',
-    barber: 'carlos',
+    barber: 'manoel',
     service: 'barba',
     customer: 'andre',
     status: 'COMPLETED',
@@ -223,7 +230,7 @@ const bookingSeeds: BookingSeed[] = [
   {
     dayOffset: -1,
     time: '16:00',
-    barber: 'carlos',
+    barber: 'manoel',
     service: 'progressiva-masculina',
     customer: 'thiago',
     status: 'COMPLETED',
@@ -262,7 +269,7 @@ const bookingSeeds: BookingSeed[] = [
   {
     dayOffset: 0,
     time: '11:15',
-    barber: 'carlos',
+    barber: 'manoel',
     service: 'barba',
     customer: 'bruno',
     status: 'CONFIRMED',
@@ -282,7 +289,7 @@ const bookingSeeds: BookingSeed[] = [
   {
     dayOffset: 0,
     time: '15:30',
-    barber: 'carlos',
+    barber: 'manoel',
     service: 'progressiva-masculina',
     customer: 'arthur',
     status: 'CANCELED',
@@ -303,7 +310,7 @@ const bookingSeeds: BookingSeed[] = [
   {
     dayOffset: 1,
     time: '10:30',
-    barber: 'carlos',
+    barber: 'manoel',
     service: 'corte-kids',
     customer: 'felipe',
     status: 'PENDING',
@@ -331,7 +338,7 @@ const bookingSeeds: BookingSeed[] = [
   {
     dayOffset: 2,
     time: '14:00',
-    barber: 'carlos',
+    barber: 'manoel',
     service: 'botox-capilar',
     customer: 'thiago',
     status: 'CONFIRMED',
@@ -375,10 +382,8 @@ function nextCode(): string {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === 'production' && process.env.DEMO_MODE !== 'true') {
-    throw new Error(
-      'Refusing to seed demo data in production. Set DEMO_MODE=true on a demo environment.',
-    )
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Refusing to seed demo data in production.')
   }
 
   await prisma.$transaction([
@@ -447,10 +452,10 @@ async function main() {
     },
   })
 
-  const carlosUser = await prisma.user.create({
+  const manoelUser = await prisma.user.create({
     data: {
-      name: 'Carlos Heitor',
-      email: 'carlos@barbeariadoluiz.com.br',
+      name: 'Manoel',
+      email: 'manoel@barbeariadoluiz.com.br',
       emailVerifiedAt: verifiedAt,
       phone: '+5531987654322',
       phoneVerifiedAt: verifiedAt,
@@ -501,7 +506,7 @@ async function main() {
       userId: owner.id,
       displayName: 'Luiz Silva',
       title: 'Proprietário / Master Barber',
-      avatarUrl: null,
+      avatarUrl: '/barbers/luiz-2.webp',
       sortOrder: 0,
       ratingAvg: 5,
       ratingCount: 240,
@@ -513,26 +518,26 @@ async function main() {
       userId: hinnerUser.id,
       displayName: 'Hinner Santos',
       title: 'Barbeiro Sênior',
-      avatarUrl: null,
+      avatarUrl: '/barbers/hinner.webp',
       sortOrder: 1,
       ratingAvg: 4.9,
       ratingCount: 180,
     },
   })
 
-  const carlos = await prisma.barberProfile.create({
+  const manoel = await prisma.barberProfile.create({
     data: {
-      userId: carlosUser.id,
-      displayName: 'Carlos Heitor',
-      title: 'Barbeiro Sênior',
-      avatarUrl: null,
+      userId: manoelUser.id,
+      displayName: 'Manoel',
+      title: 'Barbeiro',
+      avatarUrl: '/barbers/manoel.webp',
       sortOrder: 2,
       ratingAvg: 4.8,
       ratingCount: 120,
     },
   })
 
-  const barbers = { luiz, hinner, carlos }
+  const barbers = { luiz, hinner, manoel }
 
   const services: Record<
     string,
@@ -591,7 +596,7 @@ async function main() {
 
   await prisma.timeBlock.create({
     data: {
-      barberId: carlos.id,
+      barberId: manoel.id,
       label: 'Manutenção de Cadeiras',
       recurring: false,
       date: parseISO(businessDate(2)),
@@ -841,7 +846,7 @@ async function main() {
     data: { ratingAvg: 4.9, ratingCount: 180 },
   })
   await prisma.barberProfile.update({
-    where: { id: carlos.id },
+    where: { id: manoel.id },
     data: { ratingAvg: 4.8, ratingCount: 120 },
   })
 

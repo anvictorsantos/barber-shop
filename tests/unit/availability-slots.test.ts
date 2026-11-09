@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BUSINESS_TIMEZONE,
   getAvailableSlots,
+  getNextOpening,
   isShopOpen,
   type AvailabilityInput,
 } from '@/lib/availability/slots'
@@ -160,5 +161,53 @@ describe('shop open state', () => {
         now: fromZonedTime('2026-11-02 09:10:00', BUSINESS_TIMEZONE),
       }),
     ).toBe(false)
+  })
+})
+
+describe('next opening', () => {
+  const week = [
+    { weekday: 0, openMinute: 0, closeMinute: 0, closed: true },
+    { weekday: 1, openMinute: 540, closeMinute: 1200, closed: false },
+    { weekday: 2, openMinute: 540, closeMinute: 1200, closed: false },
+    { weekday: 3, openMinute: 540, closeMinute: 1200, closed: false },
+    { weekday: 4, openMinute: 540, closeMinute: 1200, closed: false },
+    { weekday: 5, openMinute: 540, closeMinute: 1200, closed: false },
+    { weekday: 6, openMinute: 540, closeMinute: 1080, closed: false },
+  ]
+
+  it('skips a closed today and points to tomorrow', () => {
+    expect(
+      getNextOpening({
+        shopHours: week,
+        now: fromZonedTime('2026-11-08 13:00:00', BUSINESS_TIMEZONE),
+      }),
+    ).toEqual({ dayOffset: 1, weekday: 1, openMinute: 540 })
+  })
+
+  it('points to today before opening', () => {
+    expect(
+      getNextOpening({
+        shopHours: week,
+        now: fromZonedTime('2026-11-02 08:00:00', BUSINESS_TIMEZONE),
+      }),
+    ).toEqual({ dayOffset: 0, weekday: 1, openMinute: 540 })
+  })
+
+  it('points to tomorrow after closing', () => {
+    expect(
+      getNextOpening({
+        shopHours: week,
+        now: fromZonedTime('2026-11-02 21:00:00', BUSINESS_TIMEZONE),
+      }),
+    ).toEqual({ dayOffset: 1, weekday: 2, openMinute: 540 })
+  })
+
+  it('returns null when every day is closed', () => {
+    expect(
+      getNextOpening({
+        shopHours: week.map((row) => ({ ...row, closed: true })),
+        now: fromZonedTime('2026-11-02 09:10:00', BUSINESS_TIMEZONE),
+      }),
+    ).toBeNull()
   })
 })

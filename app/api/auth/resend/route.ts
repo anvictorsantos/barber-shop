@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     assertSameOrigin(request)
 
     const input = await parseJson(request, resendSchema)
-    enforceRateLimit(
+    await enforceRateLimit(
       `resend:${clientIp(request)}:${input.identifier.toLowerCase()}`,
       10,
       10 * 60 * 1000,

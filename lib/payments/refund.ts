@@ -19,6 +19,7 @@ export interface RefundResult {
 }
 
 const REFUNDABLE_PAYMENT_STATUSES = new Set(['PAID', 'PARTIALLY_REFUNDED'])
+const DUPLICATE_WINDOW_MS = 10_000
 
 export async function refundOrderPayment(input: RefundOrderInput): Promise<RefundResult> {
   const order = await prisma.order.findUnique({
@@ -72,35 +73,74 @@ export async function refundOrderPayment(input: RefundOrderInput): Promise<Refun
     throw new AppError(400, 'invalid_amount', 'Valor de reembolso inválido.')
   }
 
-  let providerRefundId: string | null = null
-  if (payment.provider === 'MERCADO_PAGO' && payment.providerPaymentId) {
-    providerRefundId = await createMercadoPagoRefund(payment.providerPaymentId, input.amountCents)
-  }
+  const refund = await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "payments" WHERE "id" = ${payment.id} FOR UPDATE`
 
-  return prisma.$transaction(async (tx) => {
     const current = await tx.payment.findUniqueOrThrow({ where: { id: payment.id } })
-    const available = current.amountCents - current.refundedCents
-    if (input.amountCents > available) {
+
+    const duplicate = await tx.refund.findFirst({
+      where: {
+        paymentId: current.id,
+        amountCents: input.amountCents,
+        reason: input.reason,
+        createdAt: { gt: new Date(Date.now() - DUPLICATE_WINDOW_MS) },
+      },
+      select: { id: true },
+    })
+    if (duplicate) {
+      throw new AppError(409, 'duplicate_refund', 'Reembolso já registrado há instantes.')
+    }
+
+    const claimed = await tx.payment.updateMany({
+      where: {
+        id: current.id,
+        refundedCents: { lte: current.amountCents - input.amountCents },
+      },
+      data: { refundedCents: { increment: input.amountCents } },
+    })
+    if (claimed.count === 0) {
       throw new AppError(400, 'invalid_amount', 'Valor de reembolso inválido.')
     }
 
-    await tx.refund.create({
+    return tx.refund.create({
       data: {
         paymentId: current.id,
         appointmentId: input.appointmentId ?? null,
         orderProductId: productLine?.id ?? null,
         amountCents: input.amountCents,
         reason: input.reason,
-        providerRefundId,
+        status: 'PENDING',
       },
+      select: { id: true },
+    })
+  })
+
+  let providerRefundId: string | null = null
+  if (payment.provider === 'MERCADO_PAGO' && payment.providerPaymentId) {
+    try {
+      providerRefundId = await createMercadoPagoRefund(payment.providerPaymentId, input.amountCents)
+    } catch (error) {
+      await failRefund(refund.id, payment.id, input.amountCents)
+      console.error(
+        '[payments] provider refund failed:',
+        error instanceof Error ? error.name : 'unknown',
+      )
+      throw new AppError(502, 'provider_refund_failed', 'Não foi possível reembolsar no provedor.')
+    }
+  }
+
+  // shortcut: a provider-accepted refund whose settle transaction fails stays PENDING; reconcile by hand.
+  return prisma.$transaction(async (tx) => {
+    await tx.refund.update({
+      where: { id: refund.id },
+      data: { status: 'SUCCEEDED', providerRefundId },
     })
 
-    const refundedCents = current.refundedCents + input.amountCents
+    const current = await tx.payment.findUniqueOrThrow({ where: { id: payment.id } })
     await tx.payment.update({
       where: { id: current.id },
       data: {
-        refundedCents,
-        status: refundedCents >= current.amountCents ? 'REFUNDED' : 'PARTIALLY_REFUNDED',
+        status: current.refundedCents >= current.amountCents ? 'REFUNDED' : 'PARTIALLY_REFUNDED',
       },
     })
 
@@ -133,5 +173,24 @@ export async function refundOrderPayment(input: RefundOrderInput): Promise<Refun
     await tx.order.update({ where: { id: order.id }, data: { status: orderStatus } })
 
     return { refundedCents: input.amountCents, orderStatus, providerRefundId }
+  })
+}
+
+async function failRefund(refundId: string, paymentId: string, amountCents: number): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    await tx.refund.update({
+      where: { id: refundId },
+      data: { status: 'FAILED', failedReason: 'provider_error' },
+    })
+
+    const current = await tx.payment.findUniqueOrThrow({ where: { id: paymentId } })
+    const refundedCents = Math.max(0, current.refundedCents - amountCents)
+    await tx.payment.update({
+      where: { id: paymentId },
+      data: {
+        refundedCents,
+        status: refundedCents === 0 ? 'PAID' : 'PARTIALLY_REFUNDED',
+      },
+    })
   })
 }

@@ -58,7 +58,9 @@ export default async function AdminClientsPage({
       <PageHeader
         title="Clientes"
         description={
-          scope.role === 'OWNER' ? 'Fichas, histórico e consumo.' : 'Clientes atendidos por você.'
+          scope.role === 'OWNER'
+            ? 'Histórico e consumo dos clientes.'
+            : 'Clientes atendidos por você.'
         }
       />
 

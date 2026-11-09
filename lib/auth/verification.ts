@@ -1,5 +1,10 @@
+import { peekRateLimit, resetRateLimit, takeRateLimit } from '@/lib/auth/rate-limit'
 import {
   EMAIL_VERIFICATION_TTL_MS,
+  OTP_FAILURE_LIMIT,
+  OTP_FAILURE_WINDOW_MS,
+  OTP_ISSUE_PER_DAY,
+  OTP_ISSUE_PER_HOUR,
   OTP_MAX_ATTEMPTS,
   OTP_TTL_MS,
   PASSWORD_RESET_TTL_MS,
@@ -9,8 +14,77 @@ import {
   hashToken,
 } from '@/lib/auth/tokens'
 import { prisma } from '@/lib/db/prisma'
+import { AppError } from '@/lib/http/errors'
+
+import type { VerificationPurpose } from '@prisma/client'
+
+async function assertOtpIssuanceAllowed(identifier: string): Promise<void> {
+  const now = Date.now()
+  const [hour, day] = await Promise.all([
+    prisma.verificationToken.count({
+      where: {
+        identifier,
+        channel: 'WHATSAPP',
+        createdAt: { gt: new Date(now - 60 * 60 * 1000) },
+      },
+    }),
+    prisma.verificationToken.count({
+      where: {
+        identifier,
+        channel: 'WHATSAPP',
+        createdAt: { gt: new Date(now - 24 * 60 * 60 * 1000) },
+      },
+    }),
+  ])
+
+  if (hour >= OTP_ISSUE_PER_HOUR || day >= OTP_ISSUE_PER_DAY) {
+    throw new AppError(
+      429,
+      'rate_limited',
+      'Muitos códigos solicitados. Tente novamente mais tarde.',
+    )
+  }
+}
+
+function failureKey(identifier: string, purpose: VerificationPurpose): string {
+  return `otp-fail:${purpose}:${identifier}`
+}
+
+async function blockedByFailures(
+  identifier: string,
+  purpose: VerificationPurpose,
+): Promise<boolean> {
+  const row = await peekRateLimit(failureKey(identifier, purpose))
+  const blocked =
+    row !== null && row.resetAt.getTime() > Date.now() && row.count >= OTP_FAILURE_LIMIT
+  if (!blocked) return false
+
+  await prisma.verificationToken.updateMany({
+    where: { identifier, purpose, consumedAt: null },
+    data: { consumedAt: new Date() },
+  })
+
+  return true
+}
+
+async function recordOtpFailure(identifier: string, purpose: VerificationPurpose): Promise<void> {
+  const result = await takeRateLimit(
+    failureKey(identifier, purpose),
+    OTP_FAILURE_LIMIT,
+    OTP_FAILURE_WINDOW_MS,
+  )
+
+  if (!result.allowed) {
+    await prisma.verificationToken.updateMany({
+      where: { identifier, purpose, consumedAt: null },
+      data: { consumedAt: new Date() },
+    })
+  }
+}
 
 export async function issuePhoneOtp(userId: string, identifier: string): Promise<string> {
+  await assertOtpIssuanceAllowed(identifier)
+
   const code = createOtp()
 
   await prisma.verificationToken.updateMany({
@@ -33,6 +107,8 @@ export async function issuePhoneOtp(userId: string, identifier: string): Promise
 }
 
 export async function verifyPhoneOtp(identifier: string, code: string): Promise<string | null> {
+  if (await blockedByFailures(identifier, 'PHONE_OTP')) return null
+
   const token = await prisma.verificationToken.findFirst({
     where: {
       identifier,
@@ -50,6 +126,7 @@ export async function verifyPhoneOtp(identifier: string, code: string): Promise<
       where: { id: token.id },
       data: { attempts: { increment: 1 } },
     })
+    await recordOtpFailure(identifier, 'PHONE_OTP')
     return null
   }
 
@@ -57,6 +134,7 @@ export async function verifyPhoneOtp(identifier: string, code: string): Promise<
     where: { id: token.id },
     data: { consumedAt: new Date() },
   })
+  await resetRateLimit(failureKey(identifier, 'PHONE_OTP'))
 
   return token.userId
 }
@@ -218,6 +296,8 @@ export async function invalidatePendingActivation(userId: string): Promise<void>
 }
 
 export async function issuePasswordResetOtp(userId: string, phone: string): Promise<string> {
+  await assertOtpIssuanceAllowed(phone)
+
   const code = createOtp()
 
   await prisma.verificationToken.updateMany({
@@ -240,6 +320,8 @@ export async function issuePasswordResetOtp(userId: string, phone: string): Prom
 }
 
 export async function verifyPasswordResetOtp(phone: string, code: string): Promise<string | null> {
+  if (await blockedByFailures(phone, 'PASSWORD_RESET')) return null
+
   const token = await prisma.verificationToken.findFirst({
     where: {
       identifier: phone,
@@ -257,6 +339,7 @@ export async function verifyPasswordResetOtp(phone: string, code: string): Promi
       where: { id: token.id },
       data: { attempts: { increment: 1 } },
     })
+    await recordOtpFailure(phone, 'PASSWORD_RESET')
     return null
   }
 
@@ -264,6 +347,7 @@ export async function verifyPasswordResetOtp(phone: string, code: string): Promi
     where: { id: token.id },
     data: { consumedAt: new Date() },
   })
+  await resetRateLimit(failureKey(phone, 'PASSWORD_RESET'))
 
   return token.userId
 }

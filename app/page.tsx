@@ -1,5 +1,7 @@
 import { formatInTimeZone } from 'date-fns-tz'
 
+import { AboutSection } from '@/components/home/AboutSection'
+import { GallerySection } from '@/components/home/GallerySection'
 import { HomeHero } from '@/components/home/HomeHero'
 import { ReviewsSection } from '@/components/home/ReviewsSection'
 import { StatsSection } from '@/components/home/StatsSection'
@@ -9,12 +11,12 @@ import { PublicDesktopHeader } from '@/components/layout/PublicDesktopHeader'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { getSessionUser } from '@/lib/auth/session'
-import { BUSINESS_TIMEZONE, isShopOpen } from '@/lib/availability/slots'
+import { BUSINESS_TIMEZONE, getNextOpening, isShopOpen } from '@/lib/availability/slots'
 import { HERO_IMAGE } from '@/lib/catalog/images'
-import { getActiveBarbers } from '@/lib/catalog/queries'
-import { getHomeReviews, getHomeStats } from '@/lib/home/queries'
+import { getActiveBarbers, getActiveServices } from '@/lib/catalog/queries'
+import { getHomeHeroBooking, getHomeReviews, getHomeStats } from '@/lib/home/queries'
 import { getShopHours, getShopSettings } from '@/lib/settings/queries'
-import { minutesToTime } from '@/lib/time/schedule'
+import { formatHourLabel, minutesToTime } from '@/lib/time/schedule'
 import type { ShopHoursRow } from '@/lib/time/schedule'
 
 import type { Metadata } from 'next'
@@ -24,11 +26,11 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Barbearia do Luiz — Agende seu horário',
   description:
-    'Corte, barba e resenha de alto padrão em Belo Horizonte. Escolha serviço, profissional e horário.',
+    'Corte bem-feito, atenção aos detalhes e atendimento que faz você se sentir em casa, em Belo Horizonte.',
   openGraph: {
     title: 'Barbearia do Luiz — Agende seu horário',
     description:
-      'Corte, barba e resenha de alto padrão em Belo Horizonte. Escolha serviço, profissional e horário.',
+      'Corte bem-feito, atenção aos detalhes e atendimento que faz você se sentir em casa, em Belo Horizonte.',
     type: 'website',
     locale: 'pt_BR',
     images: [{ url: HERO_IMAGE }],
@@ -58,21 +60,41 @@ const SCHEMA_DAYS = [
   'Saturday',
 ] as const
 
+const WEEKDAY_NAMES = [
+  'domingo',
+  'segunda',
+  'terça',
+  'quarta',
+  'quinta',
+  'sexta',
+  'sábado',
+] as const
+
 export default async function HomePage() {
-  const [user, shop, storedHours, barbers, reviews, stats] = await Promise.all([
+  const [user, shop, storedHours, barbers, services, reviews, stats] = await Promise.all([
     getSessionUser(),
     getShopSettings(),
     getShopHours(),
     getActiveBarbers(),
+    getActiveServices(),
     getHomeReviews(3),
     getHomeStats(),
   ])
 
   const hours = storedHours.length > 0 ? storedHours : DEFAULT_HOURS
   const timezone = BUSINESS_TIMEZONE
-  const todayWeekday = Number(formatInTimeZone(new Date(), timezone, 'i')) % 7
+  const now = new Date()
+  const todayWeekday = Number(formatInTimeZone(now, timezone, 'i')) % 7
   const todayHours = hours.find((hour) => hour.weekday === todayWeekday) ?? null
-  const open = isShopOpen({ shopHours: todayHours, timezone })
+  const open = isShopOpen({ shopHours: todayHours, timezone, now })
+  const nextOpening = getNextOpening({ shopHours: hours, now, timezone })
+  const statusDetail = open
+    ? todayHours
+      ? `até ${formatHourLabel(todayHours.closeMinute)}`
+      : 'Aberto agora'
+    : nextOpening
+      ? `Abre ${nextOpening.dayOffset === 0 ? 'hoje' : WEEKDAY_NAMES[nextOpening.weekday]}, ${formatHourLabel(nextOpening.openMinute)}`
+      : 'Confira os horários da semana'
 
   const shopName = shop?.name ?? 'Barbearia do Luiz'
   const addressLine = shop?.addressLine ?? 'Rua dos Geólogos, 698 — Alípio de Melo'
@@ -81,17 +103,23 @@ export default async function HomePage() {
   const phone = shop?.phone ?? '+5531988815243'
   const whatsapp = (shop?.whatsapp ?? '+5531988815243').replace(/\D/g, '')
 
-  const todayLabel =
-    todayHours && !todayHours.closed
-      ? `Hoje, ${minutesToTime(todayHours.openMinute)} às ${minutesToTime(todayHours.closeMinute)}`
-      : 'Confira os horários da semana'
+  const featuredService =
+    services.find((service) => service.slug === 'corte-barba') ??
+    services.find((service) => service.category === 'COMBO') ??
+    services[0] ??
+    null
+  const featuredBarber = barbers[0] ?? null
+  const heroBooking =
+    featuredService && featuredBarber
+      ? await getHomeHeroBooking({ service: featuredService, barber: featuredBarber, now })
+      : null
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'HairSalon',
     name: shopName,
     description:
-      'Corte, barba e resenha de alto padrão em Belo Horizonte. Escolha serviço, profissional e horário.',
+      'Corte bem-feito, atenção aos detalhes e atendimento que faz você se sentir em casa, em Belo Horizonte.',
     image: HERO_IMAGE,
     telephone: phone,
     address: {
@@ -135,9 +163,12 @@ export default async function HomePage() {
 
         <HomeHero
           open={open}
-          todayLabel={todayLabel}
+          statusDetail={statusDetail}
           address={addressLine}
+          booking={heroBooking}
         />
+
+        <AboutSection />
 
         <TeamSection
           barbers={barbers}
@@ -149,6 +180,8 @@ export default async function HomePage() {
           cuts={stats.cuts}
           clients={stats.clients}
         />
+
+        <GallerySection />
 
         <ReviewsSection reviews={reviews} />
 

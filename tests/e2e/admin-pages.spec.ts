@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { e2ePassword } from './credentials'
+
 const seeded = process.env.E2E_SEEDED === 'true'
 
 test.describe('admin panel', () => {
@@ -9,14 +11,14 @@ test.describe('admin panel', () => {
 
   test('owner dashboard, finance, and clients render', async ({ page }) => {
     const login = await page.request.post('/api/auth/login', {
-      data: { identifier: 'luiz@barbeariadoluiz.com.br', password: 'demo1234' },
+      data: { identifier: 'luiz@barbeariadoluiz.com.br', password: e2ePassword() },
     })
     expect(login.ok()).toBeTruthy()
 
     await page.setViewportSize({ width: 1440, height: 900 })
 
     await page.goto('/admin')
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible()
     await expect(page.getByText('Receita — 14 dias')).toBeVisible()
 
     await page.goto('/admin/financeiro')

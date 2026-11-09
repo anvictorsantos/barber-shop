@@ -130,6 +130,12 @@ enum VerificationPurpose {
   ACCOUNT_ACTIVATION
 }
 
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
 model Shop {
   id          String   @id @default(cuid())
   name        String
@@ -349,6 +355,7 @@ model Appointment {
 model Order {
   id            String           @id @default(cuid())
   code          String           @unique
+  publicToken   String           @unique @map("public_token") @default(dbgenerated("(replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', ''))"))
   customerId    String?          @map("customer_id")
   customerName  String           @map("customer_name")
   customerPhone String?          @map("customer_phone")
@@ -420,10 +427,12 @@ model Refund {
   paymentId        String   @map("payment_id")
   appointmentId    String?  @map("appointment_id")
   orderProductId   String?  @map("order_product_id")
-  amountCents      Int      @map("amount_cents")
+  amountCents      Int          @map("amount_cents")
   reason           String
-  providerRefundId String?  @map("provider_refund_id")
-  createdAt        DateTime @default(now()) @map("created_at")
+  status           RefundStatus @default(PENDING)
+  failedReason     String?      @map("failed_reason")
+  providerRefundId String?      @map("provider_refund_id")
+  createdAt        DateTime     @default(now()) @map("created_at")
 
   payment      Payment       @relation(fields: [paymentId], references: [id])
   appointment  Appointment?  @relation(fields: [appointmentId], references: [id])
@@ -567,4 +576,26 @@ model InventoryMovement {
 
   @@index([productId, createdAt])
   @@map("inventory_movements")
+}
+
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime @map("reset_at")
+
+  @@map("rate_limits")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?  @map("actor_id")
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id")
+  detail    Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
