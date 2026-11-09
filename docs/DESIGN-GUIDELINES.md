@@ -64,14 +64,14 @@ No other colors. Use opacity on white for dividers and disabled states. Status c
 
 ## Typography
 
-- **Display:** Playfair Display 900. Brand, hero, large identity moments only.
+- **Display:** Inter (variable). Brand, hero, large identity moments, at the heavier end of the scale.
 - **UI:** Inter 400/500/600/700/800/900. Everything else.
-- Load with `next/font`: `Playfair_Display` and `Inter`.
+- Load with `next/font`: `Inter` only.
 
 | Role | Size / line | Weight |
 |---|---|---|
-| Brand desktop | 24 / 32 | Playfair 900, tracking 1px |
-| Brand mobile | 28 / 37 | Playfair 900, tracking 1px |
+| Brand desktop | 24 / 32 | Inter 900, tracking 1px |
+| Brand mobile | 28 / 37 | Inter 900, tracking 1px |
 | Page title | 20 / 24 | Inter 800 |
 | Section title | 16 / 19 | Inter 700 |
 | Card title | 15 / 18 | Inter 700 |

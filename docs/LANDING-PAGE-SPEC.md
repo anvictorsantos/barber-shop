@@ -14,7 +14,7 @@ In 10 seconds: “Barbearia do Luiz. Corte, barba e resenha de alto padrão. Age
 - Dark gradient overlay from left/bottom into `--background`.
 - Top row: green “ABERTO AGORA” badge (only when the shop is open) and a compact “Entrar” link.
 - Brand block:
-  - `BARBEARIA DO LUIZ` — Playfair Display 900, 28px, `--accent`, tracking 1px.
+  - `BARBEARIA DO LUIZ` — Inter 900, 28px, `--accent`, tracking 1px.
   - `Corte, Barba e Resenha de Alto Padrão` — Inter 400, 13px, white 80%.
 
 The “Entrar” link is the only addition to the Figma home. It is required to reach login and account screens from the public page.

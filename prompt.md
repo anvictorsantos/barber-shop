@@ -135,7 +135,7 @@ Tokens live in `app/globals.css` and are mapped in `tailwind.config.js`. Use the
 
 - Orange `#D35F27` (`primary`) means action. Gold `#EAA83A` (`accent`) means value and brand. Never decoration. Green is success only.
 - Dark only. Flat surfaces, 1px borders, no glow, glass, neumorphism, or light mode.
-- Fonts via `next/font`: Inter for everything, Playfair Display 900 for the brand and hero only.
+- Fonts via `next/font`: Inter for everything.
 - Lucide icons only, 2px stroke, no emoji, no custom SVG set.
 - Customer screens are mobile-first at 390px; admin is desktop-first at 1440px, usable to 1024px, with no mobile admin layout.
 - Loading uses skeletons shaped like the final content, never spinner-only screens. Errors keep form values. Destructive actions require confirmation.

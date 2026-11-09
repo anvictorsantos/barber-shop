@@ -25,7 +25,7 @@ materials (leather, ember). Text has three roles. Semantic colors are muted.
 - Ink `#121110`, shell `#0c0b0a`, surface `#1a1815`, raised `#211e1a`.
 - Text `#f2ece1`, secondary `#cdc5b8`, muted `#9a9285`.
 - Brass `#c8974a` with ink text `#17120a`. Success `#8fae86`, danger `#cf7a68`.
-- Interface: Inter 400/500. Display: Playfair 500/600. No 700–900 headings.
+- Interface: Inter 400/500. Display: Inter 500/600. No 700–900 headings.
 - Sentence case everywhere. No uppercase + tracking labels.
 
 ## Audit
