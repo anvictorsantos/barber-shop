@@ -37,7 +37,7 @@ export function LogoutButton({
         aria-hidden
         className="h-4 w-4"
       />
-      {pending ? 'Saindo…' : label}
+      {label}
     </button>
   )
 }
