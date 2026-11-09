@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { CartLink } from '@/components/cart/CartLink'
 import { postAuthPath } from '@/lib/auth/redirect'
 import type { SessionUser } from '@/lib/auth/session'
 import { cn } from '@/lib/utils'
@@ -79,6 +80,7 @@ export function PublicDesktopHeader({
           <div className="justify-self-end" />
         ) : (
           <div className="flex items-center justify-self-end gap-6">
+            <CartLink />
             <Link
               href={accountHref}
               className="text-body text-muted transition-colors hover:text-text"
