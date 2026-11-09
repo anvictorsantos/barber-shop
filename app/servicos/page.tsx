@@ -1,8 +1,7 @@
-import { ChevronLeft, Scissors } from 'lucide-react'
+import { MapPin, Scissors } from 'lucide-react'
 import Link from 'next/link'
 
-import { BookingCartOverview } from '@/components/booking/BookingCartOverview'
-import { ServiceCard } from '@/components/catalog/ServiceCard'
+import { ServiceRow } from '@/components/catalog/ServiceRow'
 import { PublicDesktopFooter } from '@/components/layout/PublicDesktopFooter'
 import { PublicDesktopHeader } from '@/components/layout/PublicDesktopHeader'
 import { SiteHeader } from '@/components/layout/SiteHeader'
@@ -26,6 +25,14 @@ export const metadata: Metadata = {
   description:
     'Do corte ao acabamento, cada serviço é feito com atenção para você sair satisfeito.',
 }
+
+const navLinkClass = (active: boolean) =>
+  cn(
+    'flex h-9 shrink-0 items-center gap-2 rounded-full border px-3 text-caption transition-colors lg:h-8 lg:w-full lg:rounded-md lg:px-2.5 lg:text-body',
+    active
+      ? 'border-accent/50 bg-surface text-text lg:border-transparent lg:shadow-[inset_0_0_0_1px_var(--border)]'
+      : 'border-border text-muted hover:text-text lg:border-transparent lg:hover:bg-surface/60',
+  )
 
 export default async function ServicesPage({
   searchParams,
@@ -78,65 +85,76 @@ export default async function ServicesPage({
           />
         </div>
 
-        <section className="flex w-full flex-1 flex-col gap-8 px-6 pb-16 pt-8 lg:px-10 lg:pt-10 xl:px-10">
-          <div className="flex flex-col gap-8">
-            <Link
-              href="/"
-              className="inline-flex w-fit items-center gap-1.5 text-caption text-muted transition-colors hover:text-text"
-            >
-              <ChevronLeft
-                aria-hidden
-                className="h-3.5 w-3.5"
-              />
-              Voltar ao início
-            </Link>
+        <div className="mx-auto flex w-full max-w-shell flex-1 flex-col gap-8 px-4 pb-16 pt-6 lg:px-10 lg:pt-10">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
+            <aside className="flex min-w-0 flex-col gap-5 lg:sticky lg:top-6 lg:gap-6 lg:self-start">
+              <div className="flex flex-col gap-2">
+                <SectionLabel>Catálogo</SectionLabel>
+                <h1 className="text-brand font-medium leading-tight text-text lg:text-[34px] lg:leading-[1.1]">
+                  Serviços
+                </h1>
+                <p className="text-caption tabular-nums text-muted">
+                  {services.length} serviços · {groups.length} categorias
+                </p>
+              </div>
 
-            <div className="flex flex-col gap-4">
-              <SectionLabel>Catálogo</SectionLabel>
-              <h1 className="font-display text-[40px] font-semibold leading-[1.05] text-text lg:text-[48px]">
-                O cuidado que seu visual merece.
-              </h1>
-              <p className="max-w-[560px] text-lead leading-relaxed text-muted">
-                Do corte ao acabamento, cada serviço é feito com atenção para você sair satisfeito.
-              </p>
-            </div>
-          </div>
+              <nav
+                aria-label="Categorias"
+                className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0 lg:pb-0"
+              >
+                <Link
+                  href="/servicos"
+                  aria-current={activeCategory === undefined ? 'page' : undefined}
+                  className={navLinkClass(activeCategory === undefined)}
+                >
+                  {activeCategory === undefined ? (
+                    <span
+                      aria-hidden
+                      className="h-1 w-1 shrink-0 rotate-45 bg-accent"
+                    />
+                  ) : null}
+                  <span className="flex-1 truncate">Todos</span>
+                  <span className="tabular-nums text-subtle">{services.length}</span>
+                </Link>
 
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-            <div className="flex min-w-0 flex-col gap-6">
-              <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 border-b border-border">
-                <div className="flex flex-wrap items-center gap-x-6">
-                  <Link
-                    href="/servicos"
-                    className={cn(
-                      '-mb-px border-b-2 py-3 text-body transition-colors',
-                      activeCategory === undefined
-                        ? 'border-accent text-text'
-                        : 'border-transparent text-muted hover:text-text',
-                    )}
-                  >
-                    Todos
-                  </Link>
-                  {groups.map((group) => (
+                {groups.map((group) => {
+                  const active = activeCategory === group.category
+                  return (
                     <Link
                       key={group.category}
                       href={`/servicos?categoria=${group.category}`}
-                      className={cn(
-                        '-mb-px border-b-2 py-3 text-body transition-colors',
-                        activeCategory === group.category
-                          ? 'border-accent text-text'
-                          : 'border-transparent text-muted hover:text-text',
-                      )}
+                      aria-current={active ? 'page' : undefined}
+                      className={navLinkClass(active)}
                     >
-                      {group.label}
+                      {active ? (
+                        <span
+                          aria-hidden
+                          className="h-1 w-1 shrink-0 rotate-45 bg-accent"
+                        />
+                      ) : null}
+                      <span className="flex-1 truncate">{group.label}</span>
+                      <span className="tabular-nums text-subtle">{group.services.length}</span>
                     </Link>
-                  ))}
-                </div>
+                  )
+                })}
+              </nav>
 
-                <span className="pb-3 text-caption text-muted">
-                  {visibleServices.length} {visibleServices.length === 1 ? 'serviço' : 'serviços'}
+              <div className="hidden flex-col gap-2 border-t border-border pt-4 text-caption leading-relaxed text-muted lg:flex">
+                <span>{businessHours}</span>
+                <span className="flex items-start gap-1.5">
+                  <MapPin
+                    aria-hidden
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-subtle"
+                  />
+                  {address}
                 </span>
               </div>
+            </aside>
+
+            <div className="flex min-w-0 flex-col gap-5">
+              <p className="max-w-[520px] text-body leading-relaxed text-muted">
+                Do corte ao acabamento, cada serviço é feito com atenção para você sair satisfeito.
+              </p>
 
               {visibleServices.length === 0 ? (
                 <Card>
@@ -147,28 +165,27 @@ export default async function ServicesPage({
                   />
                 </Card>
               ) : (
-                <div className="grid gap-3 md:grid-cols-2">
+                <ul className="border-t border-border">
                   {visibleServices.map((service) => (
-                    <ServiceCard
+                    <li
                       key={service.id}
-                      service={service}
-                      continuar={continuar}
-                    />
+                      className="border-b border-border"
+                    >
+                      <ServiceRow
+                        service={service}
+                        continuar={continuar}
+                      />
+                    </li>
                   ))}
-                </div>
+                </ul>
               )}
 
-              <div className="flex flex-col justify-between gap-2 text-caption text-muted lg:flex-row lg:items-center">
-                <span>Agende como visitante. Sua conta é criada ao confirmar.</span>
-                <span>{businessHours}</span>
-              </div>
-            </div>
-
-            <div className="xl:sticky xl:top-6">
-              <BookingCartOverview address={address} />
+              <p className="text-caption text-muted">
+                Agende como visitante. Sua conta é criada ao confirmar.
+              </p>
             </div>
           </div>
-        </section>
+        </div>
 
         <PublicDesktopFooter
           shopName={shopName}

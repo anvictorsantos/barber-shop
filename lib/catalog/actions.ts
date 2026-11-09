@@ -8,6 +8,7 @@ import { getSessionUser } from '@/lib/auth/session'
 import {
   createProduct,
   createService,
+  setServiceFeatured,
   toggleProduct,
   toggleService,
   updateProduct,
@@ -16,6 +17,7 @@ import {
 import type { ActionResult } from '@/lib/http/action-result'
 import { AppError } from '@/lib/http/errors'
 import {
+  featureSchema,
   productInputSchema,
   serviceInputSchema,
   toggleSchema,
@@ -90,6 +92,29 @@ export async function toggleServiceAction(input: unknown): Promise<ActionResult>
     }
 
     await toggleService(parsed.data)
+    revalidateCatalog()
+    return { ok: true }
+  } catch (error) {
+    return failure(error)
+  }
+}
+
+export async function toggleServiceFeaturedAction(input: unknown): Promise<ActionResult> {
+  try {
+    const actorId = await ownerGuard()
+    const parsed = featureSchema.safeParse(input)
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos.' }
+    }
+
+    await setServiceFeatured(parsed.data)
+    await recordAudit({
+      actorId,
+      action: 'service_update',
+      entity: 'service',
+      entityId: parsed.data.id,
+      detail: { featured: parsed.data.featured },
+    })
     revalidateCatalog()
     return { ok: true }
   } catch (error) {

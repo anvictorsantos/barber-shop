@@ -70,6 +70,7 @@ const serviceSeeds = [
     priceCents: 6000,
     originalPriceCents: 7000,
     promoLabel: 'PROMO COMBO',
+    featured: true,
     sortOrder: 0,
   },
   {

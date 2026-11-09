@@ -1,6 +1,6 @@
 'use client'
 
-import { Package, Pencil, Plus, Power, Scissors } from 'lucide-react'
+import { Package, Pencil, Plus, Power, Scissors, Star } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -11,7 +11,11 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { StatusPill } from '@/components/ui/StatusPill'
-import { toggleProductAction, toggleServiceAction } from '@/lib/catalog/actions'
+import {
+  toggleProductAction,
+  toggleServiceAction,
+  toggleServiceFeaturedAction,
+} from '@/lib/catalog/actions'
 import { serviceCategoryLabels } from '@/lib/catalog/labels'
 import type { AdminProduct, AdminService } from '@/lib/catalog/types'
 import { formatBRL } from '@/lib/format/money'
@@ -37,6 +41,23 @@ export function CatalogManager({
     setError(null)
     setPendingId(service.id)
     const result = await toggleServiceAction({ id: service.id, active: !service.active })
+    setPendingId(null)
+
+    if (!result.ok) {
+      setError(result.error)
+      return
+    }
+
+    router.refresh()
+  }
+
+  async function toggleFeatured(service: AdminService) {
+    setError(null)
+    setPendingId(service.id)
+    const result = await toggleServiceFeaturedAction({
+      id: service.id,
+      featured: !service.featured,
+    })
     setPendingId(null)
 
     if (!result.ok) {
@@ -144,9 +165,12 @@ export function CatalogManager({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="text-lead font-bold text-text">{service.name}</h2>
-                    <StatusPill tone={service.active ? 'success' : 'neutral'}>
-                      {service.active ? 'Ativo' : 'Inativo'}
-                    </StatusPill>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <StatusPill tone={service.active ? 'success' : 'neutral'}>
+                        {service.active ? 'Ativo' : 'Inativo'}
+                      </StatusPill>
+                      {service.featured ? <StatusPill tone="primary">Destaque</StatusPill> : null}
+                    </div>
                   </div>
 
                   <p className="text-caption text-muted">{service.description}</p>
@@ -168,6 +192,21 @@ export function CatalogManager({
                         aria-hidden
                       />
                       Editar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={pendingId === service.id}
+                      onClick={() => toggleFeatured(service)}
+                    >
+                      <Star
+                        className={cn(
+                          'h-3.5 w-3.5',
+                          service.featured ? 'fill-current text-accent' : '',
+                        )}
+                        aria-hidden
+                      />
+                      {service.featured ? 'Remover destaque' : 'Destacar'}
                     </Button>
                     <Button
                       size="sm"
