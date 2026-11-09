@@ -1,0 +1,16 @@
+Fotos da galeria da home
+========================
+
+Salve 6 fotos do perfil da barbearia com estes nomes:
+
+  01.jpg
+  02.jpg
+  03.jpg
+  04.jpg
+  05.jpg
+  06.jpg
+
+Também aceita .jpeg, .png e .webp.
+
+Recomendado: 1200x1200 ou maior, sem texto na imagem.
+A primeira foto aparece em destaque (formato horizontal 16:9).
