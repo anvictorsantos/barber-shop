@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
+import { RecentPayments } from '@/components/admin/financeiro/RecentPayments'
 import { Card } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { resolveAdminScope } from '@/lib/admin/context'
@@ -162,41 +163,7 @@ export default async function AdminFinancePage({
           Pagamentos recentes
         </h2>
 
-        {report.recentPayments.length === 0 ? (
-          <p className="text-caption text-subtle">Nenhum pagamento registrado.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left">
-              <thead>
-                <tr className="border-b border-border text-micro uppercase tracking-wider text-muted">
-                  <th className="py-2 font-semibold">Pedido</th>
-                  <th className="py-2 font-semibold">Cliente</th>
-                  <th className="py-2 font-semibold">Profissional</th>
-                  <th className="py-2 font-semibold">Forma</th>
-                  <th className="py-2 text-right font-semibold">Valor</th>
-                  <th className="py-2 text-right font-semibold">Quando</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.recentPayments.map((payment) => (
-                  <tr
-                    key={payment.id}
-                    className="border-b border-border/60 text-caption text-text last:border-0"
-                  >
-                    <td className="py-3 font-bold text-accent">#{payment.orderCode}</td>
-                    <td className="py-3">{payment.customerName}</td>
-                    <td className="py-3 text-muted">{payment.barberName ?? '—'}</td>
-                    <td className="py-3 text-muted">{PAYMENT_METHOD_LABELS[payment.method]}</td>
-                    <td className="py-3 text-right font-bold">
-                      {formatBRL(payment.amountCents - payment.refundedCents)}
-                    </td>
-                    <td className="py-3 text-right text-muted">{payment.paidAtLabel}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <RecentPayments payments={report.recentPayments} />
       </Card>
     </div>
   )
