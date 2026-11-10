@@ -40,7 +40,7 @@ function isActive(pathname: string, href: string): boolean {
     : pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export function AdminNav({ role }: { role: Role }) {
+export function AdminNav({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
   const pathname = usePathname()
   const items = adminNavFor(role)
 
@@ -56,6 +56,7 @@ export function AdminNav({ role }: { role: Role }) {
           <Link
             key={item.href}
             href={item.href}
+            onClick={() => onNavigate?.()}
             aria-current={active ? 'page' : undefined}
             className={cn(
               'flex items-center gap-3 rounded-lg px-4 py-3 text-body font-semibold transition',

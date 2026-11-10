@@ -43,8 +43,8 @@ export function PublicDesktopHeader({
           <Image
             src="/brand/logo.png"
             alt={`${shopName} — ${city}, ${state}`}
-            width={774}
-            height={880}
+            width={800}
+            height={800}
             sizes="48px"
             priority
             className="h-12 w-auto"

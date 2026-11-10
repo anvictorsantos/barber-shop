@@ -23,8 +23,8 @@ export function SiteHeader() {
           <Image
             src="/brand/logo.png"
             alt="Barbearia do Luiz"
-            width={774}
-            height={880}
+            width={800}
+            height={800}
             sizes="40px"
             className="h-10 w-auto"
           />
