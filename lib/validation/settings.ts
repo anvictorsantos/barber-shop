@@ -1,9 +1,7 @@
 import { z } from 'zod'
 
-const optionalUrl = z
-  .union([z.literal(''), z.string().url('URL inválida.')])
-  .optional()
-  .default('')
+import { imageUrlSchema } from '@/lib/validation/image'
+
 
 const optionalEmail = z
   .union([z.literal(''), z.string().trim().email('E-mail inválido.')])
@@ -45,7 +43,7 @@ export const createBarberSchema = z
     password: z.string().min(8, 'A senha precisa ter pelo menos 8 caracteres.').max(128),
     displayName: z.string().trim().min(2, 'Informe o nome de exibição.').max(80),
     title: z.string().trim().min(2, 'Informe o cargo.').max(80),
-    avatarUrl: optionalUrl,
+    avatarUrl: imageUrlSchema,
   })
   .refine((input) => Boolean(input.email || input.phone), {
     message: 'Informe e-mail ou telefone.',
@@ -57,7 +55,7 @@ export const updateBarberSchema = z.object({
   name: z.string().trim().min(2, 'Informe o nome.').max(120),
   displayName: z.string().trim().min(2, 'Informe o nome de exibição.').max(80),
   title: z.string().trim().min(2, 'Informe o cargo.').max(80),
-  avatarUrl: optionalUrl,
+  avatarUrl: imageUrlSchema,
   active: z.boolean(),
 })
 

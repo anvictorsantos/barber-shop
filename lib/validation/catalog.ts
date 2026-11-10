@@ -1,9 +1,6 @@
 import { z } from 'zod'
 
-const imageUrl = z
-  .union([z.literal(''), z.string().url('URL de imagem inválida.')])
-  .optional()
-  .default('')
+import { imageUrlSchema } from '@/lib/validation/image'
 
 const price = z.string().min(1, 'Informe o preço.')
 
@@ -19,7 +16,7 @@ export const serviceInputSchema = z.object({
   price,
   originalPrice: z.string().optional().default(''),
   promoLabel: z.string().trim().max(20, 'Texto promocional muito longo.').optional().default(''),
-  imageUrl,
+  imageUrl: imageUrlSchema,
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
   sortOrder: z.coerce.number().int().min(0).max(999).default(0),
@@ -34,7 +31,7 @@ export const productInputSchema = z.object({
   description: z.string().trim().min(2, 'Informe a descrição.').max(1200, 'Descrição muito longa.'),
   price,
   stock: z.coerce.number().int().min(0, 'Estoque inválido.').max(1_000_000, 'Estoque muito alto.'),
-  imageUrl,
+  imageUrl: imageUrlSchema,
   active: z.boolean().default(true),
 })
 

@@ -4,6 +4,7 @@ import { Users } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 
+import { ImageField } from '@/components/admin/ImageField'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -131,18 +132,13 @@ function BarberEditor({
               onChange={(e) => setTitle(e.target.value)}
             />
           </Field>
-          <Field
+          <ImageField
+            id="barber-avatar"
             label="URL do avatar"
-            htmlFor="barber-avatar"
             hint="Opcional"
-          >
-            <Input
-              id="barber-avatar"
-              type="url"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-            />
-          </Field>
+            value={avatarUrl}
+            onChange={setAvatarUrl}
+          />
 
           {barber ? (
             <>

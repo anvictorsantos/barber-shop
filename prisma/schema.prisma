@@ -598,3 +598,13 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+
+model Upload {
+  id        String   @id @default(cuid())
+  mimeType  String   @map("mime_type")
+  data      Bytes
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("uploads")
+}

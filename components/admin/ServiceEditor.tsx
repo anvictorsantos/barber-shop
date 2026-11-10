@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 
+import { ImageField } from '@/components/admin/ImageField'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -191,18 +192,13 @@ export function ServiceEditor({
             />
           </Field>
 
-          <Field
+          <ImageField
+            id="service-image"
             label="URL da imagem"
-            htmlFor="service-image"
             hint="Opcional"
-          >
-            <Input
-              id="service-image"
-              type="url"
-              value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
-            />
-          </Field>
+            value={imageUrl}
+            onChange={setImageUrl}
+          />
         </div>
 
         <Field

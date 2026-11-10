@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 
+import { ImageField } from '@/components/admin/ImageField'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -112,18 +113,13 @@ export function ProductEditor({
             />
           </Field>
 
-          <Field
+          <ImageField
+            id="product-image"
             label="URL da imagem"
-            htmlFor="product-image"
             hint="Opcional"
-          >
-            <Input
-              id="product-image"
-              type="url"
-              value={imageUrl}
-              onChange={(event) => setImageUrl(event.target.value)}
-            />
-          </Field>
+            value={imageUrl}
+            onChange={setImageUrl}
+          />
         </div>
 
         <Field
