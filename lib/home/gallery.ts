@@ -1,13 +1,19 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
+import { prisma } from '@/lib/db/prisma'
+
 const BASE = 'https://images.unsplash.com'
 const PARAMS = '?auto=format&fit=crop&w=1200&q=80'
+
+export const GALLERY_SLOTS = 6
 
 export interface GalleryImage {
   src: string
   alt: string
 }
+
+const DEFAULT_ALT = 'Trabalho realizado na Barbearia do Luiz'
 
 const FALLBACK_IMAGES: GalleryImage[] = [
   {
@@ -53,3 +59,15 @@ export const GALLERY_IMAGES: GalleryImage[] = FALLBACK_IMAGES.map((image, index)
   ...image,
   src: localPhoto(index) ?? image.src,
 }))
+
+export async function getGalleryImages(): Promise<GalleryImage[]> {
+  const rows = await prisma.galleryImage.findMany({
+    where: { url: { not: '' } },
+    orderBy: { sortOrder: 'asc' },
+    select: { url: true, alt: true },
+  })
+
+  if (rows.length === 0) return GALLERY_IMAGES
+
+  return rows.map((row) => ({ src: row.url, alt: row.alt || DEFAULT_ALT }))
+}

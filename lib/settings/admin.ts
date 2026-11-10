@@ -6,6 +6,7 @@ import { parseTimeToMinutes } from '@/lib/time/schedule'
 import type {
   CreateBarberInput,
   DeleteTimeBlockInput,
+  GalleryInput,
   HoursInput,
   ShopInput,
   TimeBlockInput,
@@ -192,4 +193,16 @@ export async function deleteTimeBlock(input: DeleteTimeBlockInput) {
   if (!existing) throw new AppError(404, 'not_found', 'Bloqueio não encontrado.')
 
   await prisma.timeBlock.delete({ where: { id: input.id } })
+}
+
+export async function updateGallery(input: GalleryInput) {
+  return prisma.$transaction(
+    input.images.map((image, index) =>
+      prisma.galleryImage.upsert({
+        where: { sortOrder: index + 1 },
+        update: { url: image.url, alt: image.alt },
+        create: { sortOrder: index + 1, url: image.url, alt: image.alt },
+      }),
+    ),
+  )
 }

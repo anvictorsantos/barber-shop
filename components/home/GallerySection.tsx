@@ -1,10 +1,12 @@
 import Image from 'next/image'
 
 import { SectionLabel } from '@/components/ui/SectionLabel'
-import { GALLERY_IMAGES } from '@/lib/home/gallery'
+import { getGalleryImages } from '@/lib/home/gallery'
 import { cn } from '@/lib/utils'
 
-export function GallerySection() {
+export async function GallerySection() {
+  const images = await getGalleryImages()
+
   return (
     <section className="border-b border-border py-20 lg:py-28">
       <div className="mx-auto w-full max-w-shell px-6 lg:px-10">
@@ -21,7 +23,7 @@ export function GallerySection() {
         </div>
 
         <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:mt-12">
-          {GALLERY_IMAGES.map((image, index) => (
+          {images.map((image, index) => (
             <figure
               key={image.src}
               className={cn(
