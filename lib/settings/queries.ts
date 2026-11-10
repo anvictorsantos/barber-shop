@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/db/prisma'
+import { GALLERY_SLOTS } from '@/lib/home/gallery'
 import type {
   AdminBarber,
+  AdminGalleryImage,
   AdminShopHours,
   AdminTimeBlock,
   ShopSettings,
@@ -54,6 +56,18 @@ export async function getAdminBarbers(): Promise<AdminBarber[]> {
         select: { name: true, email: true, phone: true },
       },
     },
+  })
+}
+
+export async function getAdminGallery(): Promise<AdminGalleryImage[]> {
+  const rows = await prisma.galleryImage.findMany({
+    orderBy: { sortOrder: 'asc' },
+    select: { url: true, alt: true, sortOrder: true },
+  })
+
+  return Array.from({ length: GALLERY_SLOTS }, (_, index) => {
+    const row = rows.find((item) => item.sortOrder === index + 1)
+    return { url: row?.url ?? '', alt: row?.alt ?? '' }
   })
 }
 

@@ -627,3 +627,12 @@ model PushSubscription {
   @@index([userId])
   @@map("push_subscriptions")
 }
+
+model GalleryImage {
+  id        String @id @default(cuid())
+  url       String @default("")
+  alt       String @default("")
+  sortOrder Int    @unique @map("sort_order")
+
+  @@map("gallery_images")
+}

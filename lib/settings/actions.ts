@@ -12,12 +12,14 @@ import {
   deleteTimeBlock,
   toggleBarber,
   updateBarber,
+  updateGallery,
   updateHours,
   updateShop,
 } from '@/lib/settings/admin'
 import {
   createBarberSchema,
   deleteTimeBlockSchema,
+  gallerySchema,
   hoursSchema,
   shopSchema,
   timeBlockSchema,
@@ -116,6 +118,22 @@ export async function toggleBarberAction(input: unknown): Promise<ActionResult> 
     }
 
     await toggleBarber(parsed.data)
+    revalidateSettings()
+    return { ok: true }
+  } catch (error) {
+    return failure(error)
+  }
+}
+
+export async function updateGalleryAction(input: unknown): Promise<ActionResult> {
+  try {
+    await ownerGuard()
+    const parsed = gallerySchema.safeParse(input)
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos.' }
+    }
+
+    await updateGallery(parsed.data)
     revalidateSettings()
     return { ok: true }
   } catch (error) {

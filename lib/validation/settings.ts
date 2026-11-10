@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { GALLERY_SLOTS } from '@/lib/home/gallery'
 import { imageUrlSchema } from '@/lib/validation/image'
 
 const optionalEmail = z
@@ -90,6 +91,17 @@ export const timeBlockSchema = z
 
 export const deleteTimeBlockSchema = z.object({ id: z.string().min(1) })
 
+export const gallerySchema = z.object({
+  images: z
+    .array(
+      z.object({
+        url: imageUrlSchema,
+        alt: z.string().trim().max(120).optional().default(''),
+      }),
+    )
+    .length(GALLERY_SLOTS, 'Envie as seis fotos da galeria.'),
+})
+
 export type ShopInput = z.infer<typeof shopSchema>
 export type HoursInput = z.infer<typeof hoursSchema>
 export type CreateBarberInput = z.infer<typeof createBarberSchema>
@@ -97,3 +109,4 @@ export type UpdateBarberInput = z.infer<typeof updateBarberSchema>
 export type ToggleBarberInput = z.infer<typeof toggleBarberSchema>
 export type TimeBlockInput = z.infer<typeof timeBlockSchema>
 export type DeleteTimeBlockInput = z.infer<typeof deleteTimeBlockSchema>
+export type GalleryInput = z.infer<typeof gallerySchema>

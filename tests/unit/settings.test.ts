@@ -8,6 +8,7 @@ import {
 } from '@/lib/time/schedule'
 import {
   createBarberSchema,
+  gallerySchema,
   hoursSchema,
   shopSchema,
   timeBlockSchema,
@@ -61,7 +62,7 @@ describe('settings validation', () => {
   it('accepts a valid shop', () => {
     expect(
       shopSchema.safeParse({
-        name: 'Barbearia',
+        name: 'Barbearia do Luiz',
         addressLine: 'Rua A, 1',
         city: 'Belo Horizonte',
         state: 'MG',
@@ -108,5 +109,15 @@ describe('settings validation', () => {
         end: '12:00',
       }).success,
     ).toBe(false)
+  })
+
+  it('requires six gallery slots and allows empty ones', () => {
+    const slot = { url: '', alt: '' }
+    expect(gallerySchema.safeParse({ images: Array(5).fill(slot) }).success).toBe(false)
+
+    const parsed = gallerySchema.safeParse({
+      images: [{ url: '/galeria/01.webp', alt: 'Corte' }, ...Array(5).fill(slot)],
+    })
+    expect(parsed.success).toBe(true)
   })
 })

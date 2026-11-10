@@ -33,6 +33,11 @@ export interface AdminBarber {
   }
 }
 
+export interface AdminGalleryImage {
+  url: string
+  alt: string
+}
+
 export interface AdminTimeBlock {
   id: string
   barberId: string
