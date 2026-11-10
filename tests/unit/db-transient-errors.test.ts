@@ -13,6 +13,13 @@ describe('isTransientDbError', () => {
     expect(isTransientDbError(new Error('timeout exceeded when trying to connect'))).toBe(true)
   })
 
+  it('treats a Neon idle-socket drop as transient', () => {
+    expect(isTransientDbError(new Error('Connection terminated due to connection timeout'))).toBe(
+      true,
+    )
+    expect(isTransientDbError(new Error('Connection terminated unexpectedly'))).toBe(true)
+  })
+
   it('leaves query errors alone', () => {
     expect(isTransientDbError({ code: 'P2002' })).toBe(false)
     expect(isTransientDbError(new Error('Unique constraint failed'))).toBe(false)

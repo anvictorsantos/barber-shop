@@ -12,7 +12,10 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
   images: {
-    formats: ['image/avif', 'image/webp'],
+    // Local sources top out at 1600px; wider targets only upscale and blow the instance's memory.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1600],
+    // AVIF encoding is ~10x slower than WebP and times out the optimizer on a 0.1 CPU instance.
+    formats: ['image/webp'],
     remotePatterns: [{ protocol: 'https', hostname: 'images.unsplash.com' }],
   },
   async headers() {

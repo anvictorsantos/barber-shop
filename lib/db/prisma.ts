@@ -25,7 +25,11 @@ const READ_OPERATIONS = new Set([
 export function isTransientDbError(error: unknown): boolean {
   const { code, message } = (error ?? {}) as { code?: string; message?: string }
   if (code && TRANSIENT_DB_CODES.has(code)) return true
-  return message?.includes('timeout exceeded when trying to connect') ?? false
+  // Neon drops idle sockets while its compute is suspended; the next query reconnects.
+  return (
+    message?.includes('Connection terminated') === true ||
+    message?.includes('timeout exceeded when trying to connect') === true
+  )
 }
 
 function createPrismaClient(): PrismaClient {
