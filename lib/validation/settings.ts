@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 import { imageUrlSchema } from '@/lib/validation/image'
 
-
 const optionalEmail = z
   .union([z.literal(''), z.string().trim().email('E-mail inválido.')])
   .optional()

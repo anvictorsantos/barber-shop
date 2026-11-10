@@ -28,7 +28,11 @@ describe('isTransientDbError', () => {
         message: '\nInvalid `prisma.review.findMany()` invocation:',
         meta: {
           driverAdapterError: {
-            cause: { kind: 'postgres', code: '57P03', message: 'the database system is starting up' },
+            cause: {
+              kind: 'postgres',
+              code: '57P03',
+              message: 'the database system is starting up',
+            },
           },
         },
       }),
@@ -52,9 +56,11 @@ describe('isTransientDbError', () => {
   })
 
   it('retries a pool client that was dropped mid-session', () => {
-    expect(isTransientDbError(new Error('Client has encountered a connection error and is not queryable'))).toBe(
-      true,
-    )
+    expect(
+      isTransientDbError(
+        new Error('Client has encountered a connection error and is not queryable'),
+      ),
+    ).toBe(true)
   })
 
   it('leaves query errors alone', () => {
