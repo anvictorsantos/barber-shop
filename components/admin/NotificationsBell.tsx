@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
+import { PushEnableButton } from '@/components/admin/PushEnableButton'
 import type { AdminNotification } from '@/lib/admin/notifications'
 import { postJson } from '@/lib/http/client'
 
@@ -92,6 +93,8 @@ export function NotificationsBell({ count, items }: { count: number; items: Admi
               ))}
             </ul>
           )}
+
+          <PushEnableButton />
 
           <Link
             href="/admin/agenda"

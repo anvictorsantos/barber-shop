@@ -92,6 +92,7 @@ enum LoyaltyCreditStatus {
 enum NotificationChannel {
   WHATSAPP
   EMAIL
+  PUSH
 }
 
 enum NotificationKind {
@@ -104,6 +105,9 @@ enum NotificationKind {
   OTP
   EMAIL_VERIFY
   PASSWORD_RESET
+  NEW_BOOKING
+  APPOINTMENT_SOON
+  CLIENT_LATE
 }
 
 enum NotificationStatus {
@@ -184,6 +188,7 @@ model User {
   favoriteBarbers  FavoriteBarber[]
   favoriteServices FavoriteService[]
   favoriteProducts FavoriteProduct[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -607,4 +612,18 @@ model Upload {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("uploads")
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
