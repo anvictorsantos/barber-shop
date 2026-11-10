@@ -24,8 +24,8 @@ export function HeroBookingCard({ booking }: { booking: HomeHeroBooking }) {
         <Image
           src="/brand/logo.png"
           alt="Barbearia do Luiz"
-          width={774}
-          height={880}
+          width={800}
+          height={800}
           sizes="56px"
           className="h-14 w-auto"
         />

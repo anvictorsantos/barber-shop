@@ -1,5 +1,6 @@
 'use client'
 
+import { Trash2 } from 'lucide-react'
 import { useState, type ChangeEvent } from 'react'
 
 import { buttonClasses } from '@/components/ui/Button'
@@ -60,12 +61,27 @@ export function ImageField({
       {...(hint ? { hint } : {})}
       {...(error ? { error } : {})}
     >
-      <Input
-        id={id}
-        value={value}
-        placeholder="/catalogo/exemplo.webp ou https://…"
-        onChange={(event) => onChange(event.target.value)}
-      />
+      <div className="flex items-center gap-2">
+        <Input
+          id={id}
+          value={value}
+          disabled
+          placeholder="Nenhuma imagem selecionada"
+          className="disabled:cursor-not-allowed disabled:text-muted"
+        />
+        <button
+          type="button"
+          aria-label="Remover imagem"
+          disabled={!value}
+          onClick={() => onChange('')}
+          className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-border-strong text-muted transition hover:border-danger hover:text-danger disabled:pointer-events-none disabled:opacity-40"
+        >
+          <Trash2
+            aria-hidden
+            className="h-4 w-4"
+          />
+        </button>
+      </div>
       <div className="flex flex-wrap items-center gap-3">
         <input
           id={fileId}
@@ -84,15 +100,6 @@ export function ImageField({
         >
           {pending ? 'Enviando…' : 'Enviar imagem'}
         </label>
-        {value ? (
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            className="cursor-pointer text-caption font-semibold text-muted underline hover:text-text"
-          >
-            Remover
-          </button>
-        ) : null}
       </div>
       {value ? (
         // eslint-disable-next-line @next/next/no-img-element -- admin URLs can point outside remotePatterns

@@ -13,8 +13,8 @@ export default function NotFound() {
       <Image
         src="/brand/logo.png"
         alt="Barbearia do Luiz"
-        width={774}
-        height={880}
+        width={800}
+        height={800}
         className="h-16 w-auto"
       />
 

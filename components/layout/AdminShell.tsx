@@ -10,17 +10,9 @@ import { SkipLink } from '@/components/layout/SkipLink'
 import { StatusPill } from '@/components/ui/StatusPill'
 import { getAdminNotifications } from '@/lib/admin/notifications'
 import { getSessionUser } from '@/lib/auth/session'
+import { initials } from '@/lib/format/name'
 
 import type { ReactNode } from 'react'
-
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
-}
 
 export async function AdminShell({ children }: { children: ReactNode }) {
   const user = await getSessionUser()
@@ -41,8 +33,8 @@ export async function AdminShell({ children }: { children: ReactNode }) {
             <Image
               src="/brand/logo.png"
               alt="Barbearia do Luiz"
-              width={774}
-              height={880}
+              width={800}
+              height={800}
               priority
               className="h-14 w-auto m-auto"
             />
@@ -73,7 +65,10 @@ export async function AdminShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-20 items-center justify-between border-b border-border px-6 lg:px-8">
           <div className="flex items-center gap-3 lg:hidden">
-            <AdminMobileMenu role={user.role} />
+            <AdminMobileMenu
+              name={user.name}
+              role={user.role}
+            />
             <Link
               href="/admin"
               className="flex items-center"
@@ -81,8 +76,8 @@ export async function AdminShell({ children }: { children: ReactNode }) {
               <Image
                 src="/brand/logo.png"
                 alt="Barbearia do Luiz"
-                width={774}
-                height={880}
+                width={800}
+                height={800}
                 className="h-9 w-auto m-auto"
               />
             </Link>
