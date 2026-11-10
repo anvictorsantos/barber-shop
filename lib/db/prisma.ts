@@ -6,10 +6,41 @@ const TRANSIENT_DB_CODES = new Set([
   'ECONNRESET',
   'ECONNREFUSED',
   'ENOTFOUND',
+  'P1000',
   'P1001',
   'P1002',
+  'P1003',
+  'P1008',
+  'P1010',
+  'P1011',
   'P1017',
+  'P2024',
+  '08000',
+  '08003',
+  '08006',
+  '57P01',
+  '57P03',
+  '53300',
 ])
+
+const TRANSIENT_MESSAGES = [
+  'Connection terminated',
+  'timeout exceeded when trying to connect',
+  'connection error and is not queryable',
+]
+
+const READ_RETRIES = 3
+const RETRY_DELAYS_MS = [250, 750]
+
+// Prisma prints an empty body when it cannot classify a driver error, which hides the cause.
+function isEmptyPrismaInvocation(message: string): boolean {
+  const [firstLine, ...rest] = message.trimStart().split('\n')
+  return (
+    firstLine?.includes('Invalid `prisma.') === true &&
+    firstLine.includes('invocation') &&
+    rest.join('').trim() === ''
+  )
+}
 
 const READ_OPERATIONS = new Set([
   'findUnique',
@@ -23,13 +54,34 @@ const READ_OPERATIONS = new Set([
 ])
 
 export function isTransientDbError(error: unknown): boolean {
-  const { code, message } = (error ?? {}) as { code?: string; message?: string }
-  if (code && TRANSIENT_DB_CODES.has(code)) return true
-  // Neon drops idle sockets while its compute is suspended; the next query reconnects.
-  return (
-    message?.includes('Connection terminated') === true ||
-    message?.includes('timeout exceeded when trying to connect') === true
-  )
+  const seen = new Set<unknown>()
+  const pending: unknown[] = [error]
+
+  while (pending.length > 0) {
+    const current = pending.pop()
+    if (!current || typeof current !== 'object' || seen.has(current)) continue
+    seen.add(current)
+
+    const { code, message, cause, meta } = current as {
+      code?: unknown
+      message?: unknown
+      cause?: unknown
+      meta?: { driverAdapterError?: unknown }
+    }
+    if (typeof code === 'string' && TRANSIENT_DB_CODES.has(code)) return true
+    if (typeof message === 'string') {
+      // Matches also live on driverAdapterError.cause, where Prisma stores the pg error.
+      if (TRANSIENT_MESSAGES.some((fragment) => message.includes(fragment))) return true
+      if (isEmptyPrismaInvocation(message)) return true
+    }
+    pending.push(cause, meta?.driverAdapterError)
+  }
+
+  return false
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 function createPrismaClient(): PrismaClient {
@@ -46,12 +98,15 @@ function createPrismaClient(): PrismaClient {
     query: {
       async $allOperations({ operation, args, query }) {
         if (!READ_OPERATIONS.has(operation)) return query(args)
-        try {
-          return await query(args)
-        } catch (error) {
-          // Only reads are retried: a lost socket on a write may already have committed.
-          if (!isTransientDbError(error)) throw error
-          return query(args)
+        for (let attempt = 1; ; attempt += 1) {
+          try {
+            return await query(args)
+          } catch (error) {
+            // Only reads are retried: a lost socket on a write may already have committed.
+            if (attempt >= READ_RETRIES || !isTransientDbError(error)) throw error
+            // Neon wakes a suspended compute in bursts; an immediate retry hits the same wall.
+            await sleep(RETRY_DELAYS_MS[attempt - 1] ?? 750)
+          }
         }
       },
     },
