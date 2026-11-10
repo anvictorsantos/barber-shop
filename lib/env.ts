@@ -34,6 +34,10 @@ export const serverEnvSchema = z.object({
   MERCADO_PAGO_ACCESS_TOKEN: z.string().default(''),
   MERCADO_PAGO_WEBHOOK_SECRET: z.string().default(''),
 
+  VAPID_PUBLIC_KEY: z.string().default(''),
+  VAPID_PRIVATE_KEY: z.string().default(''),
+  VAPID_SUBJECT: z.string().default('mailto:contato@barbeariadoluiz.com.br'),
+
   SENTRY_DSN: z.string().default(''),
   SENTRY_ENV: z.string().default(''),
   SENTRY_RELEASE: z.string().default(''),
