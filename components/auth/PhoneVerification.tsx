@@ -6,7 +6,6 @@ import { useState, type FormEvent } from 'react'
 
 import { AuthField, AuthInput } from '@/components/auth/AuthField'
 import { AuthHeading } from '@/components/auth/AuthHeading'
-import { AuthRedirectOverlay } from '@/components/auth/AuthRedirectOverlay'
 import { FormMessage } from '@/components/auth/FormMessage'
 import { Button } from '@/components/ui/Button'
 import { postAuthPath } from '@/lib/auth/redirect'
@@ -32,7 +31,6 @@ export function PhoneVerification({
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
-  const [redirecting, setRedirecting] = useState(false)
 
   async function verify(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -47,8 +45,6 @@ export function PhoneVerification({
       return
     }
 
-    setRedirecting(true)
-    await new Promise((resolve) => setTimeout(resolve, 450))
     router.push(postAuthPath(result.data.user.role, next))
     router.refresh()
   }
@@ -138,8 +134,6 @@ export function PhoneVerification({
           </p>
         </div>
       </form>
-
-      {pending || redirecting ? <AuthRedirectOverlay label="Confirmando…" /> : null}
     </div>
   )
 }
