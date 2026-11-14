@@ -2,7 +2,7 @@ import Image from 'next/image'
 
 import { ProductVisual } from '@/components/catalog/ProductVisual'
 import { FavoriteButton } from '@/components/customer/FavoriteButton'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 
 import type { Product } from '@prisma/client'
 
@@ -56,7 +56,7 @@ export function ProductRow({
       </span>
 
       <span className="text-right text-body tabular-nums text-text lg:text-[20px]">
-        {formatBRL(product.priceCents)}
+        {centsToBRL(product.priceCents)}
       </span>
 
       <div className="justify-self-end">

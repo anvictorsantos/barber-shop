@@ -2,7 +2,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import type { getOrderByCode } from '@/lib/orders/queries'
 
 type OrderWithLines = NonNullable<Awaited<ReturnType<typeof getOrderByCode>>>
@@ -111,7 +111,7 @@ export async function buildOrderReceiptPdf(
     const when = formatInTimeZone(appointment.startAt, BUSINESS_TIMEZONE, "dd/MM/yyyy 'às' HH:mm")
     const label = `${appointment.service.name} - ${appointment.barber.displayName} - ${when}`
     page.drawText(label, { x: margin, y, size: 10, font, color: ink })
-    const value = formatBRL(appointment.priceCents)
+    const value = centsToBRL(appointment.priceCents)
     page.drawText(value, {
       x: right - font.widthOfTextAtSize(value, 10),
       y,
@@ -125,7 +125,7 @@ export async function buildOrderReceiptPdf(
   for (const item of order.products) {
     const label = `${item.product.name} x${item.quantity}`
     page.drawText(label, { x: margin, y, size: 10, font, color: ink })
-    const value = formatBRL(item.lineTotalCents)
+    const value = centsToBRL(item.lineTotalCents)
     page.drawText(value, {
       x: right - font.widthOfTextAtSize(value, 10),
       y,
@@ -143,7 +143,7 @@ export async function buildOrderReceiptPdf(
     thickness: 0.5,
     color: rgb(0.85, 0.85, 0.88),
   })
-  amountLine('Total', formatBRL(order.totalCents), { bold: true })
+  amountLine('Total', centsToBRL(order.totalCents), { bold: true })
 
   const paid = order.payments.find(
     (payment) => payment.status === 'PAID' || payment.status === 'PARTIALLY_REFUNDED',
@@ -157,7 +157,7 @@ export async function buildOrderReceiptPdf(
       },
     )
     if (paid.refundedCents > 0) {
-      line(`Reembolsado: ${formatBRL(paid.refundedCents)}`, { size: 9, color: muted })
+      line(`Reembolsado: ${centsToBRL(paid.refundedCents)}`, { size: 9, color: muted })
     }
   }
 

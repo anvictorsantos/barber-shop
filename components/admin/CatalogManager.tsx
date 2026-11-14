@@ -18,7 +18,7 @@ import {
 } from '@/lib/catalog/actions'
 import { serviceCategoryLabels } from '@/lib/catalog/labels'
 import type { AdminProduct, AdminService } from '@/lib/catalog/types'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import { cn } from '@/lib/utils'
 
 type Tab = 'services' | 'products'
@@ -178,7 +178,7 @@ export function CatalogManager({
                   <div className="flex flex-wrap items-center gap-3 text-caption text-muted">
                     <span>{serviceCategoryLabels[service.category]}</span>
                     <span>{service.durationMin} min</span>
-                    <span className="font-bold text-accent">{formatBRL(service.priceCents)}</span>
+                    <span className="font-bold text-accent">{centsToBRL(service.priceCents)}</span>
                   </div>
 
                   <div className="mt-auto flex flex-wrap gap-2 pt-1">
@@ -274,7 +274,7 @@ export function CatalogManager({
                   <p className="text-caption text-muted">{product.description}</p>
 
                   <div className="flex flex-wrap items-center gap-3 text-caption text-muted">
-                    <span className="font-bold text-accent">{formatBRL(product.priceCents)}</span>
+                    <span className="font-bold text-accent">{centsToBRL(product.priceCents)}</span>
                     <span>Estoque: {product.stock}</span>
                     {product.reserved > 0 ? <span>Reservado: {product.reserved}</span> : null}
                   </div>

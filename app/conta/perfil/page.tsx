@@ -12,7 +12,7 @@ import { ProfileForm } from '@/components/customer/ProfileForm'
 import { getSessionUser } from '@/lib/auth/session'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { getAppointmentHistory, getCustomerProfile, getFavorites } from '@/lib/customer/queries'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import { getLoyaltySummary } from '@/lib/loyalty/service'
 
 import type { LoyaltyTier } from '@prisma/client'
@@ -228,7 +228,7 @@ export default async function CustomerProfilePage() {
             <div className="flex items-center justify-between gap-4 text-[13px] leading-4">
               <span className="text-muted">Total Gasto</span>
               <span className="text-sm font-bold leading-[17px] text-accent">
-                {formatBRL(totalSpent)}
+                {centsToBRL(totalSpent)}
               </span>
             </div>
             <div className="flex items-center justify-between gap-4 text-[13px] leading-4">

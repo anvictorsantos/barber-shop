@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
 import { slugify } from '@/lib/catalog/slug'
-import { formatBRLInput, parseBRLToCents } from '@/lib/format/money'
+import { formatBRLInput, brlToCents } from '@/lib/format/money'
 
 describe('BRL input', () => {
   it('parses comma decimals', () => {
-    expect(parseBRLToCents('60,00')).toBe(6000)
-    expect(parseBRLToCents('R$ 1.234,56')).toBe(123456)
-    expect(parseBRLToCents('55.5')).toBe(5550)
+    expect(brlToCents('60,00')).toBe(6000)
+    expect(brlToCents('R$ 1.234,56')).toBe(123456)
+    expect(brlToCents('55.5')).toBe(5550)
   })
 
   it('rejects invalid and negative values', () => {
-    expect(parseBRLToCents('')).toBeNull()
-    expect(parseBRLToCents('-10')).toBeNull()
-    expect(parseBRLToCents('abc')).toBeNull()
+    expect(brlToCents('')).toBeNull()
+    expect(brlToCents('-10')).toBeNull()
+    expect(brlToCents('abc')).toBeNull()
   })
 
   it('formats cents back to the input shape', () => {

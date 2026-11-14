@@ -21,7 +21,7 @@ import { SiteHeader } from '@/components/layout/SiteHeader'
 import { SkipLink } from '@/components/layout/SkipLink'
 import { getSessionUser } from '@/lib/auth/session'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import { canViewOrder } from '@/lib/orders/access'
 import { getOrderByCode } from '@/lib/orders/queries'
 import { orderStatusLabel, orderStatusTone } from '@/lib/orders/status'
@@ -252,7 +252,7 @@ export default async function OrderPage({
                     >
                       <span className="min-w-0 truncate text-muted">{line.label}</span>
                       <span className="shrink-0 font-semibold text-text">
-                        {formatBRL(line.priceCents)}
+                        {centsToBRL(line.priceCents)}
                       </span>
                     </li>
                   ))}
@@ -299,7 +299,7 @@ export default async function OrderPage({
               <div className="flex items-center justify-between gap-4">
                 <span className="text-[13px] leading-4 text-muted">Pagamento</span>
                 <span className="text-[22px] font-bold leading-[27px] text-accent">
-                  {formatBRL(order.totalCents)}
+                  {centsToBRL(order.totalCents)}
                 </span>
               </div>
 

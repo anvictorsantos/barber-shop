@@ -7,7 +7,7 @@ import { FavoriteButton } from '@/components/customer/FavoriteButton'
 import { getSessionUser } from '@/lib/auth/session'
 import { getActiveServices } from '@/lib/catalog/queries'
 import { getAppointmentHistory, getFavorites } from '@/lib/customer/queries'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import { getLoyaltySummary, STAMPS_FOR_CREDIT } from '@/lib/loyalty/service'
 import { cn } from '@/lib/utils'
 
@@ -194,7 +194,7 @@ export default async function CustomerFavoritesPage() {
 
                   <div className="flex flex-wrap items-center gap-4">
                     <span className="text-base font-extrabold leading-[19px] text-accent">
-                      {formatBRL(service.priceCents)}
+                      {centsToBRL(service.priceCents)}
                     </span>
                     <span className="text-caption leading-[15px] text-muted">
                       {service.durationMin} min
@@ -257,7 +257,7 @@ export default async function CustomerFavoritesPage() {
 
                   <div className="flex items-center justify-between gap-2 border-t border-white/[0.07] pt-2">
                     <span className="text-[15px] font-extrabold leading-[18px] text-accent">
-                      {formatBRL(product.priceCents)}
+                      {centsToBRL(product.priceCents)}
                     </span>
                     <Link
                       href="/loja"
@@ -298,7 +298,7 @@ export default async function CustomerFavoritesPage() {
 
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-extrabold leading-[17px] text-accent">
-                  {formatBRL(service.priceCents)}
+                  {centsToBRL(service.priceCents)}
                 </span>
                 <Link
                   href={`/servicos/${service.slug}`}

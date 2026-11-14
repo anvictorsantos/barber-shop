@@ -17,7 +17,7 @@ import { getSessionUser } from '@/lib/auth/session'
 import { getAvailability } from '@/lib/availability/queries'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { getActiveBarberById, getServiceById } from '@/lib/catalog/queries'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import { getShopSettings } from '@/lib/settings/queries'
 
 import type { Metadata } from 'next'
@@ -154,7 +154,7 @@ export default async function BookingSummaryPage({
                         {service.name}
                       </span>
                       <span className="text-[21px] font-bold leading-[25px] text-accent">
-                        {formatBRL(service.priceCents)}
+                        {centsToBRL(service.priceCents)}
                       </span>
                       <span className="text-caption text-muted">{service.durationMin} minutos</span>
                     </div>
@@ -247,7 +247,7 @@ export default async function BookingSummaryPage({
 
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-body text-muted">Serviço</span>
-                  <span className="text-sm text-text">{formatBRL(service.priceCents)}</span>
+                  <span className="text-sm text-text">{centsToBRL(service.priceCents)}</span>
                 </div>
 
                 <div className="h-px w-full bg-white/10" />
@@ -255,7 +255,7 @@ export default async function BookingSummaryPage({
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-[15px] font-semibold leading-[18px] text-text">Total</span>
                   <span className="text-[30px] font-bold leading-[36px] text-accent">
-                    {formatBRL(service.priceCents)}
+                    {centsToBRL(service.priceCents)}
                   </span>
                 </div>
 
