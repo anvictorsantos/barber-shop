@@ -115,6 +115,38 @@ async function firstSlot(serviceId: string, barberId: string) {
 }
 
 describe('loyalty', () => {
+  it('counts one visit when completion races itself', async () => {
+    const service = await prisma.service.findFirstOrThrow({ where: { active: true } })
+    const barber = await makeBarber('Loyalty Barber Race')
+    const customer = await makeCustomer('loyalty.customer.race')
+    const { order, appointment } = await makeAppointment({
+      customerId: customer.id,
+      barberId: barber.profile.id,
+      serviceId: service.id,
+    })
+
+    try {
+      const results = await Promise.allSettled([
+        completeAppointment(appointment.id, ownerScope),
+        completeAppointment(appointment.id, ownerScope),
+      ])
+
+      expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1)
+
+      const account = await prisma.loyaltyAccount.findUniqueOrThrow({
+        where: { userId: customer.id },
+      })
+      expect(account.stamps).toBe(1)
+      expect(account.lifetimeVisits).toBe(1)
+    } finally {
+      await cleanup({
+        userIds: [customer.id, barber.user.id],
+        orderIds: [order.id],
+        barberId: barber.profile.id,
+      })
+    }
+  })
+
   it('earns one stamp per completed visit, idempotently', async () => {
     const service = await prisma.service.findFirstOrThrow({ where: { active: true } })
     const barber = await makeBarber('Loyalty Barber A')

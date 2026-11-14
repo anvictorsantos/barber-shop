@@ -125,13 +125,16 @@ export async function completeAppointment(appointmentId: string, scope: AdminSco
   }
 
   return prisma.$transaction(async (tx) => {
-    const updated = await tx.appointment.update({
-      where: { id: appointment.id },
+    const updated = await tx.appointment.updateMany({
+      where: { id: appointment.id, status: { in: ['PENDING', 'CONFIRMED'] } },
       data: { status: 'COMPLETED', completedAt: new Date() },
     })
+    if (updated.count === 0) {
+      throw new AppError(409, 'invalid_status', 'Este agendamento não pode ser concluído.')
+    }
 
     await recordCompletedVisit(tx, appointment.id)
-    return updated
+    return tx.appointment.findUniqueOrThrow({ where: { id: appointment.id } })
   })
 }
 
@@ -182,14 +185,17 @@ export async function cancelAppointment(appointmentId: string, scope: AdminScope
   const late = appointment.startAt.getTime() - now.getTime() < LATE_CANCEL_WINDOW_MS
 
   return prisma.$transaction(async (tx) => {
-    await tx.appointment.update({
-      where: { id: appointment.id },
+    const updated = await tx.appointment.updateMany({
+      where: { id: appointment.id, status: { in: ['PENDING', 'CONFIRMED'] } },
       data: {
         status: late ? 'CANCELED_LATE' : 'CANCELED',
         canceledAt: now,
         ...(reason ? { note: reason } : {}),
       },
     })
+    if (updated.count === 0) {
+      throw new AppError(409, 'invalid_status', 'Este agendamento não pode ser cancelado.')
+    }
 
     if (appointment.order.status === 'OPEN') {
       const active = await tx.appointment.count({
