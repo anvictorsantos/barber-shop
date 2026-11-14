@@ -54,7 +54,7 @@ async function firstTwoSlots() {
   const gap = service.durationMin * 60_000
   const free: { startAt: string }[] = []
 
-  for (let index = 0; index < 8 && free.length < 2; index += 1) {
+  for (let index = 0; index < 8; index += 1) {
     const date = format(addDays(today, index), 'yyyy-MM-dd')
     const availability = await getAvailability({ serviceId: service.id, barberId: barber.id, date })
     free.push(...availability.slots.filter((item) => item.available))
