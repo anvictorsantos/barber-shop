@@ -17,7 +17,7 @@ import { PhoneInput } from '@/components/ui/PhoneInput'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { clearCart, removeCartItem } from '@/lib/cart/store'
 import { useCart } from '@/lib/cart/useCart'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 import { createOrderAction } from '@/lib/orders/actions'
 import { cn } from '@/lib/utils'
 
@@ -390,7 +390,7 @@ export function CartContents({
                     {item.barberName} · {when}
                   </span>
                   <span className="text-[15px] font-bold leading-[18px] text-accent">
-                    {centsToBRL(item.priceCents)}
+                    {formatMoney(item.priceCents)}
                   </span>
                 </div>
                 <button
@@ -420,7 +420,7 @@ export function CartContents({
 
         <div className="flex items-center justify-between gap-4">
           <span className="text-body text-muted">Subtotal</span>
-          <span className="text-sm text-text">{centsToBRL(total)}</span>
+          <span className="text-sm text-text">{formatMoney(total)}</span>
         </div>
 
         <div className="flex items-center justify-between gap-4">
@@ -432,7 +432,7 @@ export function CartContents({
           <div className="flex items-center justify-between gap-4">
             <span className="text-body text-muted">Crédito de fidelidade</span>
             <span className="text-sm font-semibold text-success">
-              − {centsToBRL(creditApplied)}
+              − {formatMoney(creditApplied)}
             </span>
           </div>
         ) : null}
@@ -440,7 +440,7 @@ export function CartContents({
         <div className="flex items-center justify-between gap-4">
           <span className="text-[15px] font-bold leading-[18px] text-text">Total</span>
           <span className="text-[30px] font-bold leading-[36px] text-accent">
-            {centsToBRL(total - creditApplied)}
+            {formatMoney(total - creditApplied)}
           </span>
         </div>
 

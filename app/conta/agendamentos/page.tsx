@@ -13,7 +13,7 @@ import {
   getFavorites,
   getUpcomingAppointments,
 } from '@/lib/customer/queries'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 import { getLoyaltySummary, STAMPS_FOR_CREDIT } from '@/lib/loyalty/service'
 import { cn } from '@/lib/utils'
 
@@ -284,7 +284,7 @@ export default async function CustomerAppointmentsPage() {
                     {item.barberName}
                   </span>
                   <span className="w-[80px] shrink-0 text-right text-[13px] font-bold leading-4 text-accent md:w-[100px] md:text-left">
-                    {centsToBRL(item.priceCents)}
+                    {formatMoney(item.priceCents)}
                   </span>
                   <span className="hidden w-[120px] shrink-0 text-[13px] leading-4 text-accent md:block">
                     {stars(item.reviewRating)}

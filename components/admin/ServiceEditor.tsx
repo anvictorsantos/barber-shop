@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/Textarea'
 import { createServiceAction, updateServiceAction } from '@/lib/catalog/actions'
 import { serviceCategoryLabels, serviceCategoryOrder } from '@/lib/catalog/labels'
 import type { AdminService } from '@/lib/catalog/types'
-import { formatBRLInput } from '@/lib/format/money'
+import { formatMoneyInput } from '@/lib/format/money'
 
 import type { ServiceCategory } from '@prisma/client'
 
@@ -29,9 +29,9 @@ export function ServiceEditor({
   const [description, setDescription] = useState(service?.description ?? '')
   const [category, setCategory] = useState<ServiceCategory>(service?.category ?? 'CORTE')
   const [durationMin, setDurationMin] = useState(service?.durationMin ?? 30)
-  const [price, setPrice] = useState(service ? formatBRLInput(service.priceCents) : '')
+  const [price, setPrice] = useState(service ? formatMoneyInput(service.priceCents) : '')
   const [originalPrice, setOriginalPrice] = useState(
-    service?.originalPriceCents ? formatBRLInput(service.originalPriceCents) : '',
+    service?.originalPriceCents ? formatMoneyInput(service.originalPriceCents) : '',
   )
   const [promoLabel, setPromoLabel] = useState(service?.promoLabel ?? '')
   const [imageUrl, setImageUrl] = useState(service?.imageUrl ?? '')

@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { paginationLinkClass } from '@/components/ui/Pagination'
 import type { FinanceReport } from '@/lib/admin/dashboard'
 import { PAYMENT_METHOD_LABELS } from '@/lib/finance/methods'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 
 const PAGE_SIZE = 5
 
@@ -45,7 +45,7 @@ export function RecentPayments({ payments }: { payments: FinanceReport['recentPa
                 <td className="py-3 text-muted">{payment.barberName ?? '—'}</td>
                 <td className="py-3 text-muted">{PAYMENT_METHOD_LABELS[payment.method]}</td>
                 <td className="py-3 text-right font-bold">
-                  {centsToBRL(payment.amountCents - payment.refundedCents)}
+                  {formatMoney(payment.amountCents - payment.refundedCents)}
                 </td>
                 <td className="py-3 text-right text-muted">{payment.paidAtLabel}</td>
               </tr>

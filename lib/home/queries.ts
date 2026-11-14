@@ -6,7 +6,7 @@ import { unstable_cache } from 'next/cache'
 import { getAvailability } from '@/lib/availability/queries'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { prisma } from '@/lib/db/prisma'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 import { initials } from '@/lib/format/name'
 
 export interface HomeHeroBooking {
@@ -42,7 +42,7 @@ export async function getHomeHeroBooking({
     serviceId: service.id,
     serviceName: service.name,
     durationMin: service.durationMin,
-    price: centsToBRL(service.priceCents),
+    price: formatMoney(service.priceCents),
     barberId: barber.id,
     barberName: barber.displayName,
     barberTitle: barber.title,

@@ -10,7 +10,7 @@ import {
   YAxis,
 } from 'recharts'
 
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 
 interface RevenueChartPoint {
   date: string
@@ -66,7 +66,7 @@ export function RevenueChart({ data }: { data: RevenueChartPoint[] }) {
             axisLine={false}
             fontSize={12}
             width={64}
-            tickFormatter={(value: number) => centsToBRL(value)}
+            tickFormatter={(value: number) => formatMoney(value)}
           />
           <Tooltip
             cursor={{ stroke: 'rgba(255,255,255,0.16)' }}
@@ -77,7 +77,7 @@ export function RevenueChart({ data }: { data: RevenueChartPoint[] }) {
               color: '#f4f4f5',
               fontSize: 12,
             }}
-            formatter={(value) => [centsToBRL(Number(value)), 'Receita']}
+            formatter={(value) => [formatMoney(Number(value)), 'Receita']}
             labelFormatter={(label) => String(label)}
           />
           <Area
