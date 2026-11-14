@@ -93,7 +93,8 @@ function createPrismaClient(): PrismaClient {
 
   return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+    // Prisma logs every attempt before the retry runs; a final failure still reaches Next and Sentry.
+    log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['warn'],
   }).$extends({
     query: {
       async $allOperations({ operation, args, query }) {
