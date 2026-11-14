@@ -6,7 +6,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { BookingOverview } from '@/components/booking/BookingOverview'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { useCart } from '@/lib/cart/useCart'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
@@ -42,7 +42,7 @@ export function BookingCartOverview({ address }: { address: string }) {
         formatInTimeZone(startAt, BUSINESS_TIMEZONE, "EEE, d 'de' MMM", { locale: ptBR }),
       )}
       timeLabel={`${formatInTimeZone(startAt, BUSINESS_TIMEZONE, 'HH:mm')} · ${latest.durationMin} minutos`}
-      total={centsToBRL(total)}
+      total={formatMoney(total)}
       address={address}
       actionHref="/carrinho"
       actionLabel="Ver carrinho"

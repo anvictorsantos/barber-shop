@@ -10,7 +10,7 @@ import { StatusPill, type StatusTone } from '@/components/ui/StatusPill'
 import { getClientDetail } from '@/lib/admin/clients'
 import { resolveAdminScope } from '@/lib/admin/context'
 import { getSessionUser } from '@/lib/auth/session'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 
 import type { AppointmentStatus } from '@prisma/client'
 import type { Metadata } from 'next'
@@ -74,7 +74,7 @@ export default async function AdminClientPage({ params }: { params: Promise<{ id
         <Card className="flex flex-col gap-1">
           <span className="text-caption text-muted">Total gasto</span>
           <span className="text-metric font-extrabold text-accent">
-            {centsToBRL(client.spentCents)}
+            {formatMoney(client.spentCents)}
           </span>
         </Card>
         <Card className="flex flex-col gap-1">
@@ -146,7 +146,7 @@ export default async function AdminClientPage({ params }: { params: Promise<{ id
                   <div className="flex items-center gap-3">
                     <StatusPill tone={status.tone}>{status.label}</StatusPill>
                     <span className="text-caption font-bold text-text">
-                      {centsToBRL(appointment.priceCents)}
+                      {formatMoney(appointment.priceCents)}
                     </span>
                   </div>
                 </div>

@@ -13,7 +13,7 @@ import { SkipLink } from '@/components/layout/SkipLink'
 import { getSessionUser } from '@/lib/auth/session'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { getActiveBarberById, getServiceById } from '@/lib/catalog/queries'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 import { getShopSettings } from '@/lib/settings/queries'
 
 import type { Metadata } from 'next'
@@ -106,7 +106,7 @@ export default async function SelectTimePage({
               id: service.id,
               name: service.name,
               durationMin: service.durationMin,
-              price: centsToBRL(service.priceCents),
+              price: formatMoney(service.priceCents),
               promoLabel: service.promoLabel,
               imageUrl: service.imageUrl,
             }}

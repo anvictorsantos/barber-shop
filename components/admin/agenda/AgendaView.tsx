@@ -21,7 +21,7 @@ import {
   markNoShowAction,
 } from '@/lib/admin/actions'
 import type { AgendaDay } from '@/lib/admin/queries'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 import { recordPaymentAction } from '@/lib/payments/actions'
 import { cn } from '@/lib/utils'
 
@@ -279,7 +279,7 @@ export function AgendaView({
                       <div className="flex flex-wrap items-center gap-2">
                         <StatusPill tone={status.tone}>{status.label}</StatusPill>
                         <span className="text-caption font-bold text-text">
-                          {centsToBRL(appointment.priceCents)}
+                          {formatMoney(appointment.priceCents)}
                         </span>
                         <span className="text-micro text-subtle">#{appointment.order.code}</span>
                         {appointment.order.paid ? (
@@ -662,7 +662,7 @@ function ManualBookingForm({
 
       {selectedService ? (
         <p className="text-caption text-muted">
-          {selectedService.name} · {centsToBRL(selectedService.priceCents)} ·{' '}
+          {selectedService.name} · {formatMoney(selectedService.priceCents)} ·{' '}
           {selectedService.durationMin} min
         </p>
       ) : null}

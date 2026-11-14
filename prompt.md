@@ -66,7 +66,7 @@ Target tree is in `docs/BUILD-PLAN.md`. Rules:
 
 ## Domain invariants — never break these
 
-**Money.** Integer cents everywhere (`priceCents`, `amountCents`, `totalCents`). Never floats. Render with `centsToBRL` from `lib/format/money.ts` (`Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })`). Numbers use `tabular-nums`.
+**Money.** Integer cents everywhere (`priceCents`, `amountCents`, `totalCents`). Never floats. Render with `formatMoney` from `lib/format/money.ts` (`Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })`). Numbers use `tabular-nums`.
 
 **Time.** Store UTC (`timestamptz`). Compute business dates, weekdays, and "today" in `America/Sao_Paulo` with `date-fns-tz`. Dates without time use `date`. Weekday `0` is Sunday. Times of day are integer minutes from midnight, never `HH:mm` strings in the database.
 

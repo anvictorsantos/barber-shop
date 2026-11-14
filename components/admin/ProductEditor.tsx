@@ -10,7 +10,7 @@ import { Field, Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { createProductAction, updateProductAction } from '@/lib/catalog/actions'
 import type { AdminProduct } from '@/lib/catalog/types'
-import { formatBRLInput } from '@/lib/format/money'
+import { formatMoneyInput } from '@/lib/format/money'
 
 export function ProductEditor({
   product,
@@ -23,7 +23,7 @@ export function ProductEditor({
 }) {
   const [name, setName] = useState(product?.name ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
-  const [price, setPrice] = useState(product ? formatBRLInput(product.priceCents) : '')
+  const [price, setPrice] = useState(product ? formatMoneyInput(product.priceCents) : '')
   const [stock, setStock] = useState(product?.stock ?? 0)
   const [imageUrl, setImageUrl] = useState(product?.imageUrl ?? '')
   const [active, setActive] = useState(product?.active ?? true)

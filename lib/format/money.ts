@@ -1,15 +1,15 @@
-export function centsToBRL(cents: number): string {
+export function formatMoney(cents: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   }).format(cents / 100)
 }
 
-export function formatBRLInput(cents: number): string {
+export function formatMoneyInput(cents: number): string {
   return (cents / 100).toFixed(2).replace('.', ',')
 }
 
-export function brlToCents(value: string): number | null {
+export function parseMoneyToCents(value: string): number | null {
   let normalized = value.replace(/[^\d,.-]/g, '')
   if (!normalized) return null
 

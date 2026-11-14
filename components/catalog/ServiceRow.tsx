@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { serviceImage } from '@/lib/catalog/images'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 
 import type { Service } from '@prisma/client'
 
@@ -48,7 +48,7 @@ export function ServiceRow({
         <span className="flex items-center gap-1.5 text-caption tabular-nums sm:hidden">
           <span className="text-muted">{service.durationMin} min</span>
           <span className="text-subtle">·</span>
-          <span className="text-text-secondary">{centsToBRL(service.priceCents)}</span>
+          <span className="text-text-secondary">{formatMoney(service.priceCents)}</span>
         </span>
       </div>
 
@@ -57,7 +57,7 @@ export function ServiceRow({
       </span>
 
       <span className="hidden w-24 shrink-0 text-right text-body tabular-nums text-text-secondary sm:block">
-        {centsToBRL(service.priceCents)}
+        {formatMoney(service.priceCents)}
       </span>
 
       <ChevronRight

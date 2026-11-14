@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { ProductVisual } from '@/components/catalog/ProductVisual'
 import { FavoriteButton } from '@/components/customer/FavoriteButton'
 import { StatusPill } from '@/components/ui/StatusPill'
-import { centsToBRL } from '@/lib/format/money'
+import { formatMoney } from '@/lib/format/money'
 
 import type { Product } from '@prisma/client'
 
@@ -50,7 +50,7 @@ export function ProductCard({
         </p>
         <div className="mt-auto flex items-center justify-between gap-3 pt-3">
           <span className="text-lead font-medium tabular-nums text-text">
-            {centsToBRL(product.priceCents)}
+            {formatMoney(product.priceCents)}
           </span>
           <StatusPill
             tone={available ? 'success' : 'neutral'}
