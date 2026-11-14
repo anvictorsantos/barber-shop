@@ -15,7 +15,6 @@ if (dsn) {
     dsn,
     enabled: true,
     environment: process.env.NEXT_PUBLIC_SENTRY_ENV || process.env.NODE_ENV,
-    release: process.env.NEXT_PUBLIC_SENTRY_RELEASE || undefined,
     debug: process.env.NEXT_PUBLIC_SENTRY_DEBUG === 'true',
     dataCollection: sentryDataCollection,
     tracesSampleRate: parseSampleRate(

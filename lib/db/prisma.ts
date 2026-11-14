@@ -1,6 +1,8 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 
+import { normalizeSslMode } from './connection-string'
+
 const TRANSIENT_DB_CODES = new Set([
   'ETIMEDOUT',
   'ECONNRESET',
@@ -86,7 +88,7 @@ function sleep(ms: number): Promise<void> {
 
 function createPrismaClient(): PrismaClient {
   const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: normalizeSslMode(process.env.DATABASE_URL),
     connectionTimeoutMillis: 10_000,
     keepAlive: true,
   })
