@@ -13,7 +13,6 @@ if (dsn) {
   Sentry.init({
     dsn,
     environment: process.env.SENTRY_ENV || process.env.NODE_ENV,
-    release: process.env.SENTRY_RELEASE || process.env.RENDER_GIT_COMMIT || undefined,
     debug: process.env.SENTRY_DEBUG === 'true',
     dataCollection: sentryDataCollection,
     tracesSampleRate: parseSampleRate(
