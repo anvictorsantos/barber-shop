@@ -13,7 +13,7 @@ jobs:
       DATABASE_URL: postgresql://user:pass@localhost:5432/barbearia
       DIRECT_URL: postgresql://user:pass@localhost:5432/barbearia
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v7
         with:
@@ -67,7 +67,7 @@ jobs:
       SESSION_SECRET: test-session-secret-at-least-32-chars
       CRON_SECRET: test-cron-secret
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v7
         with:
