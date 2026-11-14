@@ -52,7 +52,7 @@
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
     "ics": "^3.12.1",
-    "libphonenumber-js": "^1.13.15",
+    "libphonenumber-js": "^1.13.16",
     "lucide-react": "^1.72.0",
     "mercadopago": "^3.6.1",
     "next": "^16.4.6",
