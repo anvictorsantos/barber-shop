@@ -209,6 +209,26 @@ describe('customer account', () => {
     }
   })
 
+  it('resolves two concurrent favorite toggles without an error', async () => {
+    const { service, barberUser, customer } = await makeFixture()
+
+    try {
+      const results = await Promise.allSettled([
+        toggleFavorite(customer.id, 'service', service.id),
+        toggleFavorite(customer.id, 'service', service.id),
+      ])
+
+      expect(results.every((result) => result.status === 'fulfilled')).toBe(true)
+      expect(
+        await prisma.favoriteService.count({
+          where: { userId: customer.id, serviceId: service.id },
+        }),
+      ).toBe(0)
+    } finally {
+      await cleanup([customer.id, barberUser.id], [])
+    }
+  })
+
   it('toggles favorites, updates profile, and saves notification preferences', async () => {
     const { service, barberUser, customer } = await makeFixture()
 
