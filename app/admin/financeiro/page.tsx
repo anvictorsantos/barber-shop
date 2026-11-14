@@ -10,7 +10,7 @@ import { resolveAdminScope } from '@/lib/admin/context'
 import { getFinanceReport } from '@/lib/admin/dashboard'
 import { getSessionUser } from '@/lib/auth/session'
 import { PAYMENT_METHOD_LABELS } from '@/lib/finance/methods'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import { cn } from '@/lib/utils'
 
 import type { Metadata } from 'next'
@@ -47,25 +47,25 @@ export default async function AdminFinancePage({
   const metrics = [
     {
       label: 'Receita líquida',
-      value: formatBRL(report.summary.netCents),
+      value: centsToBRL(report.summary.netCents),
       hint: `${report.summary.paymentsCount} pagamentos`,
       icon: CircleDollarSign,
     },
     {
       label: 'Bruto recebido',
-      value: formatBRL(report.summary.grossCents),
+      value: centsToBRL(report.summary.grossCents),
       hint: 'antes de reembolsos',
       icon: ArrowUpRight,
     },
     {
       label: 'Reembolsos',
-      value: formatBRL(report.summary.refundedCents),
+      value: centsToBRL(report.summary.refundedCents),
       hint: 'no período',
       icon: ArrowDownRight,
     },
     {
       label: 'Ticket médio',
-      value: formatBRL(report.ticketCents),
+      value: centsToBRL(report.ticketCents),
       hint: `${report.completedAppointments} atendimentos concluídos`,
       icon: Scissors,
     },
@@ -139,7 +139,7 @@ export default async function AdminFinancePage({
                     {PAYMENT_METHOD_LABELS[item.method]}
                   </span>
                   <span className="text-caption font-bold text-text">
-                    {formatBRL(item.netCents)}
+                    {centsToBRL(item.netCents)}
                   </span>
                 </div>
               ))}

@@ -12,7 +12,7 @@ import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { getSessionUser } from '@/lib/auth/session'
 import { getActiveBarbers, getServiceById } from '@/lib/catalog/queries'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import { getShopSettings } from '@/lib/settings/queries'
 
 import type { Metadata } from 'next'
@@ -97,7 +97,7 @@ export default async function SelectBarberPage({
               Escolha o profissional
             </h1>
             <p className="text-[15px] leading-[1.5] text-muted">
-              {service.name} · {service.durationMin} min · {formatBRL(service.priceCents)}
+              {service.name} · {service.durationMin} min · {centsToBRL(service.priceCents)}
             </p>
           </div>
 
@@ -115,7 +115,7 @@ export default async function SelectBarberPage({
                 id: service.id,
                 name: service.name,
                 durationMin: service.durationMin,
-                price: formatBRL(service.priceCents),
+                price: centsToBRL(service.priceCents),
                 promoLabel: service.promoLabel,
                 imageUrl: service.imageUrl,
               }}

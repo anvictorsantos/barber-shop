@@ -1,36 +1,32 @@
 import { describe, expect, it } from 'vitest'
 
-import { centsToReais, formatBRL, parseBRLToCents } from '@/lib/format/money'
+import { brlToCents, centsToBRL } from '@/lib/format/money'
 
-describe('parseBRLToCents', () => {
+describe('brlToCents', () => {
   it('parses Brazilian and plain decimal formats', () => {
-    expect(parseBRLToCents('1.234,56')).toBe(123456)
-    expect(parseBRLToCents('10,50')).toBe(1050)
-    expect(parseBRLToCents('1234.56')).toBe(123456)
-    expect(parseBRLToCents('R$ 45')).toBe(4500)
-    expect(parseBRLToCents('0,01')).toBe(1)
+    expect(brlToCents('1.234,56')).toBe(123456)
+    expect(brlToCents('10,50')).toBe(1050)
+    expect(brlToCents('1234.56')).toBe(123456)
+    expect(brlToCents('R$ 45')).toBe(4500)
+    expect(brlToCents('0,01')).toBe(1)
   })
 
   it('rejects empty, malformed and negative values', () => {
-    expect(parseBRLToCents('')).toBeNull()
-    expect(parseBRLToCents('abc')).toBeNull()
-    expect(parseBRLToCents('1,2,3')).toBeNull()
-    expect(parseBRLToCents('-5')).toBeNull()
+    expect(brlToCents('')).toBeNull()
+    expect(brlToCents('abc')).toBeNull()
+    expect(brlToCents('1,2,3')).toBeNull()
+    expect(brlToCents('-5')).toBeNull()
   })
 })
 
-describe('formatBRL', () => {
+describe('centsToBRL', () => {
   it('formats integer cents as BRL', () => {
-    const value = formatBRL(6000)
+    const value = centsToBRL(6000)
     expect(value).toContain('R$')
     expect(value).toContain('60,00')
   })
 
   it('formats zero', () => {
-    expect(formatBRL(0)).toContain('0,00')
-  })
-
-  it('converts cents to reais', () => {
-    expect(centsToReais(4550)).toBe(45.5)
+    expect(centsToBRL(0)).toContain('0,00')
   })
 })

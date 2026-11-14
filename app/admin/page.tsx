@@ -21,7 +21,7 @@ import { StatusPill } from '@/components/ui/StatusPill'
 import { resolveAdminScope } from '@/lib/admin/context'
 import { getDashboard, getRevenueSeries } from '@/lib/admin/dashboard'
 import { getSessionUser } from '@/lib/auth/session'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 
 import type { Metadata } from 'next'
 
@@ -49,13 +49,13 @@ export default async function AdminDashboardPage() {
     },
     {
       label: 'Receita hoje',
-      value: formatBRL(data.revenueTodayCents),
+      value: centsToBRL(data.revenueTodayCents),
       hint: 'líquida de reembolsos',
       icon: CircleDollarSign,
     },
     {
       label: 'Últimos 7 dias',
-      value: formatBRL(data.revenueWeekCents),
+      value: centsToBRL(data.revenueWeekCents),
       hint: 'receita líquida',
       icon: TrendingUp,
     },

@@ -10,7 +10,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import { getSessionUser } from '@/lib/auth/session'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { getAppointmentHistory, type AppointmentCard } from '@/lib/customer/queries'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 
 import type { Metadata } from 'next'
 
@@ -225,7 +225,7 @@ export default async function CustomerHistoryPage({
                 {item.serviceDurationMin} min
               </span>
               <span className="w-[80px] shrink-0 text-right text-[13px] font-bold leading-4 text-accent md:w-[90px] md:text-left">
-                {formatBRL(item.priceCents)}
+                {centsToBRL(item.priceCents)}
               </span>
               <span className={`hidden w-[100px] shrink-0 text-accent md:block ${rateClasses}`}>
                 {stars(item.reviewRating)}
@@ -273,7 +273,7 @@ export default async function CustomerHistoryPage({
               </div>
               <div className="flex items-center justify-between gap-4 text-[13px] leading-4">
                 <span className="text-muted">Total gasto</span>
-                <span className="font-bold text-accent">{formatBRL(totalSpent)}</span>
+                <span className="font-bold text-accent">{centsToBRL(totalSpent)}</span>
               </div>
               <div className="flex items-center justify-between gap-4 text-[13px] leading-4">
                 <span className="shrink-0 text-muted">Serviço mais frequente</span>
@@ -322,7 +322,7 @@ export default async function CustomerHistoryPage({
 
             <div className="flex items-center justify-between gap-4 border-t border-white/[0.07] pt-2 text-caption leading-[15px]">
               <span className="text-muted">Média mensal</span>
-              <span className="font-bold text-accent">{formatBRL(monthlyAverage)}</span>
+              <span className="font-bold text-accent">{centsToBRL(monthlyAverage)}</span>
             </div>
           </section>
         </div>

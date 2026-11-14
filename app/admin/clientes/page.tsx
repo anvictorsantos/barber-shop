@@ -11,7 +11,7 @@ import { StatusPill } from '@/components/ui/StatusPill'
 import { getClients } from '@/lib/admin/clients'
 import { resolveAdminScope } from '@/lib/admin/context'
 import { getSessionUser } from '@/lib/auth/session'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 
 import type { Metadata } from 'next'
 
@@ -114,7 +114,7 @@ export default async function AdminClientsPage({
                     </td>
                     <td className="py-3 text-right text-text">{client.visits}</td>
                     <td className="py-3 text-right font-bold text-text">
-                      {formatBRL(client.spentCents)}
+                      {centsToBRL(client.spentCents)}
                     </td>
                     <td className="py-3 text-right text-muted">{client.lastVisitLabel ?? '—'}</td>
                     <td className="px-5 py-3 text-right">

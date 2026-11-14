@@ -14,7 +14,7 @@ import { serviceInclusions } from '@/lib/catalog/inclusions'
 import { serviceCategoryLabels } from '@/lib/catalog/labels'
 import { getServiceBySlug } from '@/lib/catalog/queries'
 import { getFavoriteIds } from '@/lib/customer/queries'
-import { formatBRL } from '@/lib/format/money'
+import { centsToBRL } from '@/lib/format/money'
 import { getShopSettings } from '@/lib/settings/queries'
 
 import type { Metadata } from 'next'
@@ -116,11 +116,11 @@ export default async function ServiceDetailPage({
 
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="text-[30px] font-medium leading-none tabular-nums text-text lg:text-[40px]">
-                {formatBRL(service.priceCents)}
+                {centsToBRL(service.priceCents)}
               </span>
               {service.originalPriceCents ? (
                 <span className="text-caption tabular-nums text-subtle line-through">
-                  {formatBRL(service.originalPriceCents)}
+                  {centsToBRL(service.originalPriceCents)}
                 </span>
               ) : null}
               <span className="text-body text-muted">· {service.durationMin} min</span>
@@ -259,13 +259,13 @@ export default async function ServiceDetailPage({
                 </div>
                 <div className="flex items-baseline justify-between gap-4 text-body">
                   <span className="text-muted">Valor</span>
-                  <span className="tabular-nums text-text">{formatBRL(service.priceCents)}</span>
+                  <span className="tabular-nums text-text">{centsToBRL(service.priceCents)}</span>
                 </div>
                 {service.originalPriceCents ? (
                   <div className="flex items-baseline justify-between gap-4 text-body">
                     <span className="text-muted">Antes</span>
                     <span className="tabular-nums text-subtle line-through">
-                      {formatBRL(service.originalPriceCents)}
+                      {centsToBRL(service.originalPriceCents)}
                     </span>
                   </div>
                 ) : null}

@@ -1,6 +1,6 @@
 import { slugify } from '@/lib/catalog/slug'
 import { prisma } from '@/lib/db/prisma'
-import { parseBRLToCents } from '@/lib/format/money'
+import { brlToCents } from '@/lib/format/money'
 import { AppError } from '@/lib/http/errors'
 import type {
   ProductInput,
@@ -11,7 +11,7 @@ import type {
 } from '@/lib/validation/catalog'
 
 function requiredCents(value: string, label: string): number {
-  const cents = parseBRLToCents(value)
+  const cents = brlToCents(value)
   if (cents === null) {
     throw new AppError(400, 'invalid_price', `Preço inválido em ${label}.`)
   }
