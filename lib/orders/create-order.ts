@@ -355,11 +355,12 @@ export async function expirePendingOrder(code: string): Promise<boolean> {
 
   if (!order || order.status !== 'PENDING_PAYMENT') return false
 
-  await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: { id: order.id },
+  return prisma.$transaction(async (tx) => {
+    const claimed = await tx.order.updateMany({
+      where: { id: order.id, status: 'PENDING_PAYMENT' },
       data: { status: 'EXPIRED', canceledAt: new Date() },
     })
+    if (claimed.count === 0) return false
 
     await tx.appointment.updateMany({
       where: { orderId: order.id, status: 'PENDING' },
@@ -385,9 +386,9 @@ export async function expirePendingOrder(code: string): Promise<boolean> {
         },
       })
     }
-  })
 
-  return true
+    return true
+  })
 }
 
 export async function expireOverdueOrders(limit = 100): Promise<{ expired: number }> {

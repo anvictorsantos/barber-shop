@@ -132,4 +132,35 @@ describe('order creation', () => {
       await cleanupOrder(order.code, email)
     }
   })
+
+  it('releases reserved stock only once when expiry runs twice', async () => {
+    const product = await prisma.product.findFirst({ where: { active: true, stock: { gt: 0 } } })
+    if (!product) throw new Error('product seed missing')
+    const email = `expiry.race.${suffix}@example.com`
+    const before = product.reserved
+
+    const order = await createOrder(
+      {
+        paymentMode: 'ONLINE',
+        customer: { name: 'Corrida Expiração', email, phone: '' },
+        lines: [{ kind: 'product', productId: product.id, quantity: 1 }],
+        note: '',
+      },
+      null,
+    )
+
+    try {
+      const results = await Promise.all([
+        expirePendingOrder(order.code),
+        expirePendingOrder(order.code),
+      ])
+
+      expect(results.filter(Boolean)).toHaveLength(1)
+
+      const released = await prisma.product.findUnique({ where: { id: product.id } })
+      expect(released?.reserved).toBe(before)
+    } finally {
+      await cleanupOrder(order.code, email)
+    }
+  })
 })
