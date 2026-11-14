@@ -4,11 +4,14 @@ import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
 import type { AdminScope } from '@/lib/admin/context'
 import { BUSINESS_TIMEZONE } from '@/lib/availability/slots'
 import { prisma } from '@/lib/db/prisma'
-import { getRevenueSummary } from '@/lib/finance/queries'
+import {
+  getAttributedPayments,
+  getRevenueSummary,
+  summarizePayments,
+  type AttributedPayment,
+} from '@/lib/finance/queries'
 
 import type { PaymentMethod } from '@prisma/client'
-
-const SETTLED_STATUSES = ['PAID', 'PARTIALLY_REFUNDED', 'REFUNDED'] as const
 
 export interface RevenuePoint {
   date: string
@@ -71,26 +74,14 @@ function rangeForDays(days: number): { from: Date; to: Date; dates: string[] } {
   return { from, to, dates }
 }
 
-export async function getRevenueSeries(
-  scope: AdminScope,
-  days: number,
-): Promise<{ series: RevenuePoint[]; from: Date; to: Date }> {
-  const { from, to, dates } = rangeForDays(days)
-
-  const payments = await prisma.payment.findMany({
-    where: {
-      status: { in: [...SETTLED_STATUSES] },
-      paidAt: { gte: from, lt: to },
-      ...(scope.barberId ? { appointment: { barberId: scope.barberId } } : {}),
-    },
-    select: { paidAt: true, amountCents: true, refundedCents: true },
-  })
-
+function buildSeries(
+  payments: readonly AttributedPayment[],
+  dates: readonly string[],
+): RevenuePoint[] {
   const buckets = new Map<string, { netCents: number; grossCents: number }>()
   for (const date of dates) buckets.set(date, { netCents: 0, grossCents: 0 })
 
   for (const payment of payments) {
-    if (!payment.paidAt) continue
     const key = formatInTimeZone(payment.paidAt, BUSINESS_TIMEZONE, 'yyyy-MM-dd')
     const bucket = buckets.get(key)
     if (!bucket) continue
@@ -98,40 +89,28 @@ export async function getRevenueSeries(
     bucket.netCents += payment.amountCents - payment.refundedCents
   }
 
-  return {
-    from,
-    to,
-    series: dates.map((date) => ({
-      date,
-      label: format(parseISO(date), 'dd/MM'),
-      ...(buckets.get(date) ?? { netCents: 0, grossCents: 0 }),
-    })),
-  }
+  return dates.map((date) => ({
+    date,
+    label: format(parseISO(date), 'dd/MM'),
+    ...(buckets.get(date) ?? { netCents: 0, grossCents: 0 }),
+  }))
+}
+
+export async function getRevenueSeries(
+  scope: AdminScope,
+  days: number,
+): Promise<{ series: RevenuePoint[]; from: Date; to: Date }> {
+  const { from, to, dates } = rangeForDays(days)
+  const payments = await getAttributedPayments({ from, to, barberId: scope.barberId })
+
+  return { from, to, series: buildSeries(payments, dates) }
 }
 
 export async function getFinanceReport(scope: AdminScope, days: number): Promise<FinanceReport> {
-  const { from, to, series } = await getRevenueSeries(scope, days)
+  const { from, to, dates } = rangeForDays(days)
 
-  const [summary, payments, completedAppointments, noShowAppointments] = await Promise.all([
-    getRevenueSummary({ from, to, barberId: scope.barberId }),
-    prisma.payment.findMany({
-      where: {
-        status: { in: [...SETTLED_STATUSES] },
-        paidAt: { gte: from, lt: to },
-        ...(scope.barberId ? { appointment: { barberId: scope.barberId } } : {}),
-      },
-      orderBy: { paidAt: 'desc' },
-      take: 12,
-      select: {
-        id: true,
-        amountCents: true,
-        refundedCents: true,
-        method: true,
-        paidAt: true,
-        order: { select: { code: true, customerName: true } },
-        appointment: { select: { barber: { select: { displayName: true } } } },
-      },
-    }),
+  const [payments, completedAppointments, noShowAppointments] = await Promise.all([
+    getAttributedPayments({ from, to, barberId: scope.barberId }),
     prisma.appointment.count({
       where: {
         status: 'COMPLETED',
@@ -148,6 +127,9 @@ export async function getFinanceReport(scope: AdminScope, days: number): Promise
     }),
   ])
 
+  const summary = summarizePayments(payments)
+  const series = buildSeries(payments, dates)
+
   const methodTotals = Object.entries(summary.byMethod)
     .map(([method, netCents]) => ({ method: method as PaymentMethod, netCents }))
     .filter((item) => item.netCents !== 0)
@@ -157,18 +139,19 @@ export async function getFinanceReport(scope: AdminScope, days: number): Promise
     summary,
     series,
     methodTotals,
-    recentPayments: payments.map((payment) => ({
-      id: payment.id,
-      orderCode: payment.order.code,
-      customerName: payment.order.customerName,
-      method: payment.method,
-      amountCents: payment.amountCents,
-      refundedCents: payment.refundedCents,
-      paidAtLabel: payment.paidAt
-        ? formatInTimeZone(payment.paidAt, BUSINESS_TIMEZONE, 'dd/MM HH:mm')
-        : '—',
-      barberName: payment.appointment?.barber.displayName ?? null,
-    })),
+    recentPayments: [...payments]
+      .sort((a, b) => b.paidAt.getTime() - a.paidAt.getTime())
+      .slice(0, 12)
+      .map((payment) => ({
+        id: payment.id,
+        orderCode: payment.orderCode,
+        customerName: payment.customerName,
+        method: payment.method,
+        amountCents: payment.amountCents,
+        refundedCents: payment.refundedCents,
+        paidAtLabel: formatInTimeZone(payment.paidAt, BUSINESS_TIMEZONE, 'dd/MM HH:mm'),
+        barberName: payment.barberName,
+      })),
     completedAppointments,
     noShowAppointments,
     ticketCents:
