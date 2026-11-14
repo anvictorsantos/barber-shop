@@ -7,7 +7,11 @@ import { prisma } from '@/lib/db/prisma'
 import { AppError } from '@/lib/http/errors'
 import { findAvailableCredit, releaseOrderCredit } from '@/lib/loyalty/service'
 import { createOrderPublicToken, uniqueOrderCode } from '@/lib/orders/code'
-import { isExclusionError, isTransientTransactionError } from '@/lib/orders/conflict'
+import {
+  isExclusionError,
+  isTransientTransactionError,
+  isUniqueConstraintError,
+} from '@/lib/orders/conflict'
 import type { OrderActor } from '@/lib/orders/types'
 import type { CreateOrderInput } from '@/lib/validation/orders'
 
@@ -81,21 +85,37 @@ async function resolveCustomer(input: CreateOrderInput, actor: OrderActor | null
     }
   }
 
-  const user = await prisma.user.create({
-    data: {
-      name: input.customer.name,
-      email,
-      phone,
-      passwordHash: null,
-      role: 'CUSTOMER',
-    },
-  })
+  try {
+    const user = await prisma.user.create({
+      data: {
+        name: input.customer.name,
+        email,
+        phone,
+        passwordHash: null,
+        role: 'CUSTOMER',
+      },
+    })
 
-  return {
-    customerId: user.id,
-    customerName: user.name,
-    customerEmail: user.email,
-    customerPhone: user.phone,
+    return {
+      customerId: user.id,
+      customerName: user.name,
+      customerEmail: user.email,
+      customerPhone: user.phone,
+    }
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) throw error
+
+    const raced = await prisma.user.findFirst({
+      where: email ? { email } : { phone: phone ?? '' },
+    })
+    if (!raced) throw error
+
+    return {
+      customerId: raced.id,
+      customerName: raced.name,
+      customerEmail: raced.email,
+      customerPhone: raced.phone,
+    }
   }
 }
 

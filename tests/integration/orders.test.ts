@@ -133,6 +133,69 @@ describe('order creation', () => {
     }
   })
 
+  it('reuses one customer when guest checkouts race with the same e-mail', async () => {
+    const { service, barber, slot } = await firstAvailableSlot()
+    const date = formatInTimeZone(new Date(slot.startAt), BUSINESS_TIMEZONE, 'yyyy-MM-dd')
+    const availability = await getAvailability({
+      serviceId: service.id,
+      barberId: barber.id,
+      date,
+    })
+    const free = availability.slots.filter((item) => item.available)
+    const first = free[0]
+    const second = first
+      ? free.find(
+          (item) =>
+            new Date(item.startAt).getTime() >=
+            new Date(first.startAt).getTime() + service.durationMin * 60_000,
+        )
+      : undefined
+    if (!first || !second) throw new Error('not enough free slots')
+
+    const email = `signup.race.${suffix}@example.com`
+    const results = await Promise.allSettled([
+      createOrder(
+        {
+          paymentMode: 'ON_SITE',
+          customer: { name: 'Corrida Cadastro', email, phone: '' },
+          lines: [
+            { kind: 'service', serviceId: service.id, barberId: barber.id, startAt: first.startAt },
+          ],
+          note: '',
+        },
+        null,
+      ),
+      createOrder(
+        {
+          paymentMode: 'ON_SITE',
+          customer: { name: 'Corrida Cadastro', email, phone: '' },
+          lines: [
+            {
+              kind: 'service',
+              serviceId: service.id,
+              barberId: barber.id,
+              startAt: second.startAt,
+            },
+          ],
+          note: '',
+        },
+        null,
+      ),
+    ])
+
+    const orders = results.flatMap((result) =>
+      result.status === 'fulfilled' ? [result.value] : [],
+    )
+
+    try {
+      expect(orders).toHaveLength(2)
+      expect(orders[0]!.customerId).toBe(orders[1]!.customerId)
+    } finally {
+      for (const order of orders) await cleanupOrder(order.code, '__none__')
+      await prisma.user.deleteMany({ where: { email } })
+    }
+  })
+
   it('releases reserved stock only once when expiry runs twice', async () => {
     const product = await prisma.product.findFirst({ where: { active: true, stock: { gt: 0 } } })
     if (!product) throw new Error('product seed missing')
