@@ -5,6 +5,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # @eslint/js 10 needs eslint 10; eslint-plugin-import, jsx-a11y and react
+      # still cap their peer range at ^9.
+      - dependency-name: '@eslint/js'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
