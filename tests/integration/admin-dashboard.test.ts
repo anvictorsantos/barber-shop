@@ -155,4 +155,108 @@ describe('admin dashboard, finance, and clients', () => {
       })
     }
   })
+
+  it('splits a multi-barber payment between the barbers', async () => {
+    const service = await prisma.service.findFirstOrThrow({ where: { active: true } })
+
+    async function makeBarber(label: string) {
+      const user = await prisma.user.create({
+        data: { name: label, email: `${label}.${suffix}@example.com`, role: 'BARBER' },
+      })
+      const profile = await prisma.barberProfile.create({
+        data: { userId: user.id, displayName: label, title: 'Barbeiro' },
+      })
+      return { user, profile }
+    }
+
+    const ana = await makeBarber('split.ana')
+    const bruno = await makeBarber('split.bruno')
+    const customer = await prisma.user.create({
+      data: {
+        name: 'Cliente Split',
+        email: `split.customer.${suffix}@example.com`,
+        role: 'CUSTOMER',
+      },
+    })
+
+    const now = new Date()
+    const order = await prisma.order.create({
+      data: {
+        code: `BL-${String(10000 + (Date.now() % 80000))}`,
+        customerId: customer.id,
+        customerName: customer.name,
+        status: 'PAID',
+        paymentMode: 'ONLINE',
+        serviceCents: 6000,
+        totalCents: 6000,
+        paidAt: now,
+      },
+    })
+    const anaAppointment = await prisma.appointment.create({
+      data: {
+        orderId: order.id,
+        customerId: customer.id,
+        barberId: ana.profile.id,
+        serviceId: service.id,
+        startAt: now,
+        endAt: new Date(now.getTime() + 30 * 60_000),
+        status: 'CONFIRMED',
+        source: 'ONLINE',
+        priceCents: 4000,
+      },
+    })
+    const brunoAppointment = await prisma.appointment.create({
+      data: {
+        orderId: order.id,
+        customerId: customer.id,
+        barberId: bruno.profile.id,
+        serviceId: service.id,
+        startAt: new Date(now.getTime() + 60 * 60_000),
+        endAt: new Date(now.getTime() + 90 * 60_000),
+        status: 'CONFIRMED',
+        source: 'ONLINE',
+        priceCents: 2000,
+      },
+    })
+    await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        provider: 'MANUAL',
+        method: 'PIX',
+        status: 'PAID',
+        amountCents: 6000,
+        paidAt: now,
+      },
+    })
+
+    try {
+      const anaScope: AdminScope = {
+        userId: ana.user.id,
+        role: 'BARBER',
+        barberId: ana.profile.id,
+      }
+      const brunoScope: AdminScope = {
+        userId: bruno.user.id,
+        role: 'BARBER',
+        barberId: bruno.profile.id,
+      }
+      const ownerScope: AdminScope = { userId: 'split-owner', role: 'OWNER', barberId: null }
+
+      expect((await getFinanceReport(anaScope, 7)).summary.netCents).toBe(4000)
+      expect((await getFinanceReport(brunoScope, 7)).summary.netCents).toBe(2000)
+      expect((await getFinanceReport(ownerScope, 7)).summary.netCents).toBe(6000)
+    } finally {
+      await prisma.payment.deleteMany({ where: { orderId: order.id } })
+      await prisma.appointment.deleteMany({
+        where: { id: { in: [anaAppointment.id, brunoAppointment.id] } },
+      })
+      await prisma.order.delete({ where: { id: order.id } })
+      await prisma.barberProfile.deleteMany({
+        where: { userId: { in: [ana.user.id, bruno.user.id] } },
+      })
+      await prisma.user.deleteMany({
+        where: { id: { in: [ana.user.id, bruno.user.id, customer.id] } },
+      })
+    }
+  })
 })
