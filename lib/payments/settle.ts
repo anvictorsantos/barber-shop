@@ -68,10 +68,13 @@ export async function settleOrderPayment(input: SettlePaymentInput) {
           })
         : await tx.payment.create({ data })
 
-      await tx.order.update({
-        where: { id: order.id },
+      const claimed = await tx.order.updateMany({
+        where: { id: order.id, status: { in: ['PENDING_PAYMENT', 'OPEN'] } },
         data: { status: 'PAID', paidAt },
       })
+      if (claimed.count === 0) {
+        throw new AppError(409, 'order_not_payable', 'Pedido não está mais ativo.')
+      }
 
       await tx.appointment.updateMany({
         where: { orderId: order.id, status: 'PENDING' },
