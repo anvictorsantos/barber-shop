@@ -45,6 +45,30 @@ async function firstAvailableSlot() {
   throw new Error('no available slot')
 }
 
+async function firstTwoSlots() {
+  const service = await prisma.service.findFirst({ where: { active: true } })
+  const barber = await prisma.barberProfile.findFirst({ where: { active: true } })
+  if (!service || !barber) throw new Error('seed missing')
+
+  const today = parseISO(formatInTimeZone(new Date(), BUSINESS_TIMEZONE, 'yyyy-MM-dd'))
+  const gap = service.durationMin * 60_000
+  const free: { startAt: string }[] = []
+
+  for (let index = 0; index < 8 && free.length < 2; index += 1) {
+    const date = format(addDays(today, index), 'yyyy-MM-dd')
+    const availability = await getAvailability({ serviceId: service.id, barberId: barber.id, date })
+    free.push(...availability.slots.filter((item) => item.available))
+  }
+
+  const first = free[0]
+  const second =
+    first &&
+    free.find((item) => new Date(item.startAt).getTime() >= new Date(first.startAt).getTime() + gap)
+  if (!first || !second) throw new Error('not enough free slots')
+
+  return { service, barber, first, second }
+}
+
 describe('order creation', () => {
   it('creates an on-site service order and rejects the same slot again', async () => {
     const { service, barber, slot } = await firstAvailableSlot()
@@ -134,23 +158,7 @@ describe('order creation', () => {
   })
 
   it('reuses one customer when guest checkouts race with the same e-mail', async () => {
-    const { service, barber, slot } = await firstAvailableSlot()
-    const date = formatInTimeZone(new Date(slot.startAt), BUSINESS_TIMEZONE, 'yyyy-MM-dd')
-    const availability = await getAvailability({
-      serviceId: service.id,
-      barberId: barber.id,
-      date,
-    })
-    const free = availability.slots.filter((item) => item.available)
-    const first = free[0]
-    const second = first
-      ? free.find(
-          (item) =>
-            new Date(item.startAt).getTime() >=
-            new Date(first.startAt).getTime() + service.durationMin * 60_000,
-        )
-      : undefined
-    if (!first || !second) throw new Error('not enough free slots')
+    const { service, barber, first, second } = await firstTwoSlots()
 
     const email = `signup.race.${suffix}@example.com`
     const results = await Promise.allSettled([
