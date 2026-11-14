@@ -37,38 +37,30 @@ export async function toggleFavorite(
   await ensureTarget(kind, id)
 
   if (kind === 'service') {
-    const existing = await prisma.favoriteService.findUnique({
-      where: { userId_serviceId: { userId, serviceId: id } },
+    const created = await prisma.favoriteService.createMany({
+      data: [{ userId, serviceId: id }],
+      skipDuplicates: true,
     })
-    if (existing) {
-      await prisma.favoriteService.delete({
-        where: { userId_serviceId: { userId, serviceId: id } },
-      })
-      return false
-    }
-    await prisma.favoriteService.create({ data: { userId, serviceId: id } })
-    return true
+    if (created.count === 1) return true
+    await prisma.favoriteService.deleteMany({ where: { userId, serviceId: id } })
+    return false
   }
 
   if (kind === 'barber') {
-    const existing = await prisma.favoriteBarber.findUnique({
-      where: { userId_barberId: { userId, barberId: id } },
+    const created = await prisma.favoriteBarber.createMany({
+      data: [{ userId, barberId: id }],
+      skipDuplicates: true,
     })
-    if (existing) {
-      await prisma.favoriteBarber.delete({ where: { userId_barberId: { userId, barberId: id } } })
-      return false
-    }
-    await prisma.favoriteBarber.create({ data: { userId, barberId: id } })
-    return true
-  }
-
-  const existing = await prisma.favoriteProduct.findUnique({
-    where: { userId_productId: { userId, productId: id } },
-  })
-  if (existing) {
-    await prisma.favoriteProduct.delete({ where: { userId_productId: { userId, productId: id } } })
+    if (created.count === 1) return true
+    await prisma.favoriteBarber.deleteMany({ where: { userId, barberId: id } })
     return false
   }
-  await prisma.favoriteProduct.create({ data: { userId, productId: id } })
-  return true
+
+  const created = await prisma.favoriteProduct.createMany({
+    data: [{ userId, productId: id }],
+    skipDuplicates: true,
+  })
+  if (created.count === 1) return true
+  await prisma.favoriteProduct.deleteMany({ where: { userId, productId: id } })
+  return false
 }
