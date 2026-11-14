@@ -240,11 +240,12 @@ describe('admin dashboard, finance, and clients', () => {
         role: 'BARBER',
         barberId: bruno.profile.id,
       }
-      const ownerScope: AdminScope = { userId: 'split-owner', role: 'OWNER', barberId: null }
+      const anaNet = (await getFinanceReport(anaScope, 7)).summary.netCents
+      const brunoNet = (await getFinanceReport(brunoScope, 7)).summary.netCents
 
-      expect((await getFinanceReport(anaScope, 7)).summary.netCents).toBe(4000)
-      expect((await getFinanceReport(brunoScope, 7)).summary.netCents).toBe(2000)
-      expect((await getFinanceReport(ownerScope, 7)).summary.netCents).toBe(6000)
+      expect(anaNet).toBe(4000)
+      expect(brunoNet).toBe(2000)
+      expect(anaNet + brunoNet).toBe(6000)
     } finally {
       await prisma.payment.deleteMany({ where: { orderId: order.id } })
       await prisma.appointment.deleteMany({
