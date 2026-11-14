@@ -63,12 +63,16 @@ export async function POST(request: Request) {
     }
   }
 
+  let orderCode: string | null = null
+
   try {
     const payment = await fetchMercadoPagoPayment(paymentId)
 
     if (!payment.orderCode) {
       return Response.json({ ignored: true, reason: 'missing_reference' })
     }
+
+    orderCode = payment.orderCode
 
     if (payment.status !== 'approved') {
       return Response.json({ ok: true, ignored: true, status: payment.status })
@@ -94,8 +98,10 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     if (error instanceof AppError && error.status < 500) {
-      // Retrying cannot fix a rejected notification, so acknowledge it and log for review.
-      console.warn(`[webhook:mercadopago] ${error.code}: ${error.message}`)
+      // Retrying cannot fix a rejected notification. Log the provider ids: the charge may need a manual refund.
+      console.error(
+        `[webhook:mercadopago] ${error.code} for payment ${paymentId} (order ${orderCode ?? 'unknown'}): ${error.message}`,
+      )
       return Response.json({ ok: false, error: { code: error.code } })
     }
 
